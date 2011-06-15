@@ -15,11 +15,12 @@ EXT-GWT.
 
 ZK.
 
-- Columns might have the different width. All the portlets are sized so they fit into it.
+- Columns might have different widths. All the portlets are sized so they fit the column width.
 
 SmartGWT.
 
-- The width of the portal is divided evenly between the portlets. 
+- The width of the portal can be adjusted with splitters. 
 - Portlets can be dragged into the portal from outside.
 - The set of the portlets fills the whole space of the column.
+- Portlets in the same column can fill different amount of space. 
 
