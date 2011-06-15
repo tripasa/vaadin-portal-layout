@@ -1,16 +1,21 @@
 package org.vaadin.sasha.portallayout;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
-import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.AbstractLayout;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Layout;
 
 /**
- * Server side component for the VPortalLayout widget.
+ * Layout that presents its contents in a portal style. 
+ * @author p4elkin
  */
+@SuppressWarnings("serial")
 @com.vaadin.ui.ClientWidget(org.vaadin.sasha.portallayout.client.ui.VPortalLayout.class)
-public class PortalLayout extends AbstractComponent {
+public class PortalLayout extends AbstractLayout implements Layout {
 
   private String message = "Click here.";
 
@@ -31,25 +36,21 @@ public class PortalLayout extends AbstractComponent {
 
   /**
    * Receive and handle events and other variable changes from the client.
-   * 
    * {@inheritDoc}
    */
   @Override
   public void changeVariables(Object source, Map<String, Object> variables) {
     super.changeVariables(source, variables);
+  }
 
-    // Variables set by the widget are returned in the "variables" map.
+  @Override
+  public void replaceComponent(Component oldComponent, Component newComponent) {
+    
+  }
 
-    if (variables.containsKey("click")) {
-
-      // When the user has clicked the component we increase the 
-      // click count, update the message and request a repaint so 
-      // the changes are sent back to the client.
-      clicks++;
-      message += "<br/>" + variables.get("click");
-
-      requestRepaint();
-    }
+  @Override
+  public Iterator<Component> getComponentIterator() {
+    return null;
   }
 
 }

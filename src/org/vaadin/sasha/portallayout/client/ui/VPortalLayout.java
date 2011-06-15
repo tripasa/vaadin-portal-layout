@@ -7,18 +7,17 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Client side widget which communicates with the server. Messages from the
- * server are shown as HTML and mouse clicks are sent to the server.
+ * Client-side implementation of the portal layout. 
+ * @author p4elkin
  */
-public class VPortalLayout extends Widget implements Paintable, ClickHandler {
+public class VPortalLayout extends SimplePanel implements Paintable {
 
   /** Set the CSS class name to allow styling. */
   public static final String CLASSNAME = "v-portallayout";
-
-  public static final String CLICK_EVENT_IDENTIFIER = "click";
 
   /** The client side widget identifier */
   protected String paintableId;
@@ -43,9 +42,6 @@ public class VPortalLayout extends Widget implements Paintable, ClickHandler {
 
     // Tell GWT we are interested in receiving click events
     sinkEvents(Event.ONCLICK);
-    // Add a handler for the click events (this is similar to
-    // FocusWidget.addClickHandler())
-    addDomHandler(this, ClickEvent.getType());
   }
 
   /**
@@ -67,30 +63,6 @@ public class VPortalLayout extends Widget implements Paintable, ClickHandler {
     // Save the client side identifier (paintable id) for the widget
     paintableId = uidl.getId();
 
-    // Process attributes/variables from the server
-    // The attribute names are the same as we used in
-    // paintContent on the server-side
-    int clicks = uidl.getIntAttribute("clicks");
-    String message = uidl.getStringAttribute("message");
-
-    getElement().setInnerHTML(
-        "After <b>" + clicks + "</b> mouse clicks:\n" + message);
-
-  }
-
-  /**
-   * Called when a native click event is fired.
-   * 
-   * @param event
-   *          the {@link ClickEvent} that was fired
-   */
-  public void onClick(ClickEvent event) {
-    // Send a variable change to the server side component so it knows the
-    // widget has been clicked
-    String button = "left click";
-    // The last parameter (immediate) tells that the update should be sent to
-    // the server
-    // right away
-    client.updateVariable(paintableId, CLICK_EVENT_IDENTIFIER, button, true);
+    getElement().setInnerHTML("I am an initial impl of the portal layout");
   }
 }
