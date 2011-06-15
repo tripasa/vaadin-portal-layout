@@ -21,4 +21,5 @@ SmartGWT.
 
 - The width of the portal is divided evenly between the portlets. 
 - Portlets can be dragged into the portal from outside.
+- The set of the portlets fills the whole space of the column.
 
