@@ -6,12 +6,14 @@ Three frameworks that have portal functionality were considered: EXT-GWT (Sencha
 - Portlets are laid out in columns without gaps. 
 - Portlets support collapsing and closing.
 - Portal support DnD of portlets between columns.
+- Dummy (outline) object is shown while the dragging is performed.
 - The columns might be empty.
 
 EXT-GWT.
 
 - Portlet is a ContentPanel.
 - The width of the portal is evenly divided between the columns.
+- Supports pinning the portlets which controls DnD ability.
 
 ZK.
 
