@@ -1,0 +1,24 @@
+Portal functionality overview.
+
+Three frameworks that have portal functionality were considered: EXT-GWT (Sencha), ZK, SmartGWT. All three have similar principles. 
+- Portal is panel divided into columns with portlets inside. 
+- Portlets are mere layout containers that can embed whatever content. 
+- Portlets are laid out in columns without gaps. 
+- Portlets support collapsing and closing.
+- Portal support DnD of portlets between columns.
+- The columns might be empty.
+
+EXT-GWT.
+
+- Portlet is a ContentPanel.
+- The width of the portal is evenly divided between the columns.
+
+ZK.
+
+- Columns might have the different width. All the portlets are sized so they fit into it.
+
+SmartGWT.
+
+- The width of the portal is divided evenly between the portlets. 
+- Portlets can be dragged into the portal from outside.
+
