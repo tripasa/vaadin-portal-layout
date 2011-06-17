@@ -6,13 +6,21 @@ Targets:
 - Support of the portlets as the content blocks.
 - Portlet is somewhat a panel that can expand, collapse and close.
 - Portlets can be rendered in the columns of the portal.
+- Think about maintaining the border regions where the portlets might be laid out.
 
-- Column collapsing support.
-- Column closing support.
+- Should be able to add any kind of component, but they all automatically being wrapped into the portlets.
 
 - Support of the column widths control via splitters.
 - Support of the portlet height control inside the column.
 
+- Support for the binding the of the column width to the width of any of its portlets, so whatever other portlet is 
+  contained in column it would be forced to fit the width of the chosen one.  
+
+- Freezing portlets, so no DnD available for them.
+
 - DnD between the columns support.
   * Ability to pin the portlet so it can't be neither popped by any other widget nor dragged itself.
   * Rendering the outline of the current drop location of the portlet.
+  
+- Column collapsing support.
+- Column closing support.
