@@ -3,7 +3,6 @@ package org.vaadin.sasha.portallayout.client.ui;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,10 +10,8 @@ import java.util.Set;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Container;
@@ -35,26 +32,20 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
   protected Map<Widget, ChildComponentContainer> widgetToComponentContainer = 
     new HashMap<Widget, ChildComponentContainer>();
   
-  private List<DivElement> columns = new ArrayList<DivElement>();
+  private List<FlowPanel> columns = new ArrayList<FlowPanel>();
   
   private Element root = Document.get().createDivElement();
   
   protected String paintableId;
 
   protected ApplicationConnection client;
-
-  protected List<Panel> childPanels = new LinkedList<Panel>();
   
   public VPortalLayout() {
     super();
     
     root.setClassName(CLASSNAME);
     root = Document.get().createDivElement();
-    root.getStyle().setProperty("width", "100px");
-    root.getStyle().setProperty("height", "100px");
     root.getStyle().setProperty("overflow", "hidden");
-    root.getStyle().setBorderStyle(BorderStyle.DASHED);
-    root.getStyle().setBorderColor("black");    
     
     setElement(root);
   }
@@ -64,13 +55,12 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
       return;
     }
    
-    int cols = uidl.getIntAttribute("cls");
+    int cols = uidl.getIntAttribute("cols");
     updateColumnLayout(cols);
     
     this.client = client;
     paintableId = uidl.getId();
     
-    int count = uidl.getChildCount();
     Iterator<Object> it = uidl.getChildIterator();
     while (it.hasNext())
     {
@@ -84,10 +74,12 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
       {
         c = new ChildComponentContainer(widget, CellBasedLayout.ORIENTATION_VERTICAL);
         widgetToComponentContainer.put(widget, c);
-        getChildren().add(c);
-        getElement().appendChild(c.getElement());
-        adopt(c);
+        if (!columns.isEmpty())
+        {
+          columns.get(0).add(c);
+        }
       }
+      c.setWidth(columns.get(0).getOffsetWidth() + "px");
       c.updateWidgetSize();
       c.renderChild(childUIDL, client, -1);
       c.setContainerSize(c.getWidgetSize().getWidth(), c.getWidgetSize().getHeight());
@@ -97,26 +89,44 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
   
   private void updateColumnLayout(int cols) {
     
-    if (cols == 0)
-      cols = 5;
-    int totalWidth = ((DivElement)root).getClientWidth();
-    int totalHeight = ((DivElement)root).getClientHeight();
-    
-    while (columns.size() < cols) {
-        final DivElement column = Document.get().createDivElement();
-        column.getStyle().setBorderColor("red");
-        column.getStyle().setBorderStyle(BorderStyle.DASHED);
-        column.getStyle().setBorderWidth(3, Style.Unit.PX);
-        root.appendChild(column);
+    while (columns.size() < cols)
+    {
+        final FlowPanel column = new FlowPanel();
+        column.getElement().getStyle().setProperty("float", "left");
+        column.getElement().getStyle().setProperty("border", "1px solid red");
+        getChildren().add(column);
+     
+        root.appendChild(column.getElement());
+        
+        adopt(column);
+        
         columns.add(column);
     }
     
-    double sharedWidth = totalWidth / columns.size();
+    updateColumnSize();
+  }
+
+  @Override
+  public void setWidth(String width)
+  {
+    super.setWidth(width);
+    updateColumnSize();
+  }
+  
+  private void updateColumnSize()
+  {
+    if (columns.size() < 1)
+      return;
+      
+    int totalWidth = ((DivElement)root).getClientWidth();
+    int totalHeight = ((DivElement)root).getClientHeight();
     
-    for (DivElement e : columns)
+    double sharedWidth = totalWidth / columns.size() - 3;
+    
+    for (FlowPanel e : columns)
     {
-      e.getStyle().setHeight(totalHeight, Style.Unit.PX);
-      e.getStyle().setWidth(sharedWidth, Style.Unit.PX);
+      e.setWidth(sharedWidth + "px");
+      e.setHeight(totalHeight + "px");
     }
   }
 

@@ -13,8 +13,8 @@ import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.ClientWidget;
-import com.vaadin.ui.ClientWidget.LoadStyle;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.ClientWidget.LoadStyle;
 
 /**
  * Layout that presents its contents in a portal style. 
@@ -26,15 +26,13 @@ public class PortalLayout extends AbstractLayout {
   
   private List<Component> components = new LinkedList<Component>();
   
-  private Map<Integer, List<Component>> columns = new HashMap<Integer, List<Component>>();
-  
   private int columnCount = 0;
   
-  public PortalLayout(int columncount) {
+  public PortalLayout(int columnCount) {
     super();
-    setWidth("95%");
-    setHeight("95%");
     setColumnCount(columnCount);
+    setWidth("100%");
+    setHeight("100%");
   }
   
   private void setColumnCount(int columnCount) {
@@ -44,7 +42,7 @@ public class PortalLayout extends AbstractLayout {
 
   @Override
   public void paintContent(PaintTarget target) throws PaintException {
-    target.addAttribute("cls", columnCount);
+    target.addAttribute("cols", columnCount);
     super.paintContent(target);  
     for (final Component c : components)
       c.paint(target);
