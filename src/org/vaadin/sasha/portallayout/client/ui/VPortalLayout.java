@@ -7,19 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
+import org.vaadin.sasha.portallayout.client.dnd.drop.FlowPanelDropController;
+
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Container;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.RenderSpace;
 import com.vaadin.terminal.gwt.client.UIDL;
-import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout;
-import com.vaadin.terminal.gwt.client.ui.layout.ChildComponentContainer;
 
 /**
  * Client-side implementation of the portal layout. 
@@ -28,9 +30,11 @@ import com.vaadin.terminal.gwt.client.ui.layout.ChildComponentContainer;
 public class VPortalLayout extends ComplexPanel implements Paintable, Container {
 
   public static final String CLASSNAME = "v-portallayout";
-
-  protected Map<Widget, ChildComponentContainer> widgetToComponentContainer = 
-    new HashMap<Widget, ChildComponentContainer>();
+  
+  protected Map<Widget, Portlet> widgetToComponentContainer = 
+    new HashMap<Widget, Portlet>();
+  
+  private final static PickupDragController dragControl = new PickupDragController(RootPanel.get(), false);;
   
   private List<FlowPanel> columns = new ArrayList<FlowPanel>();
   
@@ -56,6 +60,7 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     }
    
     int cols = uidl.getIntAttribute("cols");
+    
     updateColumnLayout(cols);
     
     this.client = client;
@@ -68,21 +73,18 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
       final Paintable child = client.getPaintable(childUIDL);
       
       Widget widget = (Widget) child;
-      ChildComponentContainer c = widgetToComponentContainer.get(widget);
+      Portlet c = widgetToComponentContainer.get(widget);      
       
       if (c == null)
       {
-        c = new ChildComponentContainer(widget, CellBasedLayout.ORIENTATION_VERTICAL);
+        c = new Portlet(widget);
+        dragControl.makeDraggable(c, c.getHeader());
         widgetToComponentContainer.put(widget, c);
         if (!columns.isEmpty())
-        {
           columns.get(0).add(c);
-        }
-      }
-      c.setWidth(columns.get(0).getOffsetWidth() + "px");
-      c.updateWidgetSize();
-      c.renderChild(childUIDL, client, -1);
-      c.setContainerSize(c.getWidgetSize().getWidth(), c.getWidgetSize().getHeight());
+      }      
+      c.renderContent(childUIDL, client);
+      c.updateSize(columns.get(0).getOffsetWidth(), widget.getOffsetHeight());
     }
   }
 
@@ -92,6 +94,8 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     while (columns.size() < cols)
     {
         final FlowPanel column = new FlowPanel();
+        FlowPanelDropController flowPanelDropController = new FlowPanelDropController(column);
+        dragControl.registerDropController(flowPanelDropController);
         column.getElement().getStyle().setProperty("float", "left");
         column.getElement().getStyle().setProperty("border", "1px solid red");
         getChildren().add(column);
@@ -151,6 +155,9 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
 
   @Override
   public RenderSpace getAllocatedSpace(Widget child) {
-    return null;
+    Portlet c = widgetToComponentContainer.get(child);
+    if (c == null)
+      return null;
+    return new RenderSpace(c.getContentWidth(), c.getContentHeight());
   }
 }

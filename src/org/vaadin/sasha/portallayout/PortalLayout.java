@@ -1,7 +1,6 @@
 package org.vaadin.sasha.portallayout;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +31,7 @@ public class PortalLayout extends AbstractLayout {
     super();
     setColumnCount(columnCount);
     setWidth("100%");
-    setHeight("100%");
+    setHeight("50%");
   }
   
   private void setColumnCount(int columnCount) {
@@ -80,11 +79,7 @@ public class PortalLayout extends AbstractLayout {
   
   public void addComponent(Component c, int columnIdx)
   {
-    //if (columns.size() < columnIdx)
-    //  throw new IllegalArgumentException();
     super.addComponent(c);
-   // List<Component> columnComponents = columns.get(columnIdx);
-//    columnComponents.add(c);
     components.add(c);
     requestRepaint();
   }
