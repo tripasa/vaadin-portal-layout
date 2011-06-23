@@ -10,13 +10,21 @@ import com.vaadin.terminal.gwt.client.UIDL;
 
 public class Portlet extends FlowPanel
 {
+  private VPortalLayout parentPortal = null;
+  
   private HTML header;
   
   private Widget content;
   
   public Portlet(Widget widget)
   {
+    this(widget, null);
+  }
+  
+  public Portlet(Widget widget, VPortalLayout parent)
+  {
     super();
+    parentPortal = parent;
     content = widget;
     header = new HTML("Drag Me");
     header.getElement().getStyle().setBackgroundColor("#DED");
@@ -45,6 +53,22 @@ public class Portlet extends FlowPanel
     }
   }
   
+  public Paintable getContentAsPaintable()
+  {
+    if (content == null ||
+        !(content instanceof Paintable))
+      return null;
+    return (Paintable) content;
+    
+  }
+  public Widget getContent() {
+    return content;
+  }
+
+  public void setContent(Widget content) {
+    this.content = content;
+  }
+
   public int getContentWidth()
   {
     return content == null ? 0 :content.getOffsetWidth();
@@ -58,5 +82,13 @@ public class Portlet extends FlowPanel
   public HTML getHeader()
   {
     return header;
+  }
+
+  public void setParentPortal(VPortalLayout parentPortal) {
+    this.parentPortal = parentPortal;
+  }
+
+  public VPortalLayout getParentPortal() {
+    return parentPortal;
   }
 }

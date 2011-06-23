@@ -39,6 +39,8 @@ public class PortalLayout extends AbstractLayout {
     requestRepaint();
   }
 
+  
+  
   @Override
   public void paintContent(PaintTarget target) throws PaintException {
     target.addAttribute("cols", columnCount);
@@ -54,6 +56,24 @@ public class PortalLayout extends AbstractLayout {
   @Override
   public void changeVariables(Object source, Map<String, Object> variables) {
     super.changeVariables(source, variables);
+    
+    if (variables.containsKey("paintableRemoved"))
+    {
+      Component removedPortlet = (Component)variables.get("paintableRemoved");
+      if (removedPortlet.getParent() == this)
+      {  
+        components.remove(removedPortlet);
+      }
+    }
+    
+    if (variables.containsKey("paintableAdded"))
+    {
+      Component removedPortlet = (Component)variables.get("paintableAdded");
+      removedPortlet.setParent(null);
+      removedPortlet.setParent(this);
+      components.add(removedPortlet);
+      requestRepaint();
+    }
   }
 
   @Override
@@ -61,11 +81,14 @@ public class PortalLayout extends AbstractLayout {
     // TODO Auto-generated method stub
   }
 
+  
   @Override
   public Iterator<Component> getComponentIterator() {
     return Collections.unmodifiableCollection(components).iterator();
   }
 
+ 
+  
   @Override
   public void addComponent(Component c) {
     addComponent(c, 0);

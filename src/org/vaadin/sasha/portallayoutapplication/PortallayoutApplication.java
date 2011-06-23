@@ -32,32 +32,36 @@ public class PortallayoutApplication extends Application {
 		
 		final VerticalLayout ll = (VerticalLayout) mainWindow.getContent();
 		
-		final PortalLayout portal = new PortalLayout(5);
+		final PortalLayout portal = new PortalLayout(6);
 		
-		final PortalLayout portal1 = new PortalLayout(5);
+		final PortalLayout portal1 = new PortalLayout(1);
 		
-    Button b = new Button();
+    Button b = new Button("Show Parent");
+    
+
+    final Panel vl = new Panel();
+    vl.setWidth("100px");
+    vl.setHeight("300px");
+    final TextField tf = new TextField();
+    final TextField tf1 = new TextField();
+    final TextField tf2 = new TextField();
+    final TextField tf3 = new TextField();
+    
+    tf.setWidth("100%");
+    tf1.setWidth("100%");
+    tf2.setWidth("100%");
+    tf3.setWidth("100%");
+    
+    vl.addComponent(tf);
+    vl.addComponent(tf1);
+    vl.addComponent(tf2);
+    vl.addComponent(tf3);
+    portal.addComponent(vl);
+    
     b.addListener(new Button.ClickListener() {
       @Override
       public void buttonClick(ClickEvent event) {
-        Panel vl = new Panel();
-        vl.setWidth("100px");
-        vl.setHeight("300px");
-        final TextField tf = new TextField();
-        final TextField tf1 = new TextField();
-        final TextField tf2 = new TextField();
-        final TextField tf3 = new TextField();
-        
-        tf.setWidth("100%");
-        tf1.setWidth("100%");
-        tf2.setWidth("100%");
-        tf3.setWidth("100%");
-        
-        vl.addComponent(tf);
-        vl.addComponent(tf1);
-        vl.addComponent(tf2);
-        vl.addComponent(tf3);
-        portal.addComponent(vl);
+        PortallayoutApplication.this.getMainWindow().showNotification("Parent is " + vl.getParent());
       }
     });
     
@@ -67,9 +71,6 @@ public class PortallayoutApplication extends Application {
     ll.setExpandRatio(portal, 1.0f);
     ll.setExpandRatio(portal1, 1.0f);
     setMainWindow(mainWindow);
-    
-		//mainWindow.addComponent(ll);
-    //ll.addComponent(new Button());
 	}
 	
 	

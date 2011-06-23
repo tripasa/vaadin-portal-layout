@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.vaadin.sasha.portallayout.client.PortalDropController;
 import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
 import org.vaadin.sasha.portallayout.client.dnd.drop.FlowPanelDropController;
 
@@ -31,10 +32,9 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
 
   public static final String CLASSNAME = "v-portallayout";
   
-  protected Map<Widget, Portlet> widgetToComponentContainer = 
-    new HashMap<Widget, Portlet>();
+  private final static PickupDragController cs_dragControl = new PickupDragController(RootPanel.get(), false);
   
-  private final static PickupDragController dragControl = new PickupDragController(RootPanel.get(), false);;
+  protected Map<Widget, Portlet> widgetToComponentContainer = new HashMap<Widget, Portlet>();
   
   private List<FlowPanel> columns = new ArrayList<FlowPanel>();
   
@@ -44,6 +44,8 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
 
   protected ApplicationConnection client;
   
+  protected PortalDropController dropController;
+    
   public VPortalLayout() {
     super();
     
@@ -52,6 +54,8 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     root.getStyle().setProperty("overflow", "hidden");
     
     setElement(root);
+    dropController = new PortalDropController(this);
+    cs_dragControl.registerDropController(dropController);
   }
 
   public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
@@ -74,11 +78,10 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
       
       Widget widget = (Widget) child;
       Portlet c = widgetToComponentContainer.get(widget);      
-      
       if (c == null)
       {
-        c = new Portlet(widget);
-        dragControl.makeDraggable(c, c.getHeader());
+        c = new Portlet(widget, this);
+        cs_dragControl.makeDraggable(c, c.getHeader());
         widgetToComponentContainer.put(widget, c);
         if (!columns.isEmpty())
           columns.get(0).add(c);
@@ -94,8 +97,6 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     while (columns.size() < cols)
     {
         final FlowPanel column = new FlowPanel();
-        FlowPanelDropController flowPanelDropController = new FlowPanelDropController(column);
-        dragControl.registerDropController(flowPanelDropController);
         column.getElement().getStyle().setProperty("float", "left");
         column.getElement().getStyle().setProperty("border", "1px solid red");
         getChildren().add(column);
@@ -149,7 +150,6 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
 
   @Override
   public boolean requestLayout(Set<Paintable> children) {
-    // TODO Auto-generated method stub
     return false;
   }
 
@@ -159,5 +159,40 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     if (c == null)
       return null;
     return new RenderSpace(c.getContentWidth(), c.getContentHeight());
+  }
+
+  public FlowPanel getColumnByMousePosition(int mouseX, int mouseY) {
+    if (mouseX < getAbsoluteLeft() ||
+        mouseY < getAbsoluteTop() ||
+        mouseX > getAbsoluteLeft() + getOffsetWidth() ||
+        mouseY > getAbsoluteTop() + getOffsetHeight()
+        )
+      return null;
+    int mouseOffset = mouseX - getAbsoluteLeft();
+    
+    int columnIdx = (int)Math.floor(Double.valueOf(mouseOffset * columns.size()) / ((double)getOffsetWidth()));
+    
+    assert columnIdx >= 0 &&
+           columnIdx < columns.size();
+      
+    return columns.get(columnIdx);
+  }
+
+  public void handlePortletRemoved(Portlet portlet) {
+    final Paintable child = portlet.getContentAsPaintable();
+    if (child == null)
+      return;
+    portlet.setParentPortal(null);
+    widgetToComponentContainer.remove(portlet.getContent());
+    client.updateVariable(paintableId, "paintableRemoved", child, true);
+  }
+
+  public void handlePortletAdded(Portlet portlet) {
+    final Paintable child = portlet.getContentAsPaintable();
+    if (child == null)
+      return;
+    portlet.setParentPortal(this);
+    widgetToComponentContainer.put(portlet.getContent(), portlet);
+    client.updateVariable(paintableId, "paintableAdded", child, true);
   }
 }
