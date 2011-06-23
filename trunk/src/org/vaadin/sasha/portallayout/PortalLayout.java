@@ -57,18 +57,18 @@ public class PortalLayout extends AbstractLayout {
   public void changeVariables(Object source, Map<String, Object> variables) {
     super.changeVariables(source, variables);
     
-    if (variables.containsKey("paintableRemoved"))
+    if (variables.containsKey(VPortalLayout.COMPONENT_REMOVED))
     {
-      Component removedPortlet = (Component)variables.get("paintableRemoved");
+      Component removedPortlet = (Component)variables.get(VPortalLayout.COMPONENT_REMOVED);
       if (removedPortlet.getParent() == this)
       {  
         components.remove(removedPortlet);
       }
     }
     
-    if (variables.containsKey("paintableAdded"))
+    if (variables.containsKey(VPortalLayout.COMPONENT_ADDED))
     {
-      Component removedPortlet = (Component)variables.get("paintableAdded");
+      Component removedPortlet = (Component)variables.get(VPortalLayout.COMPONENT_ADDED);
       removedPortlet.setParent(null);
       removedPortlet.setParent(this);
       components.add(removedPortlet);
