@@ -7,6 +7,7 @@ import org.vaadin.sasha.portallayout.client.dnd.util.CoordinateLocation;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 import org.vaadin.sasha.portallayout.client.dnd.util.DragClientBundle;
 import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
+import org.vaadin.sasha.portallayout.client.ui.PortalArea;
 import org.vaadin.sasha.portallayout.client.ui.Portlet;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
@@ -16,15 +17,15 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PortalDropController extends AbstractPositioningDropController{
+public class PortalDropController extends AbstractPositioningDropController {
 
   private VPortalLayout portal;
-  
-  private int targetDropIndex;
   
   private InsertPanel targetDropPanel;
     
   private Widget dummy;
+  
+  private int targetDropIndex = -1;
   
   public PortalDropController(VPortalLayout dropTarget) {
     super(dropTarget);
@@ -42,20 +43,19 @@ public class PortalDropController extends AbstractPositioningDropController{
     int dropIdx = targetDropIndex;
     for (Widget widget : context.selectedWidgets) {
       if (widget instanceof Portlet)
-        updatePortletLocation((Portlet)widget);
+        updatePortletLocation((Portlet)widget, dropIdx, targetDropPanel);
       targetDropPanel.insert(widget, dropIdx);
       dropIdx = targetDropPanel.getWidgetIndex(widget) + 1;
     }
-    super.onDrop(context);
   }
   
-  private void updatePortletLocation(Portlet portlet) {
+  private void updatePortletLocation(Portlet portlet, int dropIdx, InsertPanel targetDropPanel) {
     final VPortalLayout currentParent = portlet.getParentPortal();
     if (!currentParent.equals(portal))
-    {
       currentParent.handlePortletRemoved(portlet);
-      portal.handlePortletAdded(portlet);
-    }
+    if (!portlet.getParentArea().equals(targetDropPanel) ||
+        portlet.getPositionInArea() != dropIdx)
+        portal.handlePortletPositionUpdated(portlet, dropIdx, (PortalArea)targetDropPanel);
   }
 
   @Override
