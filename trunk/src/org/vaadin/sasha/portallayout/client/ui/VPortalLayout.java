@@ -26,44 +26,45 @@ import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
 
 /**
- * Client-side implementation of the portal layout. 
+ * Client-side implementation of the portal layout.
+ * 
  * @author p4elkin
  */
 public class VPortalLayout extends ComplexPanel implements Paintable, Container {
 
   public static final String PORTLET_POSITION_UPDATED = "COMPONENT_ADDED";
-  
+
   public static final String COMPONENT_REMOVED = "COMPONENT_REMOVED";
-  
+
   public static final String PAINTABLE_MAP_PARAM = "PAINTABLE";
-  
+
   public static final String AREA_INDEX_MAP_PARAM = "AREA_INDEX";
-  
+
   public static final String PORTLET_POSITION_MAP_PARAM = "PORTLET_POSITION";
-  
+
   public static final String CLASSNAME = "v-portallayout";
-  
-  private final static PickupDragController cs_dragControl = new PickupDragController(RootPanel.get(), false);
-  
+
+  private final static PickupDragController cs_dragControl = new PickupDragController(
+      RootPanel.get(), false);
+
   protected final Map<Widget, Portlet> widgetToPortletContainer = new HashMap<Widget, Portlet>();
-  
+
   private final List<PortalArea> areas = new ArrayList<PortalArea>();
-  
+
   private final Element root = Document.get().createDivElement();
-  
+
   protected String paintableId;
 
   protected ApplicationConnection client;
-  
+
   protected PortalDropController dropController;
-    
+
   private boolean isRendering = false;
-  
-  public static PickupDragController getDragController()
-  {
+
+  public static PickupDragController getDragController() {
     return cs_dragControl;
   }
-  
+
   public VPortalLayout() {
     super();
     root.setClassName(CLASSNAME);
@@ -77,49 +78,48 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     if (client.updateComponent(this, uidl, true)) {
       return;
     }
-   
+
     isRendering = true;
-    
+
     int cols = uidl.getIntAttribute("cols");
-    
+
     updatePortalAreas(cols);
     this.client = client;
     paintableId = uidl.getId();
-    
+
     int areaIdx = 0;
-    for (final Iterator<Object> areaIt = uidl.getChildIterator(); areaIt.hasNext();)
-    {
-      final UIDL areaUidl = (UIDL)areaIt.next();
-      if ("area".equals(areaUidl.getTag()))
-      {
+    for (final Iterator<Object> areaIt = uidl.getChildIterator(); areaIt
+        .hasNext();) {
+      final UIDL areaUidl = (UIDL) areaIt.next();
+      if ("area".equals(areaUidl.getTag())) {
         final PortalArea area = areas.get(areaIdx);
-        for (final Iterator<Object> it = areaUidl.getChildIterator(); it.hasNext();)
-        {
+        for (final Iterator<Object> it = areaUidl.getChildIterator(); it
+            .hasNext();) {
           final UIDL childUIDL = (UIDL) it.next();
           final Paintable child = client.getPaintable(childUIDL);
-          
+
           Widget widget = (Widget) child;
-          Portlet portlet = findOrCreatePortlet(widget);      
-          
+          Portlet portlet = findOrCreatePortlet(widget);
+
           setPortletPositionInArea(portlet, areaIdx);
-          
-          /// Do I have to check for caching!?!?!?
+
+          // / Do I have to check for caching!?!?!?
           FloatSize floatSize = Util.parseRelativeSize(childUIDL);
-          
+
           portlet.setHeightRelative(floatSize != null);
-          
-          //if (!portlet.isHeightRelative())
-         // {
-            portlet.renderContent(childUIDL, client);
-            portlet.updateSize(area.getOffsetWidth(), widget.getOffsetHeight());
-          //}
+
+          // if (!portlet.isHeightRelative())
+          // {
+          portlet.renderContent(childUIDL, client);
+          portlet.updateSize(area.getOffsetWidth(), widget.getOffsetHeight());
+          // }
         }
         ++areaIdx;
       }
     }
-    
-    for (final Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it.hasNext();) 
-    {
+
+    for (final Iterator<Portlet> it = widgetToPortletContainer.values()
+        .iterator(); it.hasNext();) {
       final Portlet portlet = it.next();
     }
   }
@@ -139,16 +139,15 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
   }
 
   private void setPortletPositionInArea(Portlet portlet, int i) {
-    
+
     if (i >= areas.size())
       throw new IllegalArgumentException("Invalid Area Index!");
-    
+
     final PortalArea currentArea = portlet.getParentArea();
     final PortalArea newArea = areas.get(i);
-    
-    if (currentArea == null ||
-        !currentArea.equals(newArea))
-    {
+
+    if (currentArea == null || 
+        !currentArea.equals(newArea)) {
       portlet.removeFromParent();
       portlet.setParentArea(newArea);
       newArea.addPortlet(portlet);
@@ -157,95 +156,103 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
 
   /**
    * Append areas if needed. Recalculate sizes.
-   * @param cols Current number of the portal areas.
+   * 
+   * @param cols
+   *          Current number of the portal areas.
    */
   private void updatePortalAreas(int cols) {
-    
-    while (areas.size() < cols)
-    {
-        final PortalArea column = new PortalArea(this);
-        appendToRootElement(column);
-        areas.add(column);
+
+    while (areas.size() < cols) {
+      final PortalArea column = new PortalArea(this);
+      appendToRootElement(column);
+      areas.add(column);
     }
-    
+
     recalculatePortalAreaSizes();
   }
-  
-  /// Recalculate the size of the portal areas
-  private void recalculatePortalAreaSizes()
-  {
+
+  // / Recalculate the size of the portal areas
+  private void recalculatePortalAreaSizes() {
     if (areas.size() < 1)
       return;
-      
-    int totalWidth = ((DivElement)root).getClientWidth();
-    int totalHeight = ((DivElement)root).getClientHeight();
-        
+
+    int totalWidth = ((DivElement) root).getClientWidth();
+    int totalHeight = ((DivElement) root).getClientHeight();
+
     double sharedWidth = totalWidth / areas.size() - 3;
-    
-    for (final PortalArea e : areas)
-    {
+
+    for (final PortalArea e : areas) {
       e.setSize((sharedWidth - 2) + "px", (totalHeight - 2) + "px");
     }
 
   }
-  
+
   /**
    * Add widget to the root panel
-   * @param widget The widget to be added.
+   * 
+   * @param widget
+   *          The widget to be added.
    */
-  void appendToRootElement(final Widget widget)
-  {
+  void appendToRootElement(final Widget widget) {
     getChildren().add(widget);
-    root.appendChild(widget.getElement());   
+    root.appendChild(widget.getElement());
     adopt(widget);
   }
-  
+
   /**
-   * Mostly for DnD. Given mouse coordinates -find the corresponding area. 
-   * @param mouseX Mouse x position.
-   * @param mouseY Mouse y position.
+   * Mostly for DnD. Given mouse coordinates -find the corresponding area.
+   * 
+   * @param mouseX
+   *          Mouse x position.
+   * @param mouseY
+   *          Mouse y position.
    * @return Found PortalArea. NULL if nothing was found.
    */
-  public PortalArea getColumnByMousePosition(int mouseX, int mouseY) {
-    if (mouseX < getAbsoluteLeft() ||
-        mouseY < getAbsoluteTop() ||
-        mouseX > getAbsoluteLeft() + getOffsetWidth() ||
-        mouseY > getAbsoluteTop() + getOffsetHeight()
-        )
+  public PortalArea getColumnByMousePosition(int mouseX, int mouseY) {    
+    if (mouseX < getAbsoluteLeft() || mouseY < getAbsoluteTop()
+        || mouseX > getAbsoluteLeft() + getOffsetWidth()
+        || mouseY > getAbsoluteTop() + getOffsetHeight())
       return null;
-    
+
     int mouseXOffset = mouseX - getAbsoluteLeft();
-    int columnIdx = (int)Math.floor(Double.valueOf(mouseXOffset * areas.size()) / ((double)getOffsetWidth()));
-    
-    assert columnIdx >= 0 &&
-           columnIdx < areas.size();
-      
+    int columnIdx = (int) Math
+        .floor(Double.valueOf(mouseXOffset * areas.size())
+            / ((double) getOffsetWidth()));
+
+    assert columnIdx >= 0 && columnIdx < areas.size();
+
     return areas.get(columnIdx);
   }
 
   /**
-   * The portlet might have been moved from one portal to another. 
-   * Do everything about detaching here.
-   * @param portlet The portlet that has been removed.
+   * The portlet might have been moved from one portal to another. Do everything
+   * about detaching here.
+   * 
+   * @param portlet
+   *          The portlet that has been removed.
    */
   public void handlePortletRemoved(Portlet portlet) {
     final Paintable child = portlet.getContentAsPaintable();
     if (child == null)
       return;
-    portlet.setParentArea(null);
     widgetToPortletContainer.remove(portlet.getContent());
     client.updateVariable(paintableId, COMPONENT_REMOVED, child, true);
   }
 
   /**
-   * The portlet might have been moved from one portal to another or 
-   * just drag to some other place inside the portal.  
-   * Do everything about attaching here.
-   * @param portlet The portlet that either was added to the portal or changed its position.
-   * @param newArea New Panel that will keep the protlet.
-   * @param newPosition New position of the portlet.
+   * The portlet might have been moved from one portal to another or just drag
+   * to some other place inside the portal. Do everything about attaching here.
+   * 
+   * @param portlet
+   *          The portlet that either was added to the portal or changed its
+   *          position.
+   * @param newArea
+   *          New Panel that will keep the protlet.
+   * @param newPosition
+   *          New position of the portlet.
    */
-  public void handlePortletPositionUpdated(Portlet portlet, int newPosition, final PortalArea newArea) {
+  public void handlePortletPositionUpdated(Portlet portlet, int newPosition,
+      final PortalArea newArea) {
     final Paintable child = portlet.getContentAsPaintable();
     if (child == null)
       return;
@@ -257,19 +264,19 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     params.put(PORTLET_POSITION_MAP_PARAM, newPosition);
     client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);
   }
-  
+
   @Override
-  public void setWidth(String width)
-  {
+  public void setWidth(String width) {
     super.setWidth(width);
     recalculatePortalAreaSizes();
-    for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it.hasNext();)
-    {
+    for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it
+        .hasNext();) {
       Portlet p = it.next();
-      p.updateSize(areas.get(0).getOffsetWidth(), p.getContent().getOffsetHeight());
-    } 
+      p.updateSize(areas.get(0).getOffsetWidth(), p.getContent()
+          .getOffsetHeight());
+    }
   }
-  
+
   @Override
   public void replaceChildComponent(Widget oldComponent, Widget newComponent) {
     final Portlet portlet = widgetToPortletContainer.remove(oldComponent);
@@ -287,7 +294,7 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
   }
 
   @Override
-  public void updateCaption(Paintable component, UIDL uidl) {    
+  public void updateCaption(Paintable component, UIDL uidl) {
   }
 
   @Override
@@ -300,6 +307,9 @@ public class VPortalLayout extends ComplexPanel implements Paintable, Container 
     Portlet c = widgetToPortletContainer.get(child);
     if (c == null)
       return null;
-    return new RenderSpace(/*c.getContentWidth()*/500, 600/*c.getContentHeight()*/);
+    return new RenderSpace(/* c.getContentWidth() */500, 600/*
+                                                             * c.getContentHeight
+                                                             * ()
+                                                             */);
   }
 }

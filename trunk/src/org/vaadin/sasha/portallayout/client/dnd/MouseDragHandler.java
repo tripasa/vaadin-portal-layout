@@ -273,7 +273,7 @@ class MouseDragHandler implements MouseMoveHandler, MouseDownHandler, MouseUpHan
         if (dragging != ACTIVELY_DRAGGING) {
           doSelectionToggle(event);
         }
-      } finally {
+     } finally {
         dragEndCleanup();
       }
     } finally {
