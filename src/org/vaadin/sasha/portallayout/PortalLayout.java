@@ -17,6 +17,7 @@ import com.vaadin.terminal.gwt.client.VConsole;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
+import com.vaadin.ui.Window.Notification;
 import com.vaadin.ui.Component;
 
 /**
@@ -102,13 +103,6 @@ public class PortalLayout extends AbstractLayout {
   @Override
   public void changeVariables(Object source, Map<String, Object> variables) {
     super.changeVariables(source, variables);
-
-    if (variables.containsKey(VPortalLayout.COMPONENT_REMOVED)) {
-      Component removedPortlet = (Component) variables
-          .get(VPortalLayout.COMPONENT_REMOVED);
-      portletContentsToAreaIndex.remove(removedPortlet);
-    }
-
     if (variables.containsKey(VPortalLayout.PORTLET_POSITION_UPDATED)) {
       Map<String, Object> newPortlet = (Map<String, Object>) variables
           .get(VPortalLayout.PORTLET_POSITION_UPDATED);
@@ -143,11 +137,17 @@ public class PortalLayout extends AbstractLayout {
   }
 
   public void addComponent(Component c, int areaIndex, int position) {
-    addComponentLogically(c, areaIndex, position);
+    doComponentAddLogic(c, areaIndex, position);
     requestRepaint();
   }
-
-  private void addComponentLogically(Component c, int areaIndex, int position) {
+  
+  @Override
+  public void removeComponent(Component c) {
+    doComponentRemoveLogic(c);
+    super.removeComponent(c);
+  }
+  
+  private void doComponentAddLogic(final Component c, int areaIndex, int position) {
     if (areaCount <= areaIndex)
       throw new IllegalArgumentException("Wrong index of the area");
 
@@ -159,13 +159,19 @@ public class PortalLayout extends AbstractLayout {
     if (area.size() < position)
       throw new IllegalArgumentException(
           "Wrong component position - it shouldn't be bigger then the size of the area");
-
-    super.addComponent(c);
     portletContentsToAreaIndex.put(c, areaIndex);
 
     area.add(position, c);
+    super.addComponent(c);
   }
 
+  private void doComponentRemoveLogic(final Component c)
+  {
+    int areaIndex = portletContentsToAreaIndex.get(c);
+    portletContentsToAreaIndex.remove(c);
+    portalAreas.get(areaIndex).remove(c);
+  }
+  
   private final List<Component> getAreaByIndexOrCreate(int areaIndex)
   {
     List<Component> result = portalAreas.get(areaIndex);
@@ -182,13 +188,16 @@ public class PortalLayout extends AbstractLayout {
     
     if (currentAreaIndex == null)
     {
-      addComponentLogically(c, areaIndex, position);
+      doComponentAddLogic(c, areaIndex, position);
       return;
     }
 
     final List<Component> currentArea = portalAreas.get(currentAreaIndex);
     
     int currentPosition = currentArea.indexOf(c);
+    
+    if (currentPosition == -1)
+      throw new IllegalArgumentException("Someth bad happened!");
     
     if (currentAreaIndex.equals(areaIndex) &&
         position == currentPosition)
@@ -200,6 +209,7 @@ public class PortalLayout extends AbstractLayout {
     if (position > newArea.size()) {
       position = newArea.size();
     }
+    
     newArea.add(position, c);
     portletContentsToAreaIndex.put(c, areaIndex);
   }

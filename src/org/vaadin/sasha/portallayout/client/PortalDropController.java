@@ -51,11 +51,24 @@ public class PortalDropController extends AbstractPositioningDropController {
   
   private void updatePortletLocation(Portlet portlet, int dropIdx, InsertPanel targetDropPanel) {
     final VPortalLayout currentParent = portlet.getParentPortal();
+    
+    /**
+     * Do the logic required for the former parent to clean up the 
+     * trace of the removed portlet
+     */
     if (!currentParent.equals(portal))
       currentParent.handlePortletRemoved(portlet);
+    
+    /**
+     * Do the the logic required by the new parent to add
+     * the new portlet
+     */
     if (!portlet.getParentArea().equals(targetDropPanel) ||
         portlet.getPositionInArea() != dropIdx)
-        portal.handlePortletPositionUpdated(portlet, dropIdx, (PortalArea)targetDropPanel);
+    {
+      portlet.setParentArea((PortalArea)targetDropPanel);
+      portal.handlePortletPositionUpdated(portlet, dropIdx, (PortalArea)targetDropPanel);
+    }
   }
 
   @Override
@@ -63,9 +76,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     super.onEnter(context);
     updateDropPosition(context);
     dummy = newPositioner(context);
-    int targetIndex = DOMUtil.findIntersect(targetDropPanel, new CoordinateLocation(context.mouseX,
-        context.mouseY), getLocationWidgetComparator());
-    targetDropPanel.insert(dummy, targetIndex);
+    targetDropPanel.insert(dummy, targetDropIndex);
   }
   
   /**
@@ -86,7 +97,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     targetDropIndex = DOMUtil.findIntersect(newTargetDropPanel, new CoordinateLocation(context.mouseX,
         context.mouseY), getLocationWidgetComparator());
     
-    boolean result = newTargetDropPanel != targetDropPanel;
+    boolean result = !newTargetDropPanel.equals(targetDropPanel);
     targetDropPanel = newTargetDropPanel;
     return result;
   }
@@ -104,31 +115,33 @@ public class PortalDropController extends AbstractPositioningDropController {
     
     boolean panelUpdated = updateDropPosition(context);
     
-    int positionerIndex = getPositionerIndex(); 
-
-    if (panelUpdated ||
-        // The panel remains the same but the position might change
-        (positionerIndex != targetDropIndex && 
-         !(positionerIndex == 0 && targetDropPanel.getWidgetCount() == 1)))
-    {      
-      if (targetDropIndex == -1)
-          // outside drop target, so remove positioner to indicate a drop will not happen
+    int dummyIndex = getDummyIndex(); 
+    
+    if (panelUpdated || 
+        (dummyIndex != targetDropIndex && 
+            (dummyIndex != targetDropIndex - 1 || 
+             targetDropIndex == 0))) {
+      if (dummyIndex == 0 && 
+          targetDropPanel.getWidgetCount() == 1) {
+        // Do nothing...
+      } else if (targetDropIndex == -1) {
         dummy.removeFromParent();
-      else
+      } else {
         targetDropPanel.insert(dummy, targetDropIndex);
+        targetDropIndex = dummyIndex;
+      }
     }
   }
   
-  private int getPositionerIndex() {
-    if (targetDropPanel == null ||
-        dummy == null)
-    return -1;
-    return targetDropPanel.getWidgetIndex(dummy);
+  private int getDummyIndex() {
+    return (targetDropPanel == null || dummy == null) ? 
+        -1 : targetDropPanel.getWidgetIndex(dummy);
   }
 
   @Override
   public void onPreviewDrop(DragContext context) throws VetoDragException {
     super.onPreviewDrop(context);
+    targetDropIndex = getDummyIndex();
     if (targetDropIndex == -1)
       throw new VetoDragException();
   }
