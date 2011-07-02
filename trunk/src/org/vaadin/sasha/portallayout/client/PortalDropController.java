@@ -7,21 +7,21 @@ import org.vaadin.sasha.portallayout.client.dnd.util.CoordinateLocation;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 import org.vaadin.sasha.portallayout.client.dnd.util.DragClientBundle;
 import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
-import org.vaadin.sasha.portallayout.client.ui.PortalArea;
 import org.vaadin.sasha.portallayout.client.ui.Portlet;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
-import com.google.gwt.user.client.ui.InsertPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Object that controlls the process of dropping in the portals 
+ * @author p4elkin
+ */
 public class PortalDropController extends AbstractPositioningDropController {
 
   private VPortalLayout portal;
-  
-  private InsertPanel targetDropPanel;
     
   private Widget dummy;
   
@@ -43,13 +43,13 @@ public class PortalDropController extends AbstractPositioningDropController {
     int dropIdx = targetDropIndex;
     for (Widget widget : context.selectedWidgets) {
       if (widget instanceof Portlet)
-        updatePortletLocation((Portlet)widget, dropIdx, targetDropPanel);
-      targetDropPanel.insert(widget, dropIdx);
-      dropIdx = targetDropPanel.getWidgetIndex(widget) + 1;
+        updatePortletLocation((Portlet)widget, dropIdx);
+      portal.appendToRootElement(widget, dropIdx);
+      dropIdx = portal.getWidgetIndex(widget) + 1;
     }
   }
   
-  private void updatePortletLocation(Portlet portlet, int dropIdx, InsertPanel targetDropPanel) {
+  private void updatePortletLocation(Portlet portlet, int dropIdx) {
     final VPortalLayout currentParent = portlet.getParentPortal();
     
     /**
@@ -63,20 +63,18 @@ public class PortalDropController extends AbstractPositioningDropController {
      * Do the the logic required by the new parent to add
      * the new portlet
      */
-    if (!portlet.getParentArea().equals(targetDropPanel) ||
-        portlet.getPositionInArea() != dropIdx)
+    if (portal.getWidgetIndex(portlet) != dropIdx)
     {
-      portlet.setParentArea((PortalArea)targetDropPanel);
-      portal.handlePortletPositionUpdated(portlet, dropIdx, (PortalArea)targetDropPanel);
+      portlet.setParentPortal(portal);
+      portal.handlePortletPositionUpdated(portlet, dropIdx);
     }
   }
 
   @Override
   public void onEnter(DragContext context) {
     super.onEnter(context);
-    updateDropPosition(context);
     dummy = newPositioner(context);
-    targetDropPanel.insert(dummy, targetDropIndex);
+    portal.appendToRootElement(dummy, updateDropPosition(context));
   }
   
   /**
@@ -84,22 +82,11 @@ public class PortalDropController extends AbstractPositioningDropController {
    * @param context
    * @return true if the target drop panel was changed.
    */
-  private boolean updateDropPosition(final DragContext context) {    
-    InsertPanel newTargetDropPanel = portal.getColumnByMousePosition(context.mouseX, context.mouseY);
+  private int updateDropPosition(final DragContext context) {    
     
-    if (newTargetDropPanel == null)
-    {
-      targetDropPanel = null;
-      targetDropIndex = -1;
-      return true;
-    }
-    
-    targetDropIndex = DOMUtil.findIntersect(newTargetDropPanel, new CoordinateLocation(context.mouseX,
+    int targetDropIndex = DOMUtil.findIntersect(portal, new CoordinateLocation(context.mouseX,
         context.mouseY), getLocationWidgetComparator());
-    
-    boolean result = !newTargetDropPanel.equals(targetDropPanel);
-    targetDropPanel = newTargetDropPanel;
-    return result;
+    return targetDropIndex;
   }
 
   @Override
@@ -113,29 +100,27 @@ public class PortalDropController extends AbstractPositioningDropController {
   public void onMove(DragContext context) {
     super.onMove(context);
     
-    boolean panelUpdated = updateDropPosition(context);
+    int targetIndex = updateDropPosition(context);
     
     int dummyIndex = getDummyIndex(); 
     
-    if (panelUpdated || 
-        (dummyIndex != targetDropIndex && 
-            (dummyIndex != targetDropIndex - 1 || 
-             targetDropIndex == 0))) {
+    if (dummyIndex != targetIndex && 
+            (dummyIndex != targetIndex - 1 || 
+                targetIndex == 0)) {
       if (dummyIndex == 0 && 
-          targetDropPanel.getWidgetCount() == 1) {
+          portal.getWidgetCount() == 1) {
         // Do nothing...
-      } else if (targetDropIndex == -1) {
+      } else if (targetIndex == -1) {
         dummy.removeFromParent();
       } else {
-        targetDropPanel.insert(dummy, targetDropIndex);
-        targetDropIndex = dummyIndex;
+        portal.appendToRootElement(dummy, targetIndex);
       }
     }
   }
   
   private int getDummyIndex() {
-    return (targetDropPanel == null || dummy == null) ? 
-        -1 : targetDropPanel.getWidgetIndex(dummy);
+    return (dummy == null) ? 
+        -1 : portal.getWidgetIndex(dummy);
   }
 
   @Override
