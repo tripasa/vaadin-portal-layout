@@ -201,7 +201,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   private final Portlet createPortlet(Widget widget) {
     final Portlet result = new Portlet(widget, this);
-    cs_dragControl.makeDraggable(result, result.getHeader());
+    cs_dragControl.makeDraggable(result, result.getDraggableArea());
     widgetToPortletContainer.put(widget, result);
     return result;
   }

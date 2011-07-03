@@ -154,7 +154,7 @@ public class Portlet extends ComplexPanel {
   public void updateSize(int width, int height) {
     setWidth((width) + "px");
     setHeight(height + header.getOffsetHeight() + "px");
-    header.setWidth(width + "px");
+    //header.setWidth(width + "px");
 /*    header.setWidth(width + "px");
     if (content != null) {
       content.setWidth((width) + "px");
@@ -214,8 +214,8 @@ public class Portlet extends ComplexPanel {
    * Access the header of the portlet.
    * @return The header widget.
    */
-  public HTML getHeader() {
-    return header;
+  public Widget getDraggableArea() {
+    return header.getDraggableArea();
   }
 
   /**

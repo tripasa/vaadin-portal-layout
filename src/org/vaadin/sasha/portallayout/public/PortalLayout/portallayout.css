@@ -19,6 +19,20 @@
 	background-image: url(close.png); 
 }
 
+.v-portlet .v-portlet-header-captionwrap
+{
+	float : left;
+	font-weight: bold;
+	font-size: 12px;
+	line-height: normal;
+	color: #fff;
+	text-shadow: #000 0 -1px 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-ms-text-overflow: ellipsis;		
+}
+
 .v-portlet .v-portlet-header-closebox:hover {
 	background-image: url(close-hover.png);
 }
