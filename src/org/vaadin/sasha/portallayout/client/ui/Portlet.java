@@ -63,7 +63,7 @@ public class Portlet extends ComplexPanel {
   /**
    * The portal which currently holds this portlet.
    */
-  private VPortalLayout parentArea = null;
+  private VPortalLayout parentPortal = null;
 
   /**
    * The flag that indicates that height of the portlet 
@@ -80,7 +80,7 @@ public class Portlet extends ComplexPanel {
   /**
    * Flag indicating that this portlet is collapsed (only header is visible).
    */
-  private boolean isCollapsed;
+  private boolean isCollapsed = false;
 
   /**
    * Constructor.
@@ -97,7 +97,7 @@ public class Portlet extends ComplexPanel {
    */
   public Portlet(Widget widget, VPortalLayout parent) {
     super();
-    parentArea = parent;
+    parentPortal = parent;
     content = widget;
     content.getElement().getStyle().setFloat(Style.Float.LEFT);
     
@@ -153,7 +153,10 @@ public class Portlet extends ComplexPanel {
    */
   public void updateSize(int width, int height) {
     setWidth((width) + "px");
-    setHeight(height + header.getOffsetHeight() + "px");
+    if (!isCollapsed)
+      setHeight(content.getOffsetHeight() + header.getOffsetHeight() + "px");
+    else
+      setHeight(header.getOffsetHeight() + "px");
     //header.setWidth(width + "px");
 /*    header.setWidth(width + "px");
     if (content != null) {
@@ -223,7 +226,7 @@ public class Portlet extends ComplexPanel {
    * @return Parent portal.
    */
   public VPortalLayout getParentPortal() {
-    return parentArea;
+    return parentPortal;
   }
 
   /**
@@ -231,7 +234,7 @@ public class Portlet extends ComplexPanel {
    * @param portal New parent portal.
    */
   public void setParentPortal(VPortalLayout portal) {
-    this.parentArea = portal;
+    this.parentPortal = portal;
   }
   
   /**
@@ -275,6 +278,15 @@ public class Portlet extends ComplexPanel {
   }
   
   /**
+   * Close this portlet and notify parent about it.
+   */
+  public void close()
+  {
+    removeFromParent();
+    parentPortal.onPortalClose(this);
+  }
+  
+  /**
    * Returns the height required for rendering of this portlet.
    * @return Height in pixels.
    */
@@ -289,6 +301,12 @@ public class Portlet extends ComplexPanel {
   public static String getClassName()
   {
     return CLASSNAME;
+  }
+
+  public void toggleCollapseState() {
+    setCollapsed(!isCollapsed);
+    content.setVisible(!isCollapsed);
+    updateSize(getOffsetWidth(), 0);
   }
 
 }

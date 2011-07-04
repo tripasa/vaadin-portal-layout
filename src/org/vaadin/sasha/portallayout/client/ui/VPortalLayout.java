@@ -206,6 +206,10 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     return result;
   }
 
+  public void onPortalClose(Portlet portlet) {
+    handlePortletRemoved(portlet);
+  }
+  
   private void updatePortletInPosition(Portlet portlet, int i) {
     portlet.removeFromParent();
     appendToRootElement(portlet, i);
@@ -260,6 +264,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     params.put(PAINTABLE_MAP_PARAM, child);
     params.put(PORTLET_POSITION_MAP_PARAM, newPosition);
     client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);
+    portlet.updateSize(getOffsetWidth(), 0);
+    portlet.toggleCollapseState();
   }
 
   /**
@@ -330,4 +336,5 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   public RenderSpace getAllocatedSpace(Widget child) {
     return new RenderSpace(width, height - consumedHeightCache);
   }
+
 }

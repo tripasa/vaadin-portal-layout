@@ -2,12 +2,14 @@ package org.vaadin.sasha.portallayout.client.ui;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -15,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
  * portlet like closing, collapsing and pinning. 
  * @author p4elkin
  */
-public class PortletHeader extends SimplePanel {
+public class PortletHeader extends ComplexPanel {
   
   /**
    * Class name for styling the element. 
@@ -25,7 +27,12 @@ public class PortletHeader extends SimplePanel {
   /**
    * Class name suffix for the closing button
    */
-  private static final String CLOSEBOX_CLASSNAME_SUFFIX = "-closebox";
+  private static final String CLOSEBUTTON_CLASSNAME_SUFFIX = "-closebox";
+  
+  /**
+   * Class name suffix for the button bar.
+   */
+  private static final String BUTTONBAR_CLASSNAME_SUFFIX = "-buttonbar";
   
   /**
    * Class name suffix for the caption wrapper
@@ -36,68 +43,85 @@ public class PortletHeader extends SimplePanel {
    * Element that holds the caption
    */
   private final Element captionWrapper = Document.get().createDivElement();
-  /*
-   * 
-   */
-  private Element closeElement;
+  
   /**
    * Portlet to which this header belongs.
    */
   private final Portlet parentPortlet;
   
+  /**
+   * 
+   */
   private final HTML captionWrapperHtml = new HTML();
+  
+  private final Element closeBox = Document.get().createDivElement();
+  
+  /**
+   * Close button.
+   */
+  private Button closeButton = new Button();
+
+  /**
+   * Collapse button.
+   */
+  private Button collapseButton = new Button();
+  
+  /**
+   * Handler for close button click.
+   */
+  private ClickHandler closeButtonClickHandler = new ClickHandler() {
+    @Override
+    public void onClick(ClickEvent event) {      
+      parentPortlet.close();
+    }
+  }; 
+  
+
+  /**
+   * Handler for collapse button click.
+   */
+  private ClickHandler collapseButtonClickHandler = new ClickHandler() {
+    @Override
+    public void onClick(ClickEvent event) {      
+      parentPortlet.toggleCollapseState();
+    }
+  };
+  
   /**
    * Constructor.
    * @param parent Portlet to which this header belongs.
    */
   public PortletHeader(final String caption, final Portlet parent) {
-    super(Document.get().createDivElement());
-    
-    setStyleName(getClassName());
-    
-    closeElement = Document.get().createDivElement();
-    parentPortlet = parent;
-
-    getElement().appendChild(closeElement);
-    setWidget(captionWrapperHtml);    
-
+    super();
+    setElement(captionWrapper);
+    captionWrapper.setClassName(getClassName());
+    captionWrapper.appendChild(closeBox);
     setCaption(caption);
+    parentPortlet = parent;
+    closeButton.addClickHandler(closeButtonClickHandler);
+    collapseButton.addClickHandler(collapseButtonClickHandler);
     
-    captionWrapperHtml.addMouseDownHandler(new MouseDownHandler() {
-      @Override
-      public void onMouseDown(MouseDownEvent event) {
-        System.out.println("Header handler activated!");
-        event.stopPropagation();
-        event.preventDefault();
-      }
-    });
+    add(captionWrapperHtml, (com.google.gwt.user.client.Element) captionWrapper);
+    add(collapseButton, (com.google.gwt.user.client.Element) closeBox);
+    add(closeButton, (com.google.gwt.user.client.Element) closeBox);
     
-    closeElement.addClassName(getClassName() + CLOSEBOX_CLASSNAME_SUFFIX);
-    captionWrapperHtml.getElement().addClassName(getClassName() + CAPTIONWRAPPER_CLASSNAME_SUFFIX);
-    DOM.sinkEvents((com.google.gwt.user.client.Element) closeElement, Event.MOUSEEVENTS | Event.TOUCHEVENTS | Event.ONCLICK | Event.ONLOSECAPTURE);
+    closeButton.setStyleName(getClassName() + CLOSEBUTTON_CLASSNAME_SUFFIX);
+    collapseButton.setStyleName(getClassName() + CLOSEBUTTON_CLASSNAME_SUFFIX);
+    closeBox.setClassName(getClassName() + BUTTONBAR_CLASSNAME_SUFFIX);
+    captionWrapperHtml.addStyleName(getClassName() + CAPTIONWRAPPER_CLASSNAME_SUFFIX);
+    
   }
   
   public void setCaption(final String caption)
   {
-    captionWrapperHtml.setHTML(caption);
-  }
-  
-  @Override
-  public void onBrowserEvent(Event event) {
-    super.onBrowserEvent(event);
-    if (event.getTypeInt() == Event.ONMOUSEDOWN &&
-        DOM.eventGetTarget(event).equals(closeElement))
-    {
-      System.out.println("onBrowser handler activated!");
-      event.stopPropagation();
-    }
+    captionWrapperHtml.getElement().setInnerHTML(caption);
   }
   
   @Override
   public void setWidth(String width) {
     super.setWidth(width);
     getElement().getStyle().getWidth();
-    captionWrapperHtml.setWidth(width);
+    setWidth(width);
   }
   
   public Widget getDraggableArea()
