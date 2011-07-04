@@ -121,9 +121,10 @@ public class PortalLayout extends AbstractLayout {
          
     components.remove(c);
     components.add(position, c);
+    requestRepaint();
   }
-  public void addComponent(Component c) {
-    
+  
+  public void addComponent(Component c) {  
     addComponent(c, 0);
   }
 }
