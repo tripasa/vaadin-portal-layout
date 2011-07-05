@@ -12,8 +12,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.CellStyleGenerator;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -141,8 +140,11 @@ public class PortallayoutApplication extends Application {
 
   private void addPortletWithContents(final ComponentContainer portal) {
     final Panel vl = new Panel();
-    vl.setWidth("100%");
     vl.setHeight("200px");
+    vl.setWidth("100%");
+    
+    vl.getContent().setHeight("100%");
+    vl.getContent().setWidth("100%");
     final TextField tf = new TextField();
     tf.setImmediate(true);
 
@@ -154,28 +156,13 @@ public class PortallayoutApplication extends Application {
    
     item.getItemProperty("testProp1").setValue("test1");
     item.getItemProperty("testProp2").setValue("test2");
-   
-    Table table = new Table();
-    table.setSizeUndefined();
-    table.setContainerDataSource(container);
-    table.setVisibleColumns(new String[] { "testProp2", "testProp1" });
-
-    table.setCellStyleGenerator(new CellStyleGenerator() {
-      
-      @Override
-      public String getStyle(Object itemId, Object propertyId) {
-        return "collapsed";
-      }
-    });
     
-    table.setWidth("100%");
-    table.setHeight("100%");
-    table.setPageLength(0);
+    TextArea text = new TextArea();
+    text.setSizeFull();
     tf.setWidth("100%");
-
     vl.addComponent(tf);
 
-    vl.addComponent(table);
+    vl.addComponent(text);
     portal.addComponent(vl);
   }
 

@@ -1,12 +1,10 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
@@ -82,12 +80,14 @@ public class Portlet extends ComplexPanel {
    */
   private boolean isCollapsed = false;
 
+  private ApplicationConnection client;
   /**
    * Constructor.
    * @param widget The contents of the portlets.
    */
-  public Portlet(Widget widget) {
-    this(widget, null);
+  public Portlet(final Widget widget, final ApplicationConnection client) {
+    this(widget, client, null);
+    this.client = client;
   }
   
   /**
@@ -95,27 +95,28 @@ public class Portlet extends ComplexPanel {
    * @param widget The contents of the portlets.
    * @param parent Parent layout.
    */
-  public Portlet(Widget widget, VPortalLayout parent) {
+  public Portlet(Widget widget, final ApplicationConnection client, VPortalLayout parent) {
     super();
+    
+    this.client = client;
+    
     parentPortal = parent;
     content = widget;
-    content.getElement().getStyle().setFloat(Style.Float.LEFT);
+    content.getElement().getStyle().setProperty("width", "100%");
     
     wrapperElement = DOM.createDiv();
 
-    contentDiv = DOM.createDiv();
-
     header = new PortletHeader("Drag Me", this);
-    //header.getElement().getStyle().setBackgroundColor("#DED");
     header.getElement().getStyle().setFloat(Style.Float.LEFT);
-
+    add(header, wrapperElement);
+    
+    contentDiv = DOM.createDiv();
+    contentDiv.getStyle().setFloat(Style.Float.LEFT);
+    
     wrapperElement.appendChild(contentDiv);
-    //wrapperElement.getStyle().setProperty("border", "1px green solid");
-
     setElement(wrapperElement);
     setStyleName(CLASSNAME);
     
-    add(header, contentDiv);
     add(content, contentDiv);
   }
 
@@ -140,8 +141,9 @@ public class Portlet extends ComplexPanel {
    * @param uidl
    * @param client
    */
-  public void renderContent(UIDL uidl, ApplicationConnection client) {
-    if (content == null || !(content instanceof Paintable))
+  public void renderContent(UIDL uidl) {
+    if (content == null || 
+        !(content instanceof Paintable))
       return;
     ((Paintable) content).updateFromUIDL(uidl, client);
   }
@@ -152,17 +154,8 @@ public class Portlet extends ComplexPanel {
    * @param height The new height.
    */
   public void updateSize(int width, int height) {
-    setWidth((width) + "px");
-    if (!isCollapsed)
-      setHeight(content.getOffsetHeight() + header.getOffsetHeight() + "px");
-    else
-      setHeight(header.getOffsetHeight() + "px");
-    //header.setWidth(width + "px");
-/*    header.setWidth(width + "px");
-    if (content != null) {
-      content.setWidth((width) + "px");
-      content.setHeight((height) + "px");
-    }*/
+    setWidth(width + "px");
+    setHeight((!isCollapsed ? content.getOffsetHeight() + header.getOffsetHeight(): header.getOffsetHeight()) + "px");
   }
 
   /**
@@ -305,8 +298,14 @@ public class Portlet extends ComplexPanel {
 
   public void toggleCollapseState() {
     setCollapsed(!isCollapsed);
-    content.setVisible(!isCollapsed);
+    contentDiv.getStyle().setProperty("display", isCollapsed ? "none" : "block");
     updateSize(getOffsetWidth(), 0);
+    if (!isCollapsed)
+    {
+      client.handleComponentRelativeSize(content);
+      client.runDescendentsLayout((HasWidgets) content);
+    }
+    parentPortal.onPortalCollapseStateChanged(this);  
   }
 
 }
