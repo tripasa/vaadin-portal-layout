@@ -1,6 +1,7 @@
 package org.vaadin.sasha.portallayout;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +31,12 @@ public class PortalLayout extends AbstractLayout {
    */
   private List<Component> components = new LinkedList<Component>();
 
-  // / Constructor
+  /**
+   * 
+   */
+  private Map<Component, Boolean> collapseMap = new HashMap<Component, Boolean>();
+  
+  /// Constructor
   public PortalLayout() {
     super();
     setWidth("100%");
@@ -51,16 +57,34 @@ public class PortalLayout extends AbstractLayout {
   @SuppressWarnings("unchecked")
   @Override
   public void changeVariables(Object source, Map<String, Object> variables) {
+    
     super.changeVariables(source, variables);
+    
     if (variables.containsKey(VPortalLayout.PORTLET_POSITION_UPDATED)) {
-      Map<String, Object> newPortlet = (Map<String, Object>) variables
-          .get(VPortalLayout.PORTLET_POSITION_UPDATED);
+      Map<String, Object> newPortlet = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_POSITION_UPDATED);
+      
       final Component component = (Component) newPortlet
           .get(VPortalLayout.PAINTABLE_MAP_PARAM);
+      
       Integer portletPosition = (Integer) newPortlet
           .get(VPortalLayout.PORTLET_POSITION_MAP_PARAM);
+      
       componentPositionUpdated(component, portletPosition);
     }
+    
+    if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED))
+    {
+      final Map<String, Object> params = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED);
+      
+      onPortletCollapsed((Component)params.get(VPortalLayout.PAINTABLE_MAP_PARAM), 
+          (Boolean)params.get(VPortalLayout.PORTLET_COLLAPSED));
+    }
+  }
+
+  private void onPortletCollapsed(final Component component, Boolean isCollapsed) {
+    collapseMap.put(component, isCollapsed);
+    if (!isCollapsed)
+      requestRepaint();
   }
 
   private void componentPositionUpdated(Component component, Integer portletPosition) {
@@ -83,7 +107,7 @@ public class PortalLayout extends AbstractLayout {
 
   public void addComponent(Component c, int position) {
     doComponentAddLogic(c, position);
-    requestRepaint();
+    super.addComponent(c);
   }
   
   @Override
@@ -97,7 +121,6 @@ public class PortalLayout extends AbstractLayout {
     if (components.indexOf(c) != -1)
       throw new IllegalArgumentException("Already added!");
     components.add(position, c);
-    super.addComponent(c);
   }
 
   private void doComponentRemoveLogic(final Component c)
@@ -112,7 +135,7 @@ public class PortalLayout extends AbstractLayout {
     
     if (currentComponentPosition == -1)
     {
-      doComponentAddLogic(c, position);
+      addComponent(c, position);
       return;
     }
         
@@ -121,7 +144,6 @@ public class PortalLayout extends AbstractLayout {
          
     components.remove(c);
     components.add(position, c);
-    requestRepaint();
   }
   
   public void addComponent(Component c) {  

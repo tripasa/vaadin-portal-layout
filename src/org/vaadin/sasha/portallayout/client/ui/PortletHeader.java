@@ -4,6 +4,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -88,6 +89,18 @@ public class PortletHeader extends ComplexPanel {
   };
   
   /**
+   * Mouse down handler.
+   */
+  private MouseDownHandler mouseDownHandler = new MouseDownHandler() {
+    
+    @Override
+    public void onMouseDown(MouseDownEvent event) {
+      getElement().focus();
+      System.out.println("mouse down!");
+    }
+  };
+  
+  /**
    * Constructor.
    * @param parent Portlet to which this header belongs.
    */
@@ -98,8 +111,10 @@ public class PortletHeader extends ComplexPanel {
     captionWrapper.appendChild(closeBox);
     setCaption(caption);
     parentPortlet = parent;
+    
     closeButton.addClickHandler(closeButtonClickHandler);
     collapseButton.addClickHandler(collapseButtonClickHandler);
+    captionWrapperHtml.addMouseDownHandler(mouseDownHandler);
     
     add(captionWrapperHtml, (com.google.gwt.user.client.Element) captionWrapper);
     add(collapseButton, (com.google.gwt.user.client.Element) closeBox);
@@ -109,7 +124,6 @@ public class PortletHeader extends ComplexPanel {
     collapseButton.setStyleName(getClassName() + CLOSEBUTTON_CLASSNAME_SUFFIX);
     closeBox.setClassName(getClassName() + BUTTONBAR_CLASSNAME_SUFFIX);
     captionWrapperHtml.addStyleName(getClassName() + CAPTIONWRAPPER_CLASSNAME_SUFFIX);
-    
   }
   
   public void setCaption(final String caption)

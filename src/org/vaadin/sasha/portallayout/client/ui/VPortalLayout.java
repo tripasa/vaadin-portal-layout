@@ -14,6 +14,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
@@ -37,6 +38,10 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   public static final String PORTLET_POSITION_MAP_PARAM = "PORTLET_POSITION";
 
+  public static final String PORTLET_COLLAPSED = "PORTLET_COLLAPSED";
+  
+  public static final String PORTLET_COLLAPSE_STATE_CHANGED = "PORTLET_COLLAPSE_STATE_CHANGE";
+  
   /**
    * Basic style name.
    */
@@ -130,6 +135,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   public VPortalLayout() {
     super();
+    
     getElement().setClassName(CLASSNAME);
     getElement().getStyle().setProperty("overflow", "hidden");
     if (debugMode)
@@ -166,7 +172,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
       updatePortletInPosition(portlet, pos);
 
-      portlet.renderContent(childUIDL, client);
+      portlet.renderContent(childUIDL);
 
       if (portlet.tryDetectRelativeHeight(childUIDL))
         relativeHeightPortlets.add(portlet);
@@ -177,11 +183,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     height = getElement().getClientHeight();
 
     recalculateConsumedHeight();
-
-    for (final Iterator<Portlet> it = widgetToPortletContainer.values()
-        .iterator(); it.hasNext();) {
-      final Portlet portlet = it.next();
-    }
+    client.handleComponentRelativeSize(this);
   }
 
   private void recalculateConsumedHeight() {
@@ -200,14 +202,24 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   }
 
   private final Portlet createPortlet(Widget widget) {
-    final Portlet result = new Portlet(widget, this);
+    final Portlet result = new Portlet(widget, client, this);
     cs_dragControl.makeDraggable(result, result.getDraggableArea());
     widgetToPortletContainer.put(widget, result);
     return result;
   }
 
-  public void onPortalClose(Portlet portlet) {
+  public void onPortalClose(final Portlet portlet) {
     handlePortletRemoved(portlet);
+  }
+  
+  public void onPortalCollapseStateChanged(final Portlet portlet)
+  {
+    final Map<String, Object> params = new HashMap<String, Object>();
+    
+    params.put(PAINTABLE_MAP_PARAM, portlet.getContentAsPaintable());
+    params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
+    
+    client.updateVariable(paintableId, PORTLET_COLLAPSE_STATE_CHANGED, params, true);
   }
   
   private void updatePortletInPosition(Portlet portlet, int i) {
@@ -257,15 +269,20 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
       return;
 
     portlet.setParentPortal(this);
-    widgetToPortletContainer.put(portlet.getContent(), portlet);
-    recalculateConsumedHeight();
+    portlet.updateSize(getOffsetWidth(), 0);
+    
+    
 
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put(PAINTABLE_MAP_PARAM, child);
     params.put(PORTLET_POSITION_MAP_PARAM, newPosition);
+    params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
+    
     client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);
-    portlet.updateSize(getOffsetWidth(), 0);
-    portlet.toggleCollapseState();
+    client.runDescendentsLayout((HasWidgets) child);
+    
+    widgetToPortletContainer.put(portlet.getContent(), portlet);
+    recalculateConsumedHeight();
   }
 
   /**
@@ -335,6 +352,14 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   @Override
   public RenderSpace getAllocatedSpace(Widget child) {
     return new RenderSpace(width, height - consumedHeightCache);
+  }
+
+  public void setCapacity(int capacity) {
+    this.capacity = capacity;
+  }
+
+  public int getCapacity() {
+    return capacity;
   }
 
 }
