@@ -1,5 +1,6 @@
 package org.vaadin.sasha.portallayoutapplication;
 
+import org.vaadin.henrik.drawer.Drawer;
 import org.vaadin.sasha.portallayout.PortalLayout;
 
 import com.vaadin.Application;
@@ -8,10 +9,10 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComponentContainer;
-import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -19,29 +20,28 @@ import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 public class PortallayoutApplication extends Application {
-  
+
   boolean debugMode = false;
-  
+
   private Window mainWindow;
-  
+
   @Override
   public void init() {
 
     setTheme("portallayouttheme");
-    
+
     mainWindow = new Window("Portallayout Application");
-    
+
     HorizontalLayout windowLayout = new HorizontalLayout();
     windowLayout.setSizeFull();
-    
-    
+
     mainWindow.setContent(windowLayout);
 
     final Panel mainPanel = new Panel("Column Styled Portal");
     mainPanel.addStyleName("light");
     mainPanel.setSizeFull();
     mainPanel.setContent(new HorizontalLayout());
-    
+
     final HorizontalLayout ll = (HorizontalLayout) mainPanel.getContent();
 
     ll.setMargin(false);
@@ -59,10 +59,7 @@ public class PortallayoutApplication extends Application {
       ll.setExpandRatio(p, 0.3f);
     }
 
-    
-
-    if (debugMode)
-    {
+    if (debugMode) {
       Button b = new Button("Add new");
       addPortletWithContents(widePortal);
 
@@ -78,85 +75,106 @@ public class PortallayoutApplication extends Application {
     final Panel bottomPanel = new Panel("Bottom Portal");
     bottomPanel.addStyleName("light");
     bottomPanel.setWidth("100%");
-    ((VerticalLayout)bottomPanel.getContent()).setMargin(false);
+    ((VerticalLayout) bottomPanel.getContent()).setMargin(false);
     bottomPanel.getContent().setWidth("100%");
     bottomPanel.getContent().setHeight("260px");
-    
-    
+
     final PortalLayout bottomPortlet = new PortalLayout();
     bottomPortlet.setHeight("260px");
     bottomPanel.getContent().addComponent(bottomPortlet);
 
     final PortalLayout sidePortal = new PortalLayout();
-    
+
     final Panel sidePanel = new Panel("Side Portal");
     sidePanel.addStyleName("light");
     sidePanel.setWidth("350px");
     sidePanel.setHeight("100%");
-    ((VerticalLayout)sidePanel.getContent()).setMargin(false);
+    ((VerticalLayout) sidePanel.getContent()).setMargin(false);
     sidePanel.getContent().setWidth("350px");
     sidePanel.getContent().setHeight("100%");
     sidePanel.addComponent(sidePortal);
 
-    
     windowLayout.addComponent(mainPanel);
     windowLayout.setExpandRatio(mainPanel, 1.0f);
-    
+
     windowLayout.addComponent(sidePanel);
+
+   // overrideWindowContentWIthTestData();
     
-//   overrideWindowContentWIthTestData();
     setMainWindow(mainWindow);
   }
 
   private void testGrid() {
-    final GridLayout layout = new GridLayout(3, 3);
+    final HorizontalLayout layout = new HorizontalLayout();
     layout.setSizeFull();
-    layout.addComponent(new MenuBar(), 0, 0, 2, 0);
     mainWindow.setContent(layout);
+
+    Table table1 = createTableWithDnDSupport();
+    Table table2 = createTableWithDnDSupport();
+    layout.addComponent(table1);
+    layout.addComponent(table2);
+  }
+
+  public Table createTableWithDnDSupport() {
+    final Table table = new Table("", new TestIndexedContainer());
+    table.setSelectable(true);
+    return table;
+  }
+
+  public class TestIndexedContainer extends IndexedContainer
+  {
+    public TestIndexedContainer() {
+      super();
+      addContainerProperty("test1", String.class, "0");
+      addContainerProperty("test2", String.class, "0");
+      Item item = getItem(addItem());
+      item.getItemProperty("test1").setValue("test1");
+      item.getItemProperty("test2").setValue("test2");
+    }
   }
 
   private void overrideWindowContentWIthTestData() {
-    Panel p = new Panel();
-    //p.getContent().setSizeFull();
-    p.setSizeFull();
-    p.getContent().setWidth("100%");
-//    for (int i = 0; i < 100; ++i)
-//      p.addComponent(new Button("test")); 
-    //WeeLayout vl = new WeeLayout(WeeLayout.Direction.VERTICAL);
-    PortalLayout vl = new PortalLayout();
-    vl.setSizeFull();
-    addPortletWithContents(vl);
-    addPortletWithContents(vl);
-    addPortletWithContents(vl);
-    p.addComponent(vl);
-    //mainWindow.setContent(p);
-   
-    //p.setContent(vl);
-    mainWindow.setContent(p);
-
-    //vl.setWidth("100%");
-    //vl.addComponent();
+    final VerticalLayout layout = new VerticalLayout();
+    layout.setWidth("100%");
+    
+    final Drawer dr = new Drawer();
+    dr.setWidth("100%");
+    dr.setDrawerHeight(200);
+    
+    final VerticalLayout nestedLayout = new VerticalLayout();
+    nestedLayout.setWidth("100px");
+    nestedLayout.setHeight("100px");
+    
+    TextArea ta = new TextArea();
+    ta.setWidth("200px");
+    ta.setHeight("100%");
+    
+    nestedLayout.addComponent(ta);
+    dr.setDrawerComponent(nestedLayout);
+    
+    layout.addComponent(dr);
+    
+    final Button b = new Button("add new");
+    b.addListener(new Button.ClickListener() {      
+      @Override
+      public void buttonClick(ClickEvent event) {
+        nestedLayout.addComponent(new Label("asdljslkajdaksj"));
+      }
+    });
+    layout.addComponent(b);
+    mainWindow.setContent(layout);
   }
 
   private void addPortletWithContents(final ComponentContainer portal) {
     final Panel vl = new Panel();
     vl.setHeight("200px");
     vl.setWidth("100%");
-    
+
     vl.getContent().setHeight("100%");
     vl.getContent().setWidth("100%");
     final TextField tf = new TextField();
     tf.setImmediate(true);
 
-    IndexedContainer container = new IndexedContainer();
-    container.addContainerProperty("testProp1", String.class, "0");
-    container.addContainerProperty("testProp2", String.class, "0");
-
-    Item item = container.getItem(container.addItem());
-   
-    item.getItemProperty("testProp1").setValue("test1");
-    item.getItemProperty("testProp2").setValue("test2");
-    
     TextArea text = new TextArea();
     text.setSizeFull();
     tf.setWidth("100%");

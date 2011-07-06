@@ -27,6 +27,9 @@
 		<servlet-name>Portallayout Application</servlet-name>
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
+	<listener>
+		<listener-class>org.vaadin.sasha.portallayoutapplication.TestContextListener</listener-class>
+    </listener>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>

@@ -19,4 +19,6 @@
     <!-- <set-property name="user.agent" value="gecko1_8"/> -->
 
 	<stylesheet src="PortalLayout/portallayout.css"/>
+
+    <inherits name="org.vaadin.henrik.drawer.widgetset.DrawerApplicationWidgetset" />
 </module>

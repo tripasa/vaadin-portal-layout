@@ -75,6 +75,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     super.onEnter(context);
     dummy = newPositioner(context);
     portal.appendToRootElement(dummy, updateDropPosition(context));
+    portal.recalculateConsumedHeight();
   }
   
   /**
@@ -94,6 +95,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     super.onLeave(context);
     dummy.removeFromParent();
     dummy = null;
+    portal.recalculateConsumedHeight();
   }
   
   @Override
@@ -151,7 +153,7 @@ public class PortalDropController extends AbstractPositioningDropController {
         - DOMUtil.getVerticalBorders(outer));
 
     outer.setWidget(inner);
-    outer.getElement().getStyle().setProperty("border", "2px dashed green");
+    outer.getElement().getStyle().setProperty("border", "2px dashed black");
     return outer;
   }
 
