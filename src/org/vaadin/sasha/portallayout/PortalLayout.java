@@ -108,6 +108,7 @@ public class PortalLayout extends AbstractLayout {
   public void addComponent(Component c, int position) {
     doComponentAddLogic(c, position);
     super.addComponent(c);
+    requestRepaint();
   }
   
   @Override

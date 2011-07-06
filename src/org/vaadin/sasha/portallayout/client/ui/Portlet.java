@@ -21,20 +21,25 @@ import com.vaadin.terminal.gwt.client.Util;
  */
 public class Portlet extends ComplexPanel {
   
+  /**
+   * Style name used for the portlets.
+   */
   private final static String CLASSNAME = "v-portlet";
+  
+  /**
+   * Wrapper style name.
+   */
+  private static final String WRAPPER_CLASSNAME = "-wrapper";
+  
+  /**
+   * Content DIV style name.
+   */
+  private static final String CONTENT_CLASSNAME = "-content";
+  
   /**
    * Size of the portlet wrapper element.
    */
-  private Size wrapperSize = new Size(0, 0);
-
-  /**
-   * Size data of the actual portlet content.
-   */
-  private Size contentSize = new Size(0, 0);
-
-  private int headerWidthPx = 0;
-
-  private int headerHeightPx = 0;
+  private Size sizeInfo = new Size(0, 0);
 
   /**
    * Header object that both serves as an area for 
@@ -102,20 +107,21 @@ public class Portlet extends ComplexPanel {
     
     parentPortal = parent;
     content = widget;
-    content.getElement().getStyle().setProperty("width", "100%");
     
     wrapperElement = DOM.createDiv();
-
+    
     header = new PortletHeader("Drag Me", this);
     header.getElement().getStyle().setFloat(Style.Float.LEFT);
     add(header, wrapperElement);
     
     contentDiv = DOM.createDiv();
+    contentDiv.addClassName(CLASSNAME + CONTENT_CLASSNAME);
     contentDiv.getStyle().setFloat(Style.Float.LEFT);
     
     wrapperElement.appendChild(contentDiv);
     setElement(wrapperElement);
     setStyleName(CLASSNAME);
+    wrapperElement.addClassName(CLASSNAME + WRAPPER_CLASSNAME);
     
     add(content, contentDiv);
   }
@@ -153,11 +159,40 @@ public class Portlet extends ComplexPanel {
    * @param width The new width.
    * @param height The new height.
    */
-  public void updateSize(int width, int height) {
-    setWidth(width + "px");
-    setHeight((!isCollapsed ? content.getOffsetHeight() + header.getOffsetHeight(): header.getOffsetHeight()) + "px");
+  public void setSizes(int width, int height) {
+    sizeInfo.setWidth(width);
+    sizeInfo.setHeight(height);
+    setPortletDOMSize(width, height);
   }
 
+  /**
+   * Set the wrapper element size.
+   * @param width New width.
+   * @param height New height.
+   */
+  public void setPortletDOMSize(int width, int height) {
+    contentDiv.getStyle().setPropertyPx("width", width);
+    contentDiv.getStyle().setPropertyPx("height", height);
+    wrapperElement.getStyle().setPropertyPx("width", width);
+    wrapperElement.getStyle().setPropertyPx("height", height + header.getOffsetHeight());
+  }
+
+  /**
+   * Set wrapper element DOM height in pixels. 
+   * @param height New height.
+   */
+  public void setHeightPx(int height) {
+    wrapperElement.getStyle().setPropertyPx("height", height);
+  }
+
+  /**
+   * Set wrapper element DOM width in pixels. 
+   * @param height New width.
+   */
+  public void setWidthPx(int width) {
+    wrapperElement.getStyle().setPropertyPx("width", width);
+  }
+  
   /**
    * Convenience method needed sometimes 
    * for easier passing the contents to the server side.
@@ -165,10 +200,7 @@ public class Portlet extends ComplexPanel {
    * (most likely they do, but everything may happen).
    */
   public Paintable getContentAsPaintable() {
-    if (content == null || !(content instanceof Paintable))
-      return null;
-    return (Paintable) content;
-
+    return (content == null || !(content instanceof Paintable)) ? null : (Paintable) content;
   }
 
   /**
@@ -185,25 +217,6 @@ public class Portlet extends ComplexPanel {
    */
   public void setContent(Widget content) {
     this.content = content;
-  }
-
-  /**
-   * Get the width of the contents. 
-   * Currently - excluding all the borders and margins.
-   * @return Offset width of the contents.
-   */
-  public int getContentWidth() {
-    return content == null ? 0 : content.getOffsetWidth();
-  }
-
-
-  /**
-   * Get the height of the contents. 
-   * Currently - excluding all the borders and margins.
-   * @return Offset height of the contents.
-   */
-  public int getContentHeight() {
-    return content == null ? 0 : content.getOffsetHeight();
   }
 
   /**
@@ -236,10 +249,8 @@ public class Portlet extends ComplexPanel {
    * @return Portlet index.
    */
   public int getPosition() {
-    final VPortalLayout area = getParentPortal();
-    if (area == null)
-      return -1;
-    return area.getWidgetIndex(this);
+    final VPortalLayout portal = getParentPortal();
+    return portal == null ? -1 : portal.getWidgetIndex(this);
   }
   
   /**
@@ -249,8 +260,8 @@ public class Portlet extends ComplexPanel {
    */
   public boolean tryDetectRelativeHeight(final UIDL uidl)
   {
-    FloatSize floatSize = Util.parseRelativeSize(uidl);
-    setHeightRelative(floatSize != null && floatSize.getHeight() > 0);
+    relativeSize = Util.parseRelativeSize(uidl);
+    setHeightRelative(relativeSize != null && relativeSize.getHeight() > 0);
     return isHeightRelative;
   }
   
@@ -290,22 +301,35 @@ public class Portlet extends ComplexPanel {
       result += Util.getRequiredHeight(content.getElement());
     return result;
   }
+
+  /**
+   * Change collapse state - if collapsed then expand 
+   * otherwise - collapse. Update size info as well.
+   */
+  public void toggleCollapseState() {
+    setCollapsed(!isCollapsed);
+    contentDiv.getStyle().setProperty("visibility", isCollapsed ? "hidden" : "visible");
+    setSizes(sizeInfo.getWidth(), isCollapsed ? 0 : content.getOffsetHeight());
+    //client.handleComponentRelativeSize(content);
+    //client.runDescendentsLayout((HasWidgets) content);
+    parentPortal.onPortalCollapseStateChanged(this);  
+  }
+
+  /**
+   * Get information about the size of this portlet. Size info should be formed 
+   * from 
+   * @return
+   */
+  public Size getSizeInfo() {
+    return sizeInfo;
+  }
   
+  /**
+   * Get the name of the CSS objects related to portlets.
+   * @return Name of CSS class.
+   */
   public static String getClassName()
   {
     return CLASSNAME;
   }
-
-  public void toggleCollapseState() {
-    setCollapsed(!isCollapsed);
-    contentDiv.getStyle().setProperty("display", isCollapsed ? "none" : "block");
-    updateSize(getOffsetWidth(), 0);
-    if (!isCollapsed)
-    {
-      client.handleComponentRelativeSize(content);
-      client.runDescendentsLayout((HasWidgets) content);
-    }
-    parentPortal.onPortalCollapseStateChanged(this);  
-  }
-
 }

@@ -20,8 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Container;
 import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.RenderSpace;
 import com.vaadin.terminal.gwt.client.UIDL;
+import com.vaadin.terminal.gwt.client.Util;
 
 /**
  * Client-side implementation of the portal layout.
@@ -186,12 +188,12 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     client.handleComponentRelativeSize(this);
   }
 
-  private void recalculateConsumedHeight() {
+  public void recalculateConsumedHeight() {
     consumedHeightCache = 0;
-    for (final Portlet p : widgetToPortletContainer.values())
-      consumedHeightCache += p.getRequiredHeight();
-    if (consumedHeightCache > height)
-      getElement().getStyle().setPropertyPx("height", consumedHeightCache);
+    for (final Widget p : getChildren())
+      consumedHeightCache += Util.getRequiredHeight(p);
+    System.out.println("New height " + Math.max(height, consumedHeightCache) + " required " + Util.getRequiredHeight(getElement()));
+    getElement().getStyle().setPropertyPx("height", Math.max(height, consumedHeightCache) + 200);
   }
 
   private Portlet findOrCreatePortlet(Widget widget) {
@@ -269,10 +271,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
       return;
 
     portlet.setParentPortal(this);
-    portlet.updateSize(getOffsetWidth(), 0);
     
-    
-
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put(PAINTABLE_MAP_PARAM, child);
     params.put(PORTLET_POSITION_MAP_PARAM, newPosition);
@@ -320,7 +319,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it
         .hasNext();) {
       Portlet p = it.next();
-      p.updateSize(getOffsetWidth(), p.getContent().getOffsetHeight());
+      p.setSizes(getOffsetWidth(), p.getContent().getOffsetHeight());
     }
   }
 
@@ -351,7 +350,9 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   @Override
   public RenderSpace getAllocatedSpace(Widget child) {
-    return new RenderSpace(width, height - consumedHeightCache);
+    final Portlet portlet = widgetToPortletContainer.get(child);
+    final Size sizeInfo = portlet.getSizeInfo();
+    return new RenderSpace(sizeInfo.getWidth(), sizeInfo.getHeight());
   }
 
   public void setCapacity(int capacity) {
