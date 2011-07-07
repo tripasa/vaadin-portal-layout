@@ -18,7 +18,6 @@ import com.vaadin.ui.Component;
 
 /**
  * Layout that presents its contents in a portal style.
- * 
  * @author p4elkin
  */
 @SuppressWarnings("serial")
@@ -32,7 +31,7 @@ public class PortalLayout extends AbstractLayout {
   private List<Component> components = new LinkedList<Component>();
 
   /**
-   * 
+   * The map containing the collapse states of the components.
    */
   private Map<Component, Boolean> collapseMap = new HashMap<Component, Boolean>();
   
@@ -40,7 +39,7 @@ public class PortalLayout extends AbstractLayout {
   public PortalLayout() {
     super();
     setWidth("100%");
-    setHeight("400px");
+    setHeight("450px");
   }
 
   @Override
@@ -69,7 +68,7 @@ public class PortalLayout extends AbstractLayout {
       Integer portletPosition = (Integer) newPortlet
           .get(VPortalLayout.PORTLET_POSITION_MAP_PARAM);
       
-      componentPositionUpdated(component, portletPosition);
+      onComponentPositionUpdated(component, portletPosition);
     }
     
     if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED))
@@ -79,15 +78,32 @@ public class PortalLayout extends AbstractLayout {
       onPortletCollapsed((Component)params.get(VPortalLayout.PAINTABLE_MAP_PARAM), 
           (Boolean)params.get(VPortalLayout.PORTLET_COLLAPSED));
     }
+    
+    if (variables.containsKey(VPortalLayout.COMPONENT_REMOVED))
+    {
+      final Component child = (Component) variables.get(VPortalLayout.COMPONENT_REMOVED);
+      doComponentRemoveLogic(child);
+    }
   }
 
+  /**
+   * Handler that should be invoked when the components collapse state changes.
+   * @param component Component which collapse state has changed.
+   * @param isCollapsed True if the portlet was collapsed, false - expanded.
+   */
   private void onPortletCollapsed(final Component component, Boolean isCollapsed) {
     collapseMap.put(component, isCollapsed);
     if (!isCollapsed)
       requestRepaint();
   }
 
-  private void componentPositionUpdated(Component component, Integer portletPosition) {
+  /**
+   * Handler that should be invoked when the components position in the portal 
+   * was changed.
+   * @param component Component whose position was updated
+   * @param portletPosition New position of the component.
+   */
+  private void onComponentPositionUpdated(Component component, Integer portletPosition) {
     moveComponent(component, portletPosition);
   }
 
@@ -104,25 +120,13 @@ public class PortalLayout extends AbstractLayout {
   public void setWidth(float width, int unit) {
     super.setWidth(width, unit);
   }
-
-  public void addComponent(Component c, int position) {
-    doComponentAddLogic(c, position);
-    super.addComponent(c);
-    requestRepaint();
-  }
   
   @Override
   public void removeComponent(Component c) {
     doComponentRemoveLogic(c);
     super.removeComponent(c);
   }
-  
-  private void doComponentAddLogic(final Component c, int position) {
 
-    if (components.indexOf(c) != -1)
-      throw new IllegalArgumentException("Already added!");
-    components.add(position, c);
-  }
 
   private void doComponentRemoveLogic(final Component c)
   {
@@ -131,23 +135,45 @@ public class PortalLayout extends AbstractLayout {
   
   
   private void moveComponent(Component c, int position) {
-  
+    /// The client side reported that portlet is no longer there - remove component if so.
+    if (position == -1)
+    {
+      removeComponent(c);
+      return;
+    }
+    
     int currentComponentPosition = components.indexOf(c);
     
+    /// Component is in the right position - nothing to do. 
+    if (position == currentComponentPosition)
+      return;
+    
+    /// Component has been added from other portal. We have to add in such case.
     if (currentComponentPosition == -1)
     {
       addComponent(c, position);
       return;
     }
-        
-    if (position == currentComponentPosition)
-      return;
-         
+    
+    /// Update component position in the list.
     components.remove(c);
     components.add(position, c);
   }
   
   public void addComponent(Component c) {  
     addComponent(c, 0);
+  }
+  
+  public void addComponent(Component c, int position) {
+    doComponentAddLogic(c, position);
+    super.addComponent(c);
+    requestRepaint();
+  }
+  
+  private void doComponentAddLogic(final Component c, int position) {
+
+    if (components.indexOf(c) != -1)
+      throw new IllegalArgumentException("Already added!");
+    components.add(position, c);
   }
 }

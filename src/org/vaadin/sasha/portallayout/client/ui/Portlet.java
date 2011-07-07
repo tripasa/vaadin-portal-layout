@@ -1,10 +1,10 @@
+
 package org.vaadin.sasha.portallayout.client.ui;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
@@ -37,10 +37,16 @@ public class Portlet extends ComplexPanel {
   private static final String CONTENT_CLASSNAME = "-content";
   
   /**
-   * Size of the portlet wrapper element.
+   * Size information of the portlet wrapper element.
    */
-  private Size sizeInfo = new Size(0, 0);
+  private Size containerSizeInfo = new Size(0, 0);
 
+  /**
+   * Size information of the portlet contents
+   * (how much space should be used for the non-collapsed widget in the protlet). 
+   */
+  private Size contentSizeInfo = new Size(0, 0);
+  
   /**
    * Header object that both serves as an area for 
    * the draggable part of the portlet and holds the controls 
@@ -56,7 +62,7 @@ public class Portlet extends ComplexPanel {
   /**
    * Wrapper around the contents.
    */
-  private Element wrapperElement;
+  private Element containerElement;
 
   /**
    * Element that holds contents.
@@ -108,20 +114,20 @@ public class Portlet extends ComplexPanel {
     parentPortal = parent;
     content = widget;
     
-    wrapperElement = DOM.createDiv();
+    containerElement = DOM.createDiv();
     
     header = new PortletHeader("Drag Me", this);
     header.getElement().getStyle().setFloat(Style.Float.LEFT);
-    add(header, wrapperElement);
+    add(header, containerElement);
     
     contentDiv = DOM.createDiv();
     contentDiv.addClassName(CLASSNAME + CONTENT_CLASSNAME);
     contentDiv.getStyle().setFloat(Style.Float.LEFT);
     
-    wrapperElement.appendChild(contentDiv);
-    setElement(wrapperElement);
+    containerElement.appendChild(contentDiv);
+    setElement(containerElement);
     setStyleName(CLASSNAME);
-    wrapperElement.addClassName(CLASSNAME + WRAPPER_CLASSNAME);
+    containerElement.addClassName(CLASSNAME + WRAPPER_CLASSNAME);
     
     add(content, contentDiv);
   }
@@ -160,37 +166,62 @@ public class Portlet extends ComplexPanel {
    * @param height The new height.
    */
   public void setSizes(int width, int height) {
-    sizeInfo.setWidth(width);
-    sizeInfo.setHeight(height);
-    setPortletDOMSize(width, height);
+    containerSizeInfo.setWidth(width);
+    containerSizeInfo.setHeight(height);
+    updatePortletDOMSize();
   }
 
+  /**
+   * 
+   */
+  public void setPortletWidth(int width)
+  {
+    containerSizeInfo.setWidth(width);
+    updatePortletDOMSize();
+  }
+  
+  /**
+   * 
+   */
+  public void setPortletHeight(int height)
+  {
+    containerSizeInfo.setHeight(height);
+    updatePortletDOMSize();
+  }
+  
+  /**
+   * 
+   */
+  public void updateContentSizeInfo()
+  {
+    contentSizeInfo.setWidth(Util.getRequiredWidth(content));
+    contentSizeInfo.setHeight(Util.getRequiredHeight(content));
+  }
+  
   /**
    * Set the wrapper element size.
    * @param width New width.
    * @param height New height.
    */
-  public void setPortletDOMSize(int width, int height) {
-    contentDiv.getStyle().setPropertyPx("width", width);
-    contentDiv.getStyle().setPropertyPx("height", height);
-    wrapperElement.getStyle().setPropertyPx("width", width);
-    wrapperElement.getStyle().setPropertyPx("height", height + header.getOffsetHeight());
+  public void updatePortletDOMSize() {
+    containerElement.getStyle().setPropertyPx("width", containerSizeInfo.getWidth());
+    containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight() + header.getOffsetHeight());
   }
 
   /**
    * Set wrapper element DOM height in pixels. 
    * @param height New height.
    */
-  public void setHeightPx(int height) {
-    wrapperElement.getStyle().setPropertyPx("height", height);
+  public void setContainerHeightPx(int height) {
+    containerElement.getStyle().setPropertyPx("height", height);
   }
 
   /**
    * Set wrapper element DOM width in pixels. 
    * @param height New width.
    */
-  public void setWidthPx(int width) {
-    wrapperElement.getStyle().setPropertyPx("width", width);
+  public void setContainerWidthPx(int width) {
+    containerElement.getStyle().setPropertyPx("width", width);
   }
   
   /**
@@ -296,10 +327,7 @@ public class Portlet extends ComplexPanel {
    */
   public int getRequiredHeight()
   {
-    int result = Util.getRequiredHeight(header.getElement());
-    if (!isHeightRelative)
-      result += Util.getRequiredHeight(content.getElement());
-    return result;
+    return containerSizeInfo.getHeight();
   }
 
   /**
@@ -308,20 +336,17 @@ public class Portlet extends ComplexPanel {
    */
   public void toggleCollapseState() {
     setCollapsed(!isCollapsed);
-    contentDiv.getStyle().setProperty("visibility", isCollapsed ? "hidden" : "visible");
-    setSizes(sizeInfo.getWidth(), isCollapsed ? 0 : content.getOffsetHeight());
-    //client.handleComponentRelativeSize(content);
-    //client.runDescendentsLayout((HasWidgets) content);
+    setSizes(containerSizeInfo.getWidth(), isCollapsed ? 0 : contentSizeInfo.getHeight());
+    updateCollapseStyle();
     parentPortal.onPortalCollapseStateChanged(this);  
   }
 
   /**
-   * Get information about the size of this portlet. Size info should be formed 
-   * from 
-   * @return
+   * Get information about the size of this portlet. 
+   * @return Size information of the wrapping container element.
    */
-  public Size getSizeInfo() {
-    return sizeInfo;
+  public Size getContainerSizeInfo() {
+    return containerSizeInfo;
   }
   
   /**
@@ -331,5 +356,15 @@ public class Portlet extends ComplexPanel {
   public static String getClassName()
   {
     return CLASSNAME;
+  }
+
+  public void updateContainerSizeFromContent() {
+    setPortletWidth(contentSizeInfo.getWidth());
+    setPortletHeight(isCollapsed ? 0 : contentSizeInfo.getHeight());
+  }
+
+  public void updateCollapseStyle() {
+    contentDiv.getStyle().setProperty("visibility", isCollapsed ? "hidden" : "visible");
+    contentDiv.getStyle().setPropertyPx("height", isCollapsed ? 0 : contentSizeInfo.getHeight());
   }
 }

@@ -105,16 +105,11 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * if set.
    */
   private boolean debugMode = false;
-
+  
   /**
-   * 
+   * POrtal size info.
    */
-  private int width;
-
-  /**
-   * 
-   */
-  private int height;
+  private Size sizeInfo = new Size(0, 0);
 
   /**
    * Total height required for rendering fixed sized portlets and headers of
@@ -175,25 +170,28 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
       updatePortletInPosition(portlet, pos);
 
       portlet.renderContent(childUIDL);
-
+      portlet.updateContentSizeInfo();
+      
       if (portlet.tryDetectRelativeHeight(childUIDL))
         relativeHeightPortlets.add(portlet);
-
+      
+      portlet.updateContainerSizeFromContent();
+      portlet.updateCollapseStyle();
     }
 
-    width = getElement().getClientWidth();
-    height = getElement().getClientHeight();
+    sizeInfo.setHeight(getElement().getClientHeight());
+    sizeInfo.setWidth(getElement().getClientWidth());
 
     recalculateConsumedHeight();
-    client.handleComponentRelativeSize(this);
   }
 
   public void recalculateConsumedHeight() {
     consumedHeightCache = 0;
     for (final Widget p : getChildren())
       consumedHeightCache += Util.getRequiredHeight(p);
-    System.out.println("New height " + Math.max(height, consumedHeightCache) + " required " + Util.getRequiredHeight(getElement()));
-    getElement().getStyle().setPropertyPx("height", Math.max(height, consumedHeightCache) + 200);
+    System.out.println("New height " + Math.max(sizeInfo.getHeight(), consumedHeightCache) + " required " + Util.getRequiredHeight(getElement()));
+    getElement().getStyle().setPropertyPx("height", Math.max(sizeInfo.getHeight(), consumedHeightCache));
+    Util.notifyParentOfSizeChange(this, false);
   }
 
   private Portlet findOrCreatePortlet(Widget widget) {
@@ -251,8 +249,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     if (child == null)
       return;
     widgetToPortletContainer.remove(portlet.getContent());
-    client.updateVariable(paintableId, COMPONENT_REMOVED, child, false);
-    client.sendPendingVariableChanges();
+    client.updateVariable(paintableId, COMPONENT_REMOVED, child, true);
   }
 
   /**
@@ -276,12 +273,9 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     params.put(PAINTABLE_MAP_PARAM, child);
     params.put(PORTLET_POSITION_MAP_PARAM, newPosition);
     params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
-    
-    client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);
-    client.runDescendentsLayout((HasWidgets) child);
-    
+  
+    client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);    
     widgetToPortletContainer.put(portlet.getContent(), portlet);
-    recalculateConsumedHeight();
   }
 
   /**
@@ -300,7 +294,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     return consumedHeightCache;
   }
   /**
-   * Check if heightCahe is va
+   * Check if heightCahe is valid.
    */
   public boolean isHeightCacheValid() {
     return consumedHeightCache > 0;
@@ -316,13 +310,19 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   @Override
   public void setWidth(String width) {
     super.setWidth(width);
+    int intWidth = getOffsetWidth();
     for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it
         .hasNext();) {
-      Portlet p = it.next();
-      p.setSizes(getOffsetWidth(), p.getContent().getOffsetHeight());
+      ((Portlet)it.next()).setPortletWidth(intWidth);
     }
   }
 
+  @Override
+  public void setHeight(String height) {
+    super.setHeight(height);
+    System.out.println("Setting height " + height);
+  }
+  
   @Override
   public void replaceChildComponent(Widget oldComponent, Widget newComponent) {
     final Portlet portlet = widgetToPortletContainer.remove(oldComponent);
@@ -351,7 +351,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   @Override
   public RenderSpace getAllocatedSpace(Widget child) {
     final Portlet portlet = widgetToPortletContainer.get(child);
-    final Size sizeInfo = portlet.getSizeInfo();
+    final Size sizeInfo = portlet.getContainerSizeInfo();
     return new RenderSpace(sizeInfo.getWidth(), sizeInfo.getHeight());
   }
 
