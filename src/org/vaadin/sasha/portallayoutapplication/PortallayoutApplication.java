@@ -3,9 +3,11 @@ package org.vaadin.sasha.portallayoutapplication;
 import org.vaadin.henrik.drawer.Drawer;
 import org.vaadin.sasha.portallayout.PortalLayout;
 
+import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
 import com.vaadin.Application;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.incubator.dashlayout.ui.VerDashLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComponentContainer;
@@ -99,7 +101,7 @@ public class PortallayoutApplication extends Application {
 
     windowLayout.addComponent(sidePanel);
 
-   // overrideWindowContentWIthTestData();
+    //overrideWindowContentWIthTestData();
     
     setMainWindow(mainWindow);
   }
@@ -109,13 +111,13 @@ public class PortallayoutApplication extends Application {
     layout.setSizeFull();
     mainWindow.setContent(layout);
 
-    Table table1 = createTableWithDnDSupport();
-    Table table2 = createTableWithDnDSupport();
+    Table table1 = createTableTest();
+    Table table2 = createTableTest();
     layout.addComponent(table1);
     layout.addComponent(table2);
   }
 
-  public Table createTableWithDnDSupport() {
+  public Table createTableTest() {
     final Table table = new Table("", new TestIndexedContainer());
     table.setSelectable(true);
     return table;
@@ -135,21 +137,21 @@ public class PortallayoutApplication extends Application {
 
   private void overrideWindowContentWIthTestData() {
     final VerticalLayout layout = new VerticalLayout();
+    layout.setSpacing(true);
     layout.setWidth("100%");
     
     final Drawer dr = new Drawer();
     dr.setWidth("100%");
-    dr.setDrawerHeight(200);
+    dr.setDrawerHeight(500);
     
     final VerticalLayout nestedLayout = new VerticalLayout();
-    nestedLayout.setWidth("100px");
-    nestedLayout.setHeight("100px");
+    nestedLayout.setWidth("100%");
+    //nestedLayout.setHeight("50%");
     
     TextArea ta = new TextArea();
     ta.setWidth("200px");
-    ta.setHeight("100%");
     
-    nestedLayout.addComponent(ta);
+    nestedLayout.addComponent(createTableTest());
     dr.setDrawerComponent(nestedLayout);
     
     layout.addComponent(dr);
@@ -159,9 +161,11 @@ public class PortallayoutApplication extends Application {
       @Override
       public void buttonClick(ClickEvent event) {
         nestedLayout.addComponent(new Label("asdljslkajdaksj"));
+        layout.setSpacing(!layout.isSpacing());
       }
     });
     layout.addComponent(b);
+    layout.addComponent(new Button("addasdad"));
     mainWindow.setContent(layout);
   }
 

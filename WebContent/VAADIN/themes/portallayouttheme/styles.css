@@ -1,1 +1,46 @@
 @import url(../reindeer/styles.css);
+
+.v-portlet {
+	padding-top: 10px;
+}
+
+.v-portlet .v-portlet-header {
+	height: 18px;
+	background-image: url(header-bg.png);
+	width: 100%;
+}
+
+.v-portlet .v-portlet-header-closebox {
+	margin-right: 3px;
+	margin-bottom: 1px;
+	margin-left: 2px;
+	width: 16px;
+	height: 16px;
+	background: transparent;
+	background-image: url(close.png);
+	border: 0px;
+}
+
+.v-portlet .v-portlet-header-buttonbar {
+	float: right;
+}
+
+.v-portlet .v-portlet-header-captionwrap {
+	font-weight: bold;
+	font-size: 12px;
+	line-height: normal;
+	color: #fff;
+	text-shadow: #000 0 -1px 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-ms-text-overflow: ellipsis;
+}
+
+.v-portlet .v-portlet-header-closebox:hover {
+	background-image: url(close-hover.png);
+}
+
+.v-portlet .v-portlet-header-closebox:active {
+	background-image: url(close-pressed.png);
+}

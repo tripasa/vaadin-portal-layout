@@ -14,7 +14,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
@@ -24,6 +23,7 @@ import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.RenderSpace;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
 
 /**
  * Client-side implementation of the portal layout.
@@ -118,6 +118,16 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   private int consumedHeightCache;
 
   /**
+   * Flag indicating that spacing must be enabled. 
+   */
+  private boolean isSpacingEnabled = false;
+  
+  /**
+   * Info about portlet spacing.
+   */
+  protected final Spacing activeSpacing = new Spacing(0, 0);
+  
+  /**
    * Get the Common PickupDragController that should wire all the portals
    * together.
    * 
@@ -159,6 +169,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     this.client = client;
     paintableId = uidl.getId();
 
+    updateSpacingInfoFromUidl(uidl);
+   
     int pos = 0;
     relativeHeightPortlets.clear();
     for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
@@ -177,12 +189,22 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
       
       portlet.updateContainerSizeFromContent();
       portlet.updateCollapseStyle();
+      portlet.updateSpacing(activeSpacing.vSpacing);
     }
 
     sizeInfo.setHeight(getElement().getClientHeight());
     sizeInfo.setWidth(getElement().getClientWidth());
 
     recalculateConsumedHeight();
+  }
+
+  private void updateSpacingInfoFromUidl(final UIDL uidl) {
+    boolean newSpacingEnabledState = uidl.getBooleanAttribute("spacing");
+    if (isSpacingEnabled != newSpacingEnabledState)
+    {
+      isSpacingEnabled = newSpacingEnabledState;
+      activeSpacing.vSpacing = isSpacingEnabled ? 10 : 0;
+    }
   }
 
   public void recalculateConsumedHeight() {
@@ -361,6 +383,10 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   public int getCapacity() {
     return capacity;
+  }
+
+  public Spacing getSpacingInfo() {
+    return activeSpacing;
   }
 
 }

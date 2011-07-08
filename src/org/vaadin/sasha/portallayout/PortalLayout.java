@@ -15,6 +15,7 @@ import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Layout.SpacingHandler;
 
 /**
  * Layout that presents its contents in a portal style.
@@ -22,8 +23,13 @@ import com.vaadin.ui.Component;
  */
 @SuppressWarnings("serial")
 @ClientWidget(value = VPortalLayout.class, loadStyle = LoadStyle.EAGER)
-public class PortalLayout extends AbstractLayout {
-
+public class PortalLayout extends AbstractLayout implements SpacingHandler {
+  
+  /**
+   * The flag indicating that spacing is enabled.
+   */
+  private boolean isSpacingEnabled = true;
+  
   /**
    * The components each of which is represented with the portlet inside the
    * portal
@@ -45,6 +51,7 @@ public class PortalLayout extends AbstractLayout {
   @Override
   public void paintContent(PaintTarget target) throws PaintException {
     super.paintContent(target);
+    target.addAttribute("spacing", isSpacingEnabled);
     for (final Component c : components)
      c.paint(target);
   }
@@ -175,5 +182,21 @@ public class PortalLayout extends AbstractLayout {
     if (components.indexOf(c) != -1)
       throw new IllegalArgumentException("Already added!");
     components.add(position, c);
+  }
+
+  @Override
+  public void setSpacing(boolean enabled) {
+    isSpacingEnabled = enabled;
+    requestRepaint();
+  }
+
+  @Override
+  public boolean isSpacingEnabled() {
+    return isSpacingEnabled;
+  }
+
+  @Override
+  public boolean isSpacing() {
+    return isSpacingEnabled;
   }
 }
