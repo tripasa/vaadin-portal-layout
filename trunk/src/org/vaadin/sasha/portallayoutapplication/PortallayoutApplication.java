@@ -7,6 +7,7 @@ import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
 import com.vaadin.Application;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.incubator.dashlayout.ui.HorDashLayout;
 import com.vaadin.incubator.dashlayout.ui.VerDashLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -107,6 +108,7 @@ public class PortallayoutApplication extends Application {
   }
 
   private void testGrid() {
+    HorDashLayout l;
     final HorizontalLayout layout = new HorizontalLayout();
     layout.setSizeFull();
     mainWindow.setContent(layout);

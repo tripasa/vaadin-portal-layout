@@ -138,6 +138,8 @@ public class PortalDropController extends AbstractPositioningDropController {
     SimplePanel outer = new SimplePanel();
     outer.addStyleName(DragClientBundle.INSTANCE.css().positioner());
 
+    DragClientBundle.INSTANCE.css().getText();
+    
     RootPanel.get().add(outer, -500, -500);
 
     outer.setWidget(new Label("x"));
@@ -149,11 +151,9 @@ public class PortalDropController extends AbstractPositioningDropController {
     for (final Widget widget : context.selectedWidgets) {
       if (widget instanceof Portlet)
       {
-        final Portlet portletCast = (Portlet)widget; 
-        
+        final Portlet portletCast = (Portlet)widget;         
         width += Math.max(width, widget.getOffsetWidth());
         height += portletCast.getRequiredHeight();
-        
         spacing += portletCast.getSpacing();
       }
     }
