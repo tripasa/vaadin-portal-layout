@@ -12,6 +12,7 @@ import com.vaadin.terminal.gwt.client.RenderInformation.FloatSize;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
 
 /**
  * The class representing the portlet in the portal.
@@ -90,8 +91,12 @@ public class Portlet extends ComplexPanel {
    * Flag indicating that this portlet is collapsed (only header is visible).
    */
   private boolean isCollapsed = false;
-
+  
+  /**
+   * 
+   */
   private ApplicationConnection client;
+  
   /**
    * Constructor.
    * @param widget The contents of the portlets.
@@ -207,22 +212,6 @@ public class Portlet extends ComplexPanel {
     containerElement.getStyle().setPropertyPx("width", containerSizeInfo.getWidth());
     containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight() + header.getOffsetHeight());
   }
-
-  /**
-   * Set wrapper element DOM height in pixels. 
-   * @param height New height.
-   */
-  public void setContainerHeightPx(int height) {
-    containerElement.getStyle().setPropertyPx("height", height);
-  }
-
-  /**
-   * Set wrapper element DOM width in pixels. 
-   * @param height New width.
-   */
-  public void setContainerWidthPx(int width) {
-    containerElement.getStyle().setPropertyPx("width", width);
-  }
   
   /**
    * Convenience method needed sometimes 
@@ -248,6 +237,7 @@ public class Portlet extends ComplexPanel {
    */
   public void setContent(Widget content) {
     this.content = content;
+    updateContentSizeInfo();
   }
 
   /**
@@ -320,15 +310,6 @@ public class Portlet extends ComplexPanel {
     removeFromParent();
     parentPortal.onPortalClose(this);
   }
-  
-  /**
-   * Returns the height required for rendering of this portlet.
-   * @return Height in pixels.
-   */
-  public int getRequiredHeight()
-  {
-    return containerSizeInfo.getHeight();
-  }
 
   /**
    * Change collapse state - if collapsed then expand 
@@ -341,6 +322,11 @@ public class Portlet extends ComplexPanel {
     parentPortal.onPortalCollapseStateChanged(this);  
   }
 
+  public int getRequiredHeight()
+  {
+    return containerSizeInfo.getHeight() + header.getOffsetHeight();
+  }
+  
   /**
    * Get information about the size of this portlet. 
    * @return Size information of the wrapping container element.
@@ -366,5 +352,14 @@ public class Portlet extends ComplexPanel {
   public void updateCollapseStyle() {
     contentDiv.getStyle().setProperty("visibility", isCollapsed ? "hidden" : "visible");
     contentDiv.getStyle().setPropertyPx("height", isCollapsed ? 0 : contentSizeInfo.getHeight());
+  }
+  
+  public void updateSpacing(int spacing)
+  {
+    containerElement.getStyle().setPropertyPx("paddingTop", spacing);
+  }
+
+  public int getSpacing() {
+    return parentPortal.getSpacingInfo().vSpacing;
   }
 }

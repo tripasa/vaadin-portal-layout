@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 
 /**
  * Object that controlls the process of dropping in the portals 
@@ -143,17 +144,32 @@ public class PortalDropController extends AbstractPositioningDropController {
 
     int width = 0;
     int height = 0;
+    int spacing = 0;
+    
     for (final Widget widget : context.selectedWidgets) {
-      width = Math.max(width, widget.getOffsetWidth());
-      height += widget.getOffsetHeight();
+      if (widget instanceof Portlet)
+      {
+        final Portlet portletCast = (Portlet)widget; 
+        
+        width += Math.max(width, widget.getOffsetWidth());
+        height += portletCast.getRequiredHeight();
+        
+        spacing += portletCast.getSpacing();
+      }
     }
 
     SimplePanel inner = new SimplePanel();
-    inner.setPixelSize(width - DOMUtil.getHorizontalBorders(outer), height
-        - DOMUtil.getVerticalBorders(outer));
+    
+    int innerWidth = width - DOMUtil.getHorizontalBorders(outer);
+    int innerHeight = height - DOMUtil.getVerticalBorders(outer);
+    
+    inner.setPixelSize(innerWidth, innerHeight);
 
     outer.setWidget(inner);
+    
+    outer.getElement().getStyle().setPropertyPx("marginTop", spacing);
     outer.getElement().getStyle().setProperty("border", "2px dashed black");
+    
     return outer;
   }
 
