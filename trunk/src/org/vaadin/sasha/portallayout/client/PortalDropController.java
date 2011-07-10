@@ -45,7 +45,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     for (Widget widget : context.selectedWidgets) {
       if (widget instanceof Portlet)
         updatePortletLocation((Portlet)widget, dropIdx);
-      portal.appendToRootElement(widget, dropIdx);
+      portal.addToRootElement(widget, dropIdx);
       dropIdx = portal.getWidgetIndex(widget) + 1;
     }
   }
@@ -75,8 +75,8 @@ public class PortalDropController extends AbstractPositioningDropController {
   public void onEnter(DragContext context) {
     super.onEnter(context);
     dummy = newPositioner(context);
-    portal.appendToRootElement(dummy, updateDropPosition(context));
-    portal.recalculateConsumedHeight();
+    portal.addToRootElement(dummy, updateDropPosition(context));
+    portal.recalculateLayoutAndPortletSizes();
   }
   
   /**
@@ -96,7 +96,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     super.onLeave(context);
     dummy.removeFromParent();
     dummy = null;
-    portal.recalculateConsumedHeight();
+    portal.recalculateLayoutAndPortletSizes();
   }
   
   @Override
@@ -116,7 +116,7 @@ public class PortalDropController extends AbstractPositioningDropController {
       } else if (targetIndex == -1) {
         dummy.removeFromParent();
       } else {
-        portal.appendToRootElement(dummy, targetIndex);
+        portal.addToRootElement(dummy, targetIndex);
       }
     }
   }
