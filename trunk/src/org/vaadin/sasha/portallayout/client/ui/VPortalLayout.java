@@ -12,6 +12,8 @@ import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -32,17 +34,50 @@ import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
  */
 public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
+  /**
+   * 
+   */
   public static final String PORTLET_POSITION_UPDATED = "COMPONENT_ADDED";
 
+  /**
+   * 
+   */
   public static final String COMPONENT_REMOVED = "COMPONENT_REMOVED";
 
+  /**
+   * 
+   */
   public static final String PAINTABLE_MAP_PARAM = "PAINTABLE";
 
+  /**
+   * 
+   */
   public static final String PORTLET_POSITION_MAP_PARAM = "PORTLET_POSITION";
 
+  /**
+   * 
+   */
   public static final String PORTLET_COLLAPSED = "PORTLET_COLLAPSED";
   
+  /**
+   * 
+   */
   public static final String PORTLET_COLLAPSE_STATE_CHANGED = "PORTLET_COLLAPSE_STATE_CHANGE";
+  
+  /**
+   * 
+   */
+  public static final String PORTLET_CAPTION = "PORTLET_CAPTION";
+
+  /**
+   * 
+   */
+  public static final String PORTLET_CLOSABLE = "PORTLET_CLOSABLE";
+ 
+  /**
+   * 
+   */
+  public static final String PORTLET_COLLAPSIBLE = "PORTLET_COLLAPSIBLE";
   
   /**
    * Basic style name.
@@ -50,8 +85,13 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   public static final String CLASSNAME = "v-portallayout";
 
   /**
+   * 
+   */
+  public static final String STYLENAME_SPACING = CLASSNAME + "-spacing";
+  
+  /**
    * The common drag controller for all the portals in the application. Having
-   * this drag controller static alloes us to drag portlets between all the
+   * this drag controller static allows us to drag portlets between all the
    * possible portals.
    */
   private final static PickupDragController cs_dragControl = new PickupDragController(
@@ -78,7 +118,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * Id of the current paintable.
    */
   protected String paintableId;
-
+  
   /**
    * Server side communication interface.
    */
@@ -125,6 +165,11 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   /**
    * Info about portlet spacing.
    */
+  protected final Spacing computedSpacing = new Spacing(0, 0);
+  
+  /**
+   * Info about portlet spacing.
+   */
   protected final Spacing activeSpacing = new Spacing(0, 0);
   
   /**
@@ -143,7 +188,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   public VPortalLayout() {
     super();
     
-    getElement().setClassName(CLASSNAME);
+    setStyleName(CLASSNAME);
     getElement().getStyle().setProperty("overflow", "hidden");
     if (debugMode)
       getElement().getStyle().setProperty("border", "1px solid");
@@ -174,22 +219,35 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     int pos = 0;
     relativeHeightPortlets.clear();
     for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
-      final UIDL childUIDL = (UIDL) it.next();
-      final Paintable child = client.getPaintable(childUIDL);
-      final Widget widget = (Widget) child;
-      final Portlet portlet = findOrCreatePortlet(widget);
+      final UIDL itUidl = (UIDL) it.next();
+      if (itUidl.getTag().equals("portlet"))
+      {
+          final String portletCaption = itUidl.getStringAttribute(PORTLET_CAPTION);
+          final Boolean isClosable = itUidl.getBooleanAttribute(PORTLET_CLOSABLE);
+          final Boolean isCollapsible = itUidl.getBooleanAttribute(PORTLET_COLLAPSIBLE);
+          
+          final UIDL childUidl = (UIDL)itUidl.getChildUIDL(0);
+          
+          final Paintable child = client.getPaintable(childUidl);
+          final Widget widget = (Widget) child;
+          final Portlet portlet = findOrCreatePortlet(widget); 
+          
+          updatePortletInPosition(portlet, pos);
 
-      updatePortletInPosition(portlet, pos);
-
-      portlet.renderContent(childUIDL);
-      portlet.updateContentSizeInfo();
-      
-      if (portlet.tryDetectRelativeHeight(childUIDL))
-        relativeHeightPortlets.add(portlet);
-      
-      portlet.updateContainerSizeFromContent();
-      portlet.updateCollapseStyle();
-      portlet.updateSpacing(activeSpacing.vSpacing);
+          portlet.setCaption(portletCaption);
+          portlet.setClosable(isClosable);
+          portlet.setCollapsible(isCollapsible);
+          
+          portlet.renderContent(childUidl);
+          portlet.updateContentSizeInfo();
+          
+          if (portlet.tryDetectRelativeHeight(childUidl))
+            relativeHeightPortlets.add(portlet);
+          
+          portlet.updateContainerSizeFromContent();
+          portlet.updateCollapseStyle();
+          portlet.updateSpacing(activeSpacing.vSpacing);
+      }
     }
 
     sizeInfo.setHeight(getElement().getClientHeight());
@@ -203,7 +261,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     if (isSpacingEnabled != newSpacingEnabledState)
     {
       isSpacingEnabled = newSpacingEnabledState;
-      activeSpacing.vSpacing = isSpacingEnabled ? 10 : 0;
+      activeSpacing.vSpacing = isSpacingEnabled ? computedSpacing.vSpacing : 0;
     }
   }
 
@@ -295,7 +353,9 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     params.put(PAINTABLE_MAP_PARAM, child);
     params.put(PORTLET_POSITION_MAP_PARAM, newPosition);
     params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
-  
+    params.put(PORTLET_CLOSABLE, portlet.isClosable());
+    params.put(PORTLET_COLLAPSIBLE, portlet.isCollapsible());
+    params.put(PORTLET_CAPTION, portlet.getCaption());
     client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);    
     widgetToPortletContainer.put(portlet.getContent(), portlet);
   }
@@ -377,6 +437,13 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     return new RenderSpace(sizeInfo.getWidth(), sizeInfo.getHeight());
   }
 
+  @Override
+  public void setStyleName(String style) {
+    super.setStyleName(style);
+    measureSpacing();
+  }
+ 
+
   public void setCapacity(int capacity) {
     this.capacity = capacity;
   }
@@ -387,6 +454,54 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   public Spacing getSpacingInfo() {
     return activeSpacing;
+  }
+  
+  /**
+   * Takes a String value e.g. "12px" and parses that to int 12
+   * 
+   * @param String
+   *            value with "px" ending
+   * @return int the value from the string before "px", converted to int
+   */
+  public static int parsePixel(String value) {
+      if (value == "" || value == null) {
+          return 0;
+      }
+      Float ret;
+      if (value.length() > 2) {
+          ret = Float.parseFloat(value.substring(0, value.length() - 2));
+      } else {
+          ret = Float.parseFloat(value);
+      }
+      return (int) Math.ceil(ret);
+  }
+  
+  private static DivElement measurement;
+  private static DivElement helper;
+
+  static {
+      helper = Document.get().createDivElement();
+      helper.setInnerHTML("<div style=\"position:absolute;top:0;left:0;height:0;visibility:hidden;overflow:hidden;\">"
+              + "<div style=\"width:0;height:0;visibility:hidden;overflow:hidden;\">"
+              + "</div></div>"
+              + "<div style=\"position:absolute;height:0;overflow:hidden;\"></div>");
+      NodeList<Node> childNodes = helper.getChildNodes();
+      measurement = (DivElement) childNodes.getItem(1);
+  }
+
+  protected boolean measureSpacing() {
+      if (!isAttached()) {
+          return false;
+      }
+
+      // Measure spacing (actually CSS padding)
+      measurement.setClassName(STYLENAME_SPACING);
+      getElement().appendChild(helper);
+    
+      computedSpacing.vSpacing = measurement.getOffsetWidth();
+      computedSpacing.hSpacing = measurement.getOffsetWidth();
+      getElement().removeChild(helper);
+      return true;
   }
 
 }

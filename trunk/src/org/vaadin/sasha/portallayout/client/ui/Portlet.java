@@ -121,7 +121,7 @@ public class Portlet extends ComplexPanel {
     
     containerElement = DOM.createDiv();
     
-    header = new PortletHeader("Drag Me", this);
+    header = new PortletHeader(this);
     header.getElement().getStyle().setFloat(Style.Float.LEFT);
     add(header, containerElement);
     
@@ -361,5 +361,30 @@ public class Portlet extends ComplexPanel {
 
   public int getSpacing() {
     return parentPortal.getSpacingInfo().vSpacing;
+  }
+
+  public void setCaption(final String portletCaption) {
+    header.setCaption(portletCaption);
+  }
+  
+  public void setClosable(boolean closable)
+  {
+    header.setClosable(closable);
+  }
+
+  public void setCollapsible(Boolean isCollapsible) {
+    header.setCollapsible(isCollapsible);
+  }
+
+  public boolean isClosable() {
+    return header.isClosable();
+  }
+
+  public boolean isCollapsible() {
+    return header.isCollapsible();
+  }
+
+  public String getCaption() {
+    return header.getCaption();
   }
 }
