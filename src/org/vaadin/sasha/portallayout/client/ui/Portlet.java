@@ -165,6 +165,12 @@ public class Portlet extends ComplexPanel {
     ((Paintable) content).updateFromUIDL(uidl, client);
   }
 
+  public void updateContentAndWrapperSizes(int width, int height) {
+    setSizes(width, height);
+    contentSizeInfo.setWidth(width);
+    contentSizeInfo.setHeight(height - header.getOffsetHeight());
+  }
+  
   /**
    * Set the new sizes of the contents and wrappers.
    * @param width The new width.
@@ -197,7 +203,7 @@ public class Portlet extends ComplexPanel {
   /**
    * 
    */
-  public void updateContentSizeInfo()
+  public void updateContentSizeInfoFromDOM()
   {
     contentSizeInfo.setWidth(Util.getRequiredWidth(content));
     contentSizeInfo.setHeight(Util.getRequiredHeight(content));
@@ -210,7 +216,7 @@ public class Portlet extends ComplexPanel {
    */
   public void updatePortletDOMSize() {
     containerElement.getStyle().setPropertyPx("width", containerSizeInfo.getWidth());
-    containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight() + header.getOffsetHeight());
+    containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight() /*- parentPortal.getSpacingInfo().vSpacing*/);
   }
   
   /**
@@ -237,7 +243,7 @@ public class Portlet extends ComplexPanel {
    */
   public void setContent(Widget content) {
     this.content = content;
-    updateContentSizeInfo();
+    updateContentSizeInfoFromDOM();
   }
 
   /**
@@ -317,14 +323,21 @@ public class Portlet extends ComplexPanel {
    */
   public void toggleCollapseState() {
     setCollapsed(!isCollapsed);
-    setSizes(containerSizeInfo.getWidth(), isCollapsed ? 0 : contentSizeInfo.getHeight());
+    setSizes(containerSizeInfo.getWidth(), getRequiredHeight());
     updateCollapseStyle();
     parentPortal.onPortalCollapseStateChanged(this);  
   }
 
+  /**
+   * 
+   * @return
+   */
   public int getRequiredHeight()
   {
-    return containerSizeInfo.getHeight() + header.getOffsetHeight();
+    int result = header.getOffsetHeight();
+    if (!isCollapsed) 
+      result += contentSizeInfo.getHeight();
+    return result;
   }
   
   /**
@@ -333,6 +346,15 @@ public class Portlet extends ComplexPanel {
    */
   public Size getContainerSizeInfo() {
     return containerSizeInfo;
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public Size getContentSizeInfo()
+  {
+    return contentSizeInfo;
   }
   
   /**
@@ -386,5 +408,17 @@ public class Portlet extends ComplexPanel {
 
   public String getCaption() {
     return header.getCaption();
+  }
+
+  public float getRealtiveHeight() {
+    if (relativeSize != null)
+      return relativeSize.getHeight();
+    return 0f;
+  }
+
+  public void setRelativeHeight(float height) {
+    if (relativeSize == null)
+      relativeSize = new FloatSize(0, 0);
+    relativeSize.setHeight(height);
   }
 }
