@@ -11,6 +11,7 @@ import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
+import com.vaadin.terminal.Resource;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
@@ -37,9 +38,24 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   private List<Component> components = new LinkedList<Component>();
 
   /**
+   * Captions of the corresponding portlets
+   */
+  private Map<Component, String> componentCaptions = new HashMap<Component, String>();
+  
+  /**
    * The map containing the collapse states of the components.
    */
-  private Map<Component, Boolean> collapseMap = new HashMap<Component, Boolean>();
+  private Map<Component, Boolean> collapseStateMap = new HashMap<Component, Boolean>();
+  
+  /**
+   * 
+   */
+  private Map<Component, Boolean> closableMap = new HashMap<Component, Boolean>();
+  
+  /**
+   * 
+   */
+  private Map<Component, Boolean> collapsibleMap = new HashMap<Component, Boolean>();
   
   /// Constructor
   public PortalLayout() {
@@ -53,7 +69,31 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     super.paintContent(target);
     target.addAttribute("spacing", isSpacingEnabled);
     for (final Component c : components)
-     c.paint(target);
+    {
+      target.startTag("portlet");
+      
+      target.addAttribute(VPortalLayout.PORTLET_CAPTION, getComponentCaption(c));
+      target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, isClosable(c));
+      target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE, isCollapsible(c));
+      
+      c.paint(target);
+      target.endTag("portlet");
+    }
+  }
+
+  public boolean isCollapsible(Component c) {
+    Boolean result = collapsibleMap.get(c);
+    return result == null || result;
+  }
+
+  public boolean isClosable(Component c) {
+    Boolean result = closableMap.get(c); 
+    return result == null || result;
+  }
+
+  private String getComponentCaption(Component c) {
+    final String caption = componentCaptions.get(c);
+    return caption == null ? "" : caption;
   }
 
   /**
@@ -76,6 +116,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
           .get(VPortalLayout.PORTLET_POSITION_MAP_PARAM);
       
       onComponentPositionUpdated(component, portletPosition);
+      
+      setClosable(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_CLOSABLE));
+      setCollapsible(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_COLLAPSIBLE));
+      setComponentCaption(component, (String)newPortlet.get(VPortalLayout.PORTLET_CAPTION));
     }
     
     if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED))
@@ -99,7 +143,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
    * @param isCollapsed True if the portlet was collapsed, false - expanded.
    */
   private void onPortletCollapsed(final Component component, Boolean isCollapsed) {
-    collapseMap.put(component, isCollapsed);
+    collapseStateMap.put(component, isCollapsed);
     if (!isCollapsed)
       requestRepaint();
   }
@@ -175,6 +219,36 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     doComponentAddLogic(c, position);
     super.addComponent(c);
     requestRepaint();
+  }
+  
+  public void setComponentCaption(final Component c, final String caption)
+  {
+    if (!components.contains(c))
+      throw new IllegalArgumentException("Component is not attached to the portal!");
+    componentCaptions.put(c, caption);
+    requestRepaint();
+  }
+  
+  public void setClosable(final Component c, boolean closable)
+  {
+    Boolean currentState = closableMap.get(c);
+    if (currentState == null ||
+        !currentState.equals(closable))
+    {
+      closableMap.put(c, closable);
+      requestRepaint();
+    }
+  }
+  
+  public void setCollapsible(final Component c, boolean collapsible)
+  {
+    Boolean currentState = collapsibleMap.get(c);
+    if (currentState == null ||
+        !currentState.equals(collapsible))
+    {
+      collapsibleMap.put(c, collapsible);
+      requestRepaint();
+    }    
   }
   
   private void doComponentAddLogic(final Component c, int position) {

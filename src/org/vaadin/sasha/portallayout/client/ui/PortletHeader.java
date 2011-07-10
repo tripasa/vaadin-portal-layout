@@ -26,9 +26,19 @@ public class PortletHeader extends ComplexPanel {
   public static final String CLASSNAME_SUFFIX = "-header";
   
   /**
-   * Class name suffix for the closing button
+   * Class name suffix for the close button
    */
-  private static final String CLOSEBUTTON_CLASSNAME_SUFFIX = "-closebox";
+  private static final String CLOSEBUTTON_CLASSNAME_SUFFIX = "-close";
+
+  /**
+   * Class name suffix for the collapse button
+   */
+  private static final String COLLAPSEBUTTON_CLASSNAME_SUFFIX = "-collapse";
+
+  /**
+   * Class name suffix for the collapse button
+   */
+  private static final String BUTTON_CLASSNAME_SUFFIX = "-button";
   
   /**
    * Class name suffix for the button bar.
@@ -54,8 +64,11 @@ public class PortletHeader extends ComplexPanel {
    * 
    */
   private final HTML captionWrapperHtml = new HTML();
-  
-  private final Element closeBox = Document.get().createDivElement();
+
+  /**
+   * 
+   */
+  private final Element buttonBar = Document.get().createDivElement();
   
   /**
    * Close button.
@@ -66,6 +79,21 @@ public class PortletHeader extends ComplexPanel {
    * Collapse button.
    */
   private Button collapseButton = new Button();
+  
+  /**
+   * 
+   */
+  private boolean closable = true;
+  
+  /**
+   * 
+   */
+  private boolean collapsible = true;
+  
+  /**
+   * 
+   */
+  private String caption;
   
   /**
    * Handler for close button click.
@@ -95,8 +123,7 @@ public class PortletHeader extends ComplexPanel {
     
     @Override
     public void onMouseDown(MouseDownEvent event) {
-      getElement().focus();
-      System.out.println("mouse down!");
+      closeButton.getElement().focus();
     }
   };
   
@@ -104,12 +131,12 @@ public class PortletHeader extends ComplexPanel {
    * Constructor.
    * @param parent Portlet to which this header belongs.
    */
-  public PortletHeader(final String caption, final Portlet parent) {
+  public PortletHeader(final Portlet parent) {
     super();
     setElement(captionWrapper);
+    setCaption("");
     captionWrapper.setClassName(getClassName());
-    captionWrapper.appendChild(closeBox);
-    setCaption(caption);
+    captionWrapper.appendChild(buttonBar);
     parentPortlet = parent;
     
     closeButton.addClickHandler(closeButtonClickHandler);
@@ -117,18 +144,27 @@ public class PortletHeader extends ComplexPanel {
     captionWrapperHtml.addMouseDownHandler(mouseDownHandler);
     
     add(captionWrapperHtml, (com.google.gwt.user.client.Element) captionWrapper);
-    add(collapseButton, (com.google.gwt.user.client.Element) closeBox);
-    add(closeButton, (com.google.gwt.user.client.Element) closeBox);
+    add(collapseButton, (com.google.gwt.user.client.Element) buttonBar);
+    add(closeButton, (com.google.gwt.user.client.Element) buttonBar);
     
-    closeButton.setStyleName(getClassName() + CLOSEBUTTON_CLASSNAME_SUFFIX);
-    collapseButton.setStyleName(getClassName() + CLOSEBUTTON_CLASSNAME_SUFFIX);
-    closeBox.setClassName(getClassName() + BUTTONBAR_CLASSNAME_SUFFIX);
+    closeButton.setStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX);
+    closeButton.addStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX + CLOSEBUTTON_CLASSNAME_SUFFIX);
+    collapseButton.setStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX);
+    collapseButton.addStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX + COLLAPSEBUTTON_CLASSNAME_SUFFIX);
+    
+    
+    buttonBar.setClassName(getClassName() + BUTTONBAR_CLASSNAME_SUFFIX);
     captionWrapperHtml.addStyleName(getClassName() + CAPTIONWRAPPER_CLASSNAME_SUFFIX);
   }
   
   public void setCaption(final String caption)
   {
-    captionWrapperHtml.getElement().setInnerHTML(caption);
+    this.caption = caption;
+    if (caption == null ||
+        caption.isEmpty())
+      captionWrapperHtml.getElement().setInnerHTML("&nbsp");
+    else
+      captionWrapperHtml.getElement().setInnerHTML(caption);
   }
   
   @Override
@@ -146,5 +182,28 @@ public class PortletHeader extends ComplexPanel {
   public static String getClassName()
   {
     return Portlet.getClassName() + CLASSNAME_SUFFIX;
+  }
+
+  public void setClosable(boolean closable) {
+    this.closable = closable;
+    closeButton.setVisible(closable);
+  }
+  
+  public void setCollapsible(boolean isCollapsible)
+  {
+    this.collapsible = isCollapsible;
+    collapseButton.setVisible(isCollapsible);
+  }
+
+  public boolean isClosable() {
+    return closable;
+  }
+
+  public boolean isCollapsible() {
+    return collapsible;
+  }
+
+  public String getCaption() {
+    return caption;
   }
 }

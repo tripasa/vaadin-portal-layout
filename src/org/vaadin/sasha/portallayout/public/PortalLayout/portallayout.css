@@ -1,5 +1,12 @@
+.v-portallayout {
+}
+
+.v-portallayout-spacing {
+	height: 8px;
+	width: 8px;
+}
+
 .v-portlet {
-	padding-top: 10px;
 }
 
 .v-portlet .v-portlet-header {
@@ -8,15 +15,20 @@
 	width: 100%;
 }
 
-.v-portlet .v-portlet-header-closebox {
-	margin-right: 3px;
+.v-portlet .v-portlet-header-button {
 	margin-bottom: 1px;
-	margin-left: 2px;
 	width: 16px;
 	height: 16px;
 	background: transparent;
-	background-image: url(close.png);
 	border: 0px;
+}
+
+.v-portlet .v-portlet-header-button-close {
+	background-image: url(close.png);
+}
+
+.v-portlet .v-portlet-header-button-collapse {
+	background-image: url(collapse.png);
 }
 
 .v-portlet .v-portlet-header-buttonbar {
@@ -24,6 +36,7 @@
 }
 
 .v-portlet .v-portlet-header-captionwrap {
+	padding-right: 3px;
 	font-weight: bold;
 	font-size: 12px;
 	line-height: normal;
@@ -35,10 +48,18 @@
 	-ms-text-overflow: ellipsis;
 }
 
-.v-portlet .v-portlet-header-closebox:hover {
-	background-image: url(close-hover.png);
+.v-portlet .v-portlet-header:hover {
+	cursor: move;
 }
 
-.v-portlet .v-portlet-header-closebox:active {
-	background-image: url(close-pressed.png);
+.v-portlet .v-portlet-header:active {
+	cursor: move;
+}
+
+.v-portlet .v-portlet-header-button-close:hover {
+	background-image: url(close.png);
+}
+
+.v-portlet .v-portlet-header-button-collapse:active {
+	background-image: url(collapse.png);
 }

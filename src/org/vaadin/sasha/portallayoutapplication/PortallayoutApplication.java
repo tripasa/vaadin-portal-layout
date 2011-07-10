@@ -3,14 +3,13 @@ package org.vaadin.sasha.portallayoutapplication;
 import org.vaadin.henrik.drawer.Drawer;
 import org.vaadin.sasha.portallayout.PortalLayout;
 
-import com.sun.java.swing.plaf.windows.WindowsBorders.DashedBorder;
 import com.vaadin.Application;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.incubator.dashlayout.ui.HorDashLayout;
-import com.vaadin.incubator.dashlayout.ui.VerDashLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -28,6 +27,8 @@ public class PortallayoutApplication extends Application {
 
   private Window mainWindow;
 
+  private boolean flag = true;
+  
   @Override
   public void init() {
 
@@ -122,6 +123,8 @@ public class PortallayoutApplication extends Application {
   public Table createTableTest() {
     final Table table = new Table("", new TestIndexedContainer());
     table.setSelectable(true);
+    table.setWidth("100%");
+    table.setHeight("300px");
     return table;
   }
 
@@ -172,22 +175,37 @@ public class PortallayoutApplication extends Application {
   }
 
   private void addPortletWithContents(final ComponentContainer portal) {
-    final Panel vl = new Panel();
-    vl.setHeight("200px");
-    vl.setWidth("100%");
+    if (flag)
+    {
+      final Panel vl = new Panel();
+      vl.setHeight("200px");
+      vl.setWidth("100%");
 
-    vl.getContent().setHeight("100%");
-    vl.getContent().setWidth("100%");
-    final TextField tf = new TextField();
-    tf.setImmediate(true);
+      vl.getContent().setHeight("100%");
+      vl.getContent().setWidth("100%");
+      final TextField tf = new TextField();
+      tf.setImmediate(true);
 
-    TextArea text = new TextArea();
-    text.setSizeFull();
-    tf.setWidth("100%");
-    vl.addComponent(tf);
+      
+      TextArea text = new TextArea();
+      text.setSizeFull();
+      tf.setWidth("100%");
+      vl.addComponent(tf);
 
-    vl.addComponent(text);
-    portal.addComponent(vl);
+      vl.addComponent(text);
+      portal.addComponent(vl);
+      ((PortalLayout)portal).setComponentCaption(vl, "Layout in portal");
+      ((PortalLayout)portal).setCollapsible(vl, false);
+    }
+    else
+    {
+      Component c = createTableTest();
+      portal.addComponent(c);
+      ((PortalLayout)portal).setComponentCaption(c, "Table dummy");
+      ((PortalLayout)portal).setClosable(c, false);
+    }
+    flag = !flag;
+    
   }
 
 }
