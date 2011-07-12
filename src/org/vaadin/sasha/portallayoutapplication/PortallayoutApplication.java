@@ -179,19 +179,17 @@ public class PortallayoutApplication extends Application {
     if (flag) {
       for (int i = 0; i < 1; ++i) {
         final Panel vl = new Panel();
-        //vl.setHeight("100%");
-        vl.setSizeUndefined();
+        vl.setHeight("100%");
         vl.setWidth("100%");
 
-        //vl.getContent().setHeight("100%");
+        vl.getContent().setHeight("100%");
         vl.getContent().setWidth("100%");
-        ((VerticalLayout)vl.getContent()).setSpacing(true);
         final TextField tf = new TextField();
         tf.setImmediate(true);
-        tf.setWidth("100%");
+
         TextArea text = new TextArea();
-        text.setWidth("100%");
-        text.setHeight("200px");
+        text.setSizeFull();
+        tf.setWidth("100%");
         vl.addComponent(tf);
 
         vl.addComponent(text);

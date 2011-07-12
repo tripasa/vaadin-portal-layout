@@ -13,10 +13,6 @@
 .v-portlet {
 }
 
-.v-app .v-portallayout .dragdrop-movable-panel {
-	z-index: 200;	
-}
-
 .v-portlet .v-portlet-header {
 	height: 18px;
 	background-image: url(header-bg.png);
@@ -70,4 +66,9 @@
 
 .v-portlet .v-portlet-header-button-collapse:active {
 	background-image: url(collapse.png);
+}
+
+.dragdrop-movable-panel {
+	opacity : 0.4;
+	z-index: 1000;
 }
