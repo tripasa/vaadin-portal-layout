@@ -315,11 +315,13 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     
     /// TODO set proper calcs after the padding problem fixed
     consumedHeight += (getChildren().size()) * activeSpacing.vSpacing;
+    
     int newHeigth = Math.max(sizeInfo.getHeight(), consumedHeight);
 
     getElement().getStyle().setPropertyPx("height", newHeigth);
     calculatePortletSizes();
-    Util.notifyParentOfSizeChange(this, false);
+    if (newHeigth != sizeInfo.getHeight())
+      Util.notifyParentOfSizeChange(this, false);
   }
 
   /**
@@ -352,7 +354,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
         //residualHeight -= newHeight;
       }
     }
-    client.runDescendentsLayout(this);
+    if (client != null)
+      client.runDescendentsLayout(this);
   }
 
   /**
@@ -505,10 +508,18 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   @Override
   public void setWidth(String width) {
     super.setWidth(width);
+    System.out.println("width is " + width);
+    int widthPx  = parsePixel(width);
+    sizeInfo.setWidth(widthPx);
     int intWidth = getOffsetWidth();
     for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it
         .hasNext();) {
       ((Portlet)it.next()).setWrapperWidth(intWidth);
+    }
+    if (client != null)
+    {
+      recalculateLayoutAndPortletSizes();
+      client.runDescendentsLayout(this);
     }
   }
 
