@@ -224,8 +224,11 @@ public class PickupDragController extends AbstractDragController {
       }
       movablePanel = container;
     }
-    movablePanel.addStyleName(DragClientBundle.INSTANCE.css().movablePanel());
+    
     movablePanel.addStyleName(APPLICATION_STYLE_NAME);
+    movablePanel.addStyleName(DragClientBundle.INSTANCE.css().movablePanel());
+    
+
     calcBoundaryOffset();
     dropTargetClientWidth = DOMUtil.getClientWidth(boundaryPanel.getElement());
     dropTargetClientHeight = DOMUtil.getClientHeight(boundaryPanel.getElement());
