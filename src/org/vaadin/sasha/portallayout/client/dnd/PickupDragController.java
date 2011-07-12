@@ -178,6 +178,8 @@ public class PickupDragController extends AbstractDragController {
     }
   }
 
+  private final static String APPLICATION_STYLE_NAME = "v-app";
+  
   @Override
   public void dragStart() {
     super.dragStart();
@@ -223,6 +225,7 @@ public class PickupDragController extends AbstractDragController {
       movablePanel = container;
     }
     movablePanel.addStyleName(DragClientBundle.INSTANCE.css().movablePanel());
+    movablePanel.addStyleName(APPLICATION_STYLE_NAME);
     calcBoundaryOffset();
     dropTargetClientWidth = DOMUtil.getClientWidth(boundaryPanel.getElement());
     dropTargetClientHeight = DOMUtil.getClientHeight(boundaryPanel.getElement());

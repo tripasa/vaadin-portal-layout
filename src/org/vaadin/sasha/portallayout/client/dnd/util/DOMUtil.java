@@ -37,7 +37,7 @@ public class DOMUtil {
   private static DOMUtilImpl impl;
 
   static {
-    impl = new DOMUtilImplOpera();////(DOMUtilImpl) GWT.create(DOMUtilImpl.class);
+    impl = GWT.create(DOMUtilImpl.class);
   }
 
   /**

@@ -6,7 +6,15 @@
 	width: 8px;
 }
 
+.v-portallayout-positioner {
+	border: 2px dashed black;	
+}
+
 .v-portlet {
+}
+
+.v-app .v-portallayout .dragdrop-movable-panel {
+	z-index: 200;	
 }
 
 .v-portlet .v-portlet-header {

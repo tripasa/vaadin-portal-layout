@@ -11,7 +11,6 @@ import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
-import com.vaadin.terminal.Resource;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
@@ -61,7 +60,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   public PortalLayout() {
     super();
     setWidth("100%");
-    setHeight("600px");
+    setHeight("700px");
   }
 
   @Override

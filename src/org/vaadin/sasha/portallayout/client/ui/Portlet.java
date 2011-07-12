@@ -12,7 +12,6 @@ import com.vaadin.terminal.gwt.client.RenderInformation.FloatSize;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
 
 /**
  * The class representing the portlet in the portal.
@@ -20,7 +19,7 @@ import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
  * and the widget which plays the role of the portlet contents. 
  * @author p4elkin
  */
-public class Portlet extends ComplexPanel {
+public class Portlet extends ComplexPanel implements SizeHandler {
   
   /**
    * Style name used for the portlets.
@@ -138,22 +137,6 @@ public class Portlet extends ComplexPanel {
   }
 
   /**
-   * Check if the contents height should be relatively sized.
-   * @return true if the height of the contents is relative.
-   */
-  public boolean isHeightRelative() {
-    return isHeightRelative;
-  }
-
-  /**
-   * Set the value of the relativity flag of the contents height.
-   * @param isHeightRelative
-   */
-  public void setHeightRelative(boolean isHeightRelative) {
-    this.isHeightRelative = isHeightRelative;
-  }
-
-  /**
    * Paint the contents.
    * @param uidl
    * @param client
@@ -165,18 +148,13 @@ public class Portlet extends ComplexPanel {
     ((Paintable) content).updateFromUIDL(uidl, client);
   }
 
-  public void updateContentAndWrapperSizes(int width, int height) {
-    setSizes(width, height);
-    contentSizeInfo.setWidth(width);
-    contentSizeInfo.setHeight(height - header.getOffsetHeight());
-  }
   
   /**
    * Set the new sizes of the contents and wrappers.
    * @param width The new width.
    * @param height The new height.
    */
-  public void setSizes(int width, int height) {
+  public void setWrapperSizes(int width, int height) {
     containerSizeInfo.setWidth(width);
     containerSizeInfo.setHeight(height);
     updatePortletDOMSize();
@@ -185,7 +163,7 @@ public class Portlet extends ComplexPanel {
   /**
    * 
    */
-  public void setPortletWidth(int width)
+  public void setWrapperWidth(int width)
   {
     containerSizeInfo.setWidth(width);
     updatePortletDOMSize();
@@ -194,7 +172,7 @@ public class Portlet extends ComplexPanel {
   /**
    * 
    */
-  public void setPortletHeight(int height)
+  public void setWrapperHeight(int height)
   {
     containerSizeInfo.setHeight(height);
     updatePortletDOMSize();
@@ -216,7 +194,7 @@ public class Portlet extends ComplexPanel {
    */
   public void updatePortletDOMSize() {
     containerElement.getStyle().setPropertyPx("width", containerSizeInfo.getWidth());
-    containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight() /*- parentPortal.getSpacingInfo().vSpacing*/);
+    containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight());
   }
   
   /**
@@ -288,7 +266,7 @@ public class Portlet extends ComplexPanel {
   public boolean tryDetectRelativeHeight(final UIDL uidl)
   {
     relativeSize = Util.parseRelativeSize(uidl);
-    setHeightRelative(relativeSize != null && relativeSize.getHeight() > 0);
+    isHeightRelative = relativeSize != null && relativeSize.getHeight() > 0;
     return isHeightRelative;
   }
   
@@ -310,6 +288,7 @@ public class Portlet extends ComplexPanel {
   
   /**
    * Close this portlet and notify parent about it.
+   * TODO - implement observer!
    */
   public void close()
   {
@@ -320,24 +299,13 @@ public class Portlet extends ComplexPanel {
   /**
    * Change collapse state - if collapsed then expand 
    * otherwise - collapse. Update size info as well.
+   * TODO - implement observer!
    */
   public void toggleCollapseState() {
     setCollapsed(!isCollapsed);
-    setSizes(containerSizeInfo.getWidth(), getRequiredHeight());
+    setWrapperSizes(containerSizeInfo.getWidth(), getRequiredHeight());
     updateCollapseStyle();
     parentPortal.onPortalCollapseStateChanged(this);  
-  }
-
-  /**
-   * 
-   * @return
-   */
-  public int getRequiredHeight()
-  {
-    int result = header.getOffsetHeight();
-    if (!isCollapsed) 
-      result += contentSizeInfo.getHeight();
-    return result;
   }
   
   /**
@@ -364,11 +332,6 @@ public class Portlet extends ComplexPanel {
   public static String getClassName()
   {
     return CLASSNAME;
-  }
-
-  public void updateContainerSizeFromContent() {
-    setPortletWidth(contentSizeInfo.getWidth());
-    setPortletHeight(isCollapsed ? 0 : contentSizeInfo.getHeight());
   }
 
   public void updateCollapseStyle() {
@@ -409,16 +372,50 @@ public class Portlet extends ComplexPanel {
   public String getCaption() {
     return header.getCaption();
   }
-
+  
+  /**
+   * 
+   * @return
+   */
+  @Override
+  public int getRequiredHeight()
+  {
+    int result = header.getOffsetHeight();
+    if (!isCollapsed) 
+      result += contentSizeInfo.getHeight();
+    return result;
+  }
+  
+  /**
+   * 
+   */
+  @Override
   public float getRealtiveHeight() {
     if (relativeSize != null)
       return relativeSize.getHeight();
     return 0f;
   }
 
-  public void setRelativeHeight(float height) {
+  /**
+   * Check if the contents height should be relatively sized.
+   * @return true if the height of the contents is relative.
+   */
+  @Override
+  public boolean isHeightRelative() {
+    return isHeightRelative;
+  }
+  
+  @Override
+  public void setSizes(int width, int height) {
+    contentSizeInfo.setWidth(width);
+    contentSizeInfo.setHeight(height - header.getOffsetHeight());
+    setWrapperSizes(width, height);
+  }
+  
+  @Override
+  public void setRealtiveHeightValue(float heightValue) {
     if (relativeSize == null)
       relativeSize = new FloatSize(0, 0);
-    relativeSize.setHeight(height);
+    relativeSize.setHeight(heightValue);
   }
 }

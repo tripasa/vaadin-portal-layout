@@ -7,6 +7,7 @@ import org.vaadin.sasha.portallayout.client.dnd.util.CoordinateLocation;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 import org.vaadin.sasha.portallayout.client.dnd.util.DragClientBundle;
 import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
+import org.vaadin.sasha.portallayout.client.ui.PortalDropPositioner;
 import org.vaadin.sasha.portallayout.client.ui.Portlet;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
@@ -135,42 +136,13 @@ public class PortalDropController extends AbstractPositioningDropController {
   }
   
   protected Widget newPositioner(DragContext context) {
-    SimplePanel outer = new SimplePanel();
-    outer.addStyleName(DragClientBundle.INSTANCE.css().positioner());
-
-    DragClientBundle.INSTANCE.css().getText();
     
-    RootPanel.get().add(outer, -500, -500);
-
-    outer.setWidget(new Label("x"));
-
-    int width = 0;
-    int height = 0;
-    int spacing = 0;
-    
-    for (final Widget widget : context.selectedWidgets) {
-      if (widget instanceof Portlet)
-      {
-        final Portlet portletCast = (Portlet)widget;         
-        width += Math.max(width, widget.getOffsetWidth());
-        height += portletCast.getRequiredHeight();
-        spacing += portletCast.getSpacing();
-      }
-    }
-
-    SimplePanel inner = new SimplePanel();
-    
-    int innerWidth = width - DOMUtil.getHorizontalBorders(outer);
-    int innerHeight = height - DOMUtil.getVerticalBorders(outer);
-    
-    inner.setPixelSize(innerWidth, innerHeight);
-
-    outer.setWidget(inner);
-    
-    outer.getElement().getStyle().setPropertyPx("marginTop", spacing);
-    outer.getElement().getStyle().setProperty("border", "2px dashed black");
-    
-    return outer;
-  }
+    final Portlet portlet = (Portlet)context.selectedWidgets.get(0);
+    if (portlet == null)
+      return null;
+    final Widget result = new PortalDropPositioner(portlet); 
+    RootPanel.get().add(result, -500, -500);
+    return result;
+ }
 
 }
