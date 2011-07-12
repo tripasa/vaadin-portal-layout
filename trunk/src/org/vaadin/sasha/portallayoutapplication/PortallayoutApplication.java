@@ -28,14 +28,17 @@ public class PortallayoutApplication extends Application {
   private Window mainWindow;
 
   private boolean flag = true;
-  
+
   @Override
   public void init() {
 
     setTheme("portallayouttheme");
-
     mainWindow = new Window("Portallayout Application");
+    testInit();
+    setMainWindow(mainWindow);
+  }
 
+  public void testInit() {
     HorizontalLayout windowLayout = new HorizontalLayout();
     windowLayout.setSizeFull();
 
@@ -97,15 +100,14 @@ public class PortallayoutApplication extends Application {
     sidePanel.getContent().setWidth("350px");
     sidePanel.getContent().setHeight("100%");
     sidePanel.addComponent(sidePortal);
+    addPortletWithContents(sidePortal);
 
     windowLayout.addComponent(mainPanel);
     windowLayout.setExpandRatio(mainPanel, 1.0f);
 
     windowLayout.addComponent(sidePanel);
 
-    //overrideWindowContentWIthTestData();
-    
-    setMainWindow(mainWindow);
+    // overrideWindowContentWIthTestData();
   }
 
   private void testGrid() {
@@ -128,8 +130,7 @@ public class PortallayoutApplication extends Application {
     return table;
   }
 
-  public class TestIndexedContainer extends IndexedContainer
-  {
+  public class TestIndexedContainer extends IndexedContainer {
     public TestIndexedContainer() {
       super();
       addContainerProperty("test1", String.class, "0");
@@ -144,25 +145,25 @@ public class PortallayoutApplication extends Application {
     final VerticalLayout layout = new VerticalLayout();
     layout.setSpacing(true);
     layout.setWidth("100%");
-    
+
     final Drawer dr = new Drawer();
     dr.setWidth("100%");
     dr.setDrawerHeight(500);
-    
+
     final VerticalLayout nestedLayout = new VerticalLayout();
     nestedLayout.setWidth("100%");
-    //nestedLayout.setHeight("50%");
-    
+    // nestedLayout.setHeight("50%");
+
     TextArea ta = new TextArea();
     ta.setWidth("200px");
-    
+
     nestedLayout.addComponent(createTableTest());
     dr.setDrawerComponent(nestedLayout);
-    
+
     layout.addComponent(dr);
-    
+
     final Button b = new Button("add new");
-    b.addListener(new Button.ClickListener() {      
+    b.addListener(new Button.ClickListener() {
       @Override
       public void buttonClick(ClickEvent event) {
         nestedLayout.addComponent(new Label("asdljslkajdaksj"));
@@ -175,41 +176,42 @@ public class PortallayoutApplication extends Application {
   }
 
   private void addPortletWithContents(final ComponentContainer portal) {
-    if (flag)
-    {
-      final Panel vl = new Panel();
-      vl.setHeight("80%");
-      vl.setWidth("100%");
+    if (flag) {
+      for (int i = 0; i < 1; ++i) {
+        final Panel vl = new Panel();
+        //vl.setHeight("100%");
+        vl.setSizeUndefined();
+        vl.setWidth("100%");
 
-      vl.getContent().setHeight("100%");
-      vl.getContent().setWidth("100%");
-      final TextField tf = new TextField();
-      tf.setImmediate(true);
+        //vl.getContent().setHeight("100%");
+        vl.getContent().setWidth("100%");
+        ((VerticalLayout)vl.getContent()).setSpacing(true);
+        final TextField tf = new TextField();
+        tf.setImmediate(true);
+        tf.setWidth("100%");
+        TextArea text = new TextArea();
+        text.setWidth("100%");
+        text.setHeight("200px");
+        vl.addComponent(tf);
 
-      
-      TextArea text = new TextArea();
-      text.setSizeFull();
-      tf.setWidth("100%");
-      vl.addComponent(tf);
-
-      vl.addComponent(text);
-      portal.addComponent(vl);
-      ((PortalLayout)portal).setComponentCaption(vl, "Layout in portal");
-      ((PortalLayout)portal).setCollapsible(vl, false);
-    /**  Component c = createTableTest();
-      portal.addComponent(c);
-      ((PortalLayout)portal).setComponentCaption(c, "Table dummy");
-      ((PortalLayout)portal).setClosable(c, false);*/
-    }
-    else
-    {
+        vl.addComponent(text);
+        portal.addComponent(vl);
+        ((PortalLayout) portal).setComponentCaption(vl, "Layout in portal");
+        ((PortalLayout) portal).setClosable(vl, false);
+        /**
+         * Component c = createTableTest(); portal.addComponent(c);
+         * ((PortalLayout)portal).setComponentCaption(c, "Table dummy");
+         * ((PortalLayout)portal).setClosable(c, false);
+         */
+      }
+    } else {
       Component c = createTableTest();
       portal.addComponent(c);
-      ((PortalLayout)portal).setComponentCaption(c, "Table dummy");
-      ((PortalLayout)portal).setClosable(c, false);
+      ((PortalLayout) portal).setComponentCaption(c, "Table dummy");
+      ((PortalLayout) portal).setClosable(c, false);
     }
     flag = !flag;
-    
+
   }
 
 }

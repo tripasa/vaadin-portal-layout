@@ -23,4 +23,33 @@
     <inherits name="org.vaadin.henrik.drawer.widgetset.DrawerApplicationWidgetset" />
 
     <inherits name="com.vaadin.incubator.dashlayout.DashLayoutWidgetSet" />
+
+
+	<replace-with
+		class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImplOpera">
+		<when-type-is class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl" />
+		<when-property-is name="user.agent" value="opera" />
+	</replace-with>
+
+	<replace-with
+		class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImplSafari">
+		<when-type-is class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl" />
+		<when-property-is name="user.agent" value="safari" />
+	</replace-with>
+
+	<replace-with class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImplIE6">
+		<when-type-is class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl" />
+		<any>
+			<when-property-is name="user.agent" value="ie6" />
+      <when-property-is name="user.agent" value="ie8" />
+      <when-property-is name="user.agent" value="ie9" />
+		</any>
+	</replace-with>
+
+	<replace-with
+		class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImplMozilla">
+		<when-type-is class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl" />
+		<when-property-is name="user.agent" value="gecko1_8" />
+	</replace-with>
+	
 </module>

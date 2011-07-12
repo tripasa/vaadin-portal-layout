@@ -155,7 +155,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * Total height required for rendering fixed sized portlets and headers of
    * relative heighted portlets.
    */
-  private int consumedHeightCache;
+  private int consumedHeight;
 
   /**
    * Flag indicating that spacing must be enabled. 
@@ -251,16 +251,16 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
           portlet.setCollapsible(isCollapsible);
           portlet.updateSpacing(activeSpacing.vSpacing);       
           
-          if (portlet.tryDetectRelativeHeight(childUidl))
+          if (!Util.isCached(childUidl)) 
+              portlet.tryDetectRelativeHeight(childUidl);
+              
+          if (portlet.isHeightRelative())    
           {
             realtiveSizePortletUIDLS.put(portlet, childUidl); 
           }
-          else
-          {
+          else {
             portlet.renderContent(childUidl);
             portlet.updateContentSizeInfoFromDOM();
-            portlet.updateContainerSizeFromContent();
-            portlet.updateCollapseStyle();
           }
    
       }
@@ -276,6 +276,11 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     
   }
 
+  /**
+   * Check if spacing was enabled/disabled on the server side and update 
+   * spacing info accordingly.
+   * @param uidl Server payload.
+   */
   private void updateSpacingInfoFromUidl(final UIDL uidl) {
     boolean newSpacingEnabledState = uidl.getBooleanAttribute("spacing");
     if (isSpacingEnabled != newSpacingEnabledState)
@@ -285,64 +290,76 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     }
   }
 
+  /**
+   * Calculate height consumed by the fixed sized portlets and
+   * distribute the remaining height between the relative sized portlets.
+   * When the relative height comes to consideration - if the total sum of 
+   * percentages overflows 100, that value is normalized, so every relative height 
+   * portlet would get its piece of space. 
+   */
   public void recalculateLayoutAndPortletSizes() {    
-    consumedHeightCache = 0;
+    consumedHeight = 0;
     sumRelativeHeight = 0;
     
     for (final Widget p : getChildren())
     {
-      if (p instanceof Portlet)
+      if (p instanceof SizeHandler)
       {
-        final Portlet portletCast = (Portlet)p;
+        final SizeHandler portletCast = (SizeHandler)p;
         if (portletCast.isHeightRelative())
           sumRelativeHeight += portletCast.getRealtiveHeight();
         else
-          consumedHeightCache += portletCast.getRequiredHeight();
+          consumedHeight += portletCast.getRequiredHeight();
       }
-      else
-        consumedHeightCache += p.getOffsetHeight();
     }
     
     /// TODO set proper calcs after the padding problem fixed
-    consumedHeightCache += (getChildren().size() - 1) * activeSpacing.vSpacing;
-    
-    int newHeigth = Math.max(sizeInfo.getHeight(), consumedHeightCache);
-    boolean overflown = newHeigth == consumedHeightCache;
+    consumedHeight += (getChildren().size()) * activeSpacing.vSpacing;
+    int newHeigth = Math.max(sizeInfo.getHeight(), consumedHeight);
 
-    sizeInfo.setHeight(newHeigth);
-    
-    if (overflown)
-    {
-      getElement().getStyle().setPropertyPx("height", newHeigth);
-      Util.notifyParentOfSizeChange(this, false);
-    }
-    
+    getElement().getStyle().setPropertyPx("height", newHeigth);
     calculatePortletSizes();
+    Util.notifyParentOfSizeChange(this, false);
   }
 
+  /**
+   * Calculate and accordingly update the size info of the portlets. In case of relative 
+   * height portlets the contents need to be re-laid out.
+   */
   private void calculatePortletSizes() {
     int totalHeight = getOffsetHeight();
     int totalWidth = getOffsetWidth();
     
-    int residualHeight = totalHeight - consumedHeightCache;
+    int residualHeight = totalHeight - consumedHeight;
     
     float relativeHeightRatio = normalizedRealtiveRatio();
     
-    for (final Portlet portlet : widgetToPortletContainer.values())
+    for (final Widget p : getChildren())
     {
-      if (!portlet.isHeightRelative()) 
-        portlet.updateContentAndWrapperSizes(totalWidth, portlet.getRequiredHeight());
+      if (!(p instanceof SizeHandler))
+        continue;
+      
+      final SizeHandler sizeHandler = (SizeHandler)p;
+      
+      if (!sizeHandler.isHeightRelative()) 
+        sizeHandler.setSizes(totalWidth, sizeHandler.getRequiredHeight());
       else 
       {
-        portlet.setRelativeHeight(relativeHeightRatio * portlet.getRealtiveHeight());
-        int newHeight = (int)(residualHeight * portlet.getRealtiveHeight() / 100);
-        portlet.updateContentAndWrapperSizes(totalWidth, newHeight);
-        residualHeight -= newHeight;
-        client.runDescendentsLayout(this);
+        float newRealtiveHeight = relativeHeightRatio * sizeHandler.getRealtiveHeight();
+        int newHeight = (int)(residualHeight * newRealtiveHeight / 100);
+        sizeHandler.setRealtiveHeightValue(newRealtiveHeight);
+        sizeHandler.setSizes(totalWidth, newHeight);
+        //residualHeight -= newHeight;
       }
     }
+    client.runDescendentsLayout(this);
   }
 
+  /**
+   * Calculated a ratio that would be used in the calculation of how much height the relative sized
+   * portlet can consume. 
+   * @return 1 if the sum of the relative heights is less or equal to 100, 100 / SUM if sum is more than 100.
+   */
   private float normalizedRealtiveRatio() {
     float result = 0;
     if (sumRelativeHeight != 0f)
@@ -350,6 +367,12 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     return result;
   }
 
+  /**
+   * Search for the portlet corresponding to the widget. If it does not
+   * exist - create it.
+   * @param widget Search criteria.
+   * @return Found or created portlet.
+   */
   private Portlet findOrCreatePortlet(Widget widget) {
     Portlet result = widgetToPortletContainer.get(widget);
     if (result == null)
@@ -357,17 +380,31 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     return result;
   }
 
+  /**
+   * Create new portlet, make it draggable and save it in the map.
+   * @param widget Contents for the new portlet.
+   * @return Created portlet.
+   */
   private final Portlet createPortlet(Widget widget) {
     final Portlet result = new Portlet(widget, client, this);
-    cs_dragControl.makeDraggable(result, result.getDraggableArea());
+    getDragController().makeDraggable(result, result.getDraggableArea());
     widgetToPortletContainer.put(widget, result);
     return result;
   }
 
+  /**
+   * If the portlet was closed somewhere outsuide - this method should be called, 
+   * so portal would do all the required logic on client and server sides. 
+   * @param portlet The portlet that has been closed.
+   */
   public void onPortalClose(final Portlet portlet) {
     handlePortletRemoved(portlet);
   }
   
+  /**
+   * Handler for the portlet collapse state toggle.
+   * @param portlet Target portlet.
+   */
   public void onPortalCollapseStateChanged(final Portlet portlet)
   {
     final Map<String, Object> params = new HashMap<String, Object>();
@@ -449,20 +486,20 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   {
     if (!isHeightCacheValid())
       recalculateLayoutAndPortletSizes();
-    return consumedHeightCache;
+    return consumedHeight;
   }
   /**
    * Check if heightCahe is valid.
    */
   public boolean isHeightCacheValid() {
-    return consumedHeightCache > 0;
+    return consumedHeight > 0;
   }
 
   /**
    * Set the value of consumed height cache so everybody knows it's not valid.
    */
   public void invalidateConsumedHeigthCache() {
-    consumedHeightCache = -1;
+    consumedHeight = -1;
   }
 
   @Override
@@ -471,7 +508,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     int intWidth = getOffsetWidth();
     for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it
         .hasNext();) {
-      ((Portlet)it.next()).setPortletWidth(intWidth);
+      ((Portlet)it.next()).setWrapperWidth(intWidth);
     }
   }
 
@@ -513,8 +550,15 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     final Size sizeInfo = portlet.getContentSizeInfo();
     
     int height = sizeInfo.getHeight();
+    /**
+     * Due to the logic of the portal layout realtive height portlets 
+     * consume the according amount of free space (if 50% portlet height is specified - a half of free space 
+     * goes to that portlet). Here we ensure that the rendering routines get the correct information about how much space 
+     * can be consumed. 
+     */
     if (portlet.isHeightRelative())
       height = (int)(((float)height) * 100 /portlet.getRealtiveHeight());
+    System.out.println("Alloc height " + height + " out of " + sizeInfo.getHeight());
     return new RenderSpace(sizeInfo.getWidth(), height);
   }
 
