@@ -14,9 +14,11 @@
 }
 
 .v-portlet .v-portlet-header {
-	height: 18px;
 	background-image: url(header-bg.png);
 	width: 100%;
+	height: 19px;
+	padding-top: 7px;
+	padding-bottom: 2px;
 }
 
 .v-portlet .v-portlet-header-button {
@@ -37,10 +39,12 @@
 
 .v-portlet .v-portlet-header-buttonbar {
 	float: right;
+	margin-right: 9px;
 }
 
 .v-portlet .v-portlet-header-captionwrap {
 	padding-right: 3px;
+	padding-left: 11px;
 	font-weight: bold;
 	font-size: 12px;
 	line-height: normal;
@@ -52,6 +56,9 @@
 	-ms-text-overflow: ellipsis;
 }
 
+.v-portlet. .v-portlet-header-caption {
+	
+}
 .v-portlet .v-portlet-header:hover {
 	cursor: move;
 }
@@ -61,11 +68,20 @@
 }
 
 .v-portlet .v-portlet-header-button-close:hover {
-	background-image: url(close.png);
+	background-image: url(close-hover.png);
+	cursor: pointer;
+}
+
+.v-portlet .v-portlet-header-button-collapse:hover {
+	cursor: pointer;
 }
 
 .v-portlet .v-portlet-header-button-collapse:active {
-	background-image: url(collapse.png);
+	background-image: url(collapse-pressed.png);
+}
+
+.v-portlet .v-portlet-header-button-close:active {
+	background-image: url(close-pressed.png);
 }
 
 .dragdrop-movable-panel {
