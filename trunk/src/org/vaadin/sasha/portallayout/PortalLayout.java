@@ -60,7 +60,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   public PortalLayout() {
     super();
     setWidth("100%");
-    setHeight("500px");
+    setHeight("300px");
   }
 
   @Override

@@ -226,8 +226,19 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
     updateSpacingInfoFromUidl(uidl);
    
+    Set<String> attrs  = uidl.getAttributeNames();
+    
+    for (String str : attrs)
+      System.out.println(str);
+    
     int pos = 0;
     sizeInfo.setHeight(getElement().getClientHeight());
+    
+    Widget parent = getParent();
+    
+    if (parent != null)
+      sizeInfo.setHeight(parent.getOffsetHeight());
+    
     sizeInfo.setWidth(getElement().getClientWidth());
     final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet,UIDL>();
     for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
@@ -425,6 +436,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
     
     client.updateVariable(paintableId, PORTLET_COLLAPSE_STATE_CHANGED, params, true);
+    recalculateLayoutAndPortletSizes();
   }
   
   private void updatePortletInPosition(Portlet portlet, int i) {

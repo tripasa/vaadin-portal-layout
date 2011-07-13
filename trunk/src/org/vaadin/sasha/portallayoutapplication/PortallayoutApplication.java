@@ -178,7 +178,7 @@ public class PortallayoutApplication extends Application {
       for (int i = 0; i < 1; ++i) {
         final Panel vl = new Panel();
         vl.setHeight("50%");
-        vl.setWidth("150px");
+        vl.setWidth("100%");
 
         vl.getContent().setHeight("100%");
         vl.getContent().setWidth("100%");
@@ -193,7 +193,7 @@ public class PortallayoutApplication extends Application {
         vl.addComponent(text);
         portal.addComponent(vl);
         ((PortalLayout) portal).setComponentCaption(vl, "Layout in portal");
-        ((PortalLayout) portal).setClosable(vl, false);
+  //      ((PortalLayout) portal).setClosable(vl, false);
         /**
          * Component c = createTableTest(); portal.addComponent(c);
          * ((PortalLayout)portal).setComponentCaption(c, "Table dummy");

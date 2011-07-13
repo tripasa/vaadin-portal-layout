@@ -54,4 +54,6 @@
 		<when-property-is name="user.agent" value="gecko1_8" />
 	</replace-with>
 	
+
+    <inherits name="com.vaadin.incubator.dashlayout.DashLayoutWidgetSet" />
 </module>
