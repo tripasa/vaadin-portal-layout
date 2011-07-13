@@ -3,6 +3,7 @@ package org.vaadin.sasha.portallayout.client.ui;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * 
@@ -63,11 +64,15 @@ public class PortalDropPositioner extends SimplePanel implements SizeHandler {
 
   @Override
   public void setSizes(int width, int height) {
-    System.out.println("Setting positioner sizes " + width + " " + height);
     int innerWidth = width - DOMUtil.getHorizontalBorders(this);
     int innerHeight = height - DOMUtil.getVerticalBorders(this);
     
     internalContent.setPixelSize(innerWidth, innerHeight);
   }
+
+    public Widget getPortlet() {
+        assert portlet != null;
+        return portlet;
+    }
  
 }

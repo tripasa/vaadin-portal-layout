@@ -60,7 +60,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   public PortalLayout() {
     super();
     setWidth("100%");
-    setHeight("700px");
+    setHeight("500px");
   }
 
   @Override
@@ -74,7 +74,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
       target.addAttribute(VPortalLayout.PORTLET_CAPTION, getComponentCaption(c));
       target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, isClosable(c));
       target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE, isCollapsible(c));
-      
       c.paint(target);
       target.endTag("portlet");
     }

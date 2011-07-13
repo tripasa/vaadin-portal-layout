@@ -6,7 +6,6 @@ import org.vaadin.sasha.portallayout.PortalLayout;
 import com.vaadin.Application;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.incubator.dashlayout.ui.HorDashLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -105,13 +104,12 @@ public class PortallayoutApplication extends Application {
     windowLayout.addComponent(mainPanel);
     windowLayout.setExpandRatio(mainPanel, 1.0f);
 
-    windowLayout.addComponent(sidePanel);
+   // windowLayout.addComponent(sidePanel);
 
     // overrideWindowContentWIthTestData();
   }
 
   private void testGrid() {
-    HorDashLayout l;
     final HorizontalLayout layout = new HorizontalLayout();
     layout.setSizeFull();
     mainWindow.setContent(layout);
@@ -179,8 +177,8 @@ public class PortallayoutApplication extends Application {
     if (flag) {
       for (int i = 0; i < 1; ++i) {
         final Panel vl = new Panel();
-        vl.setHeight("100%");
-        vl.setWidth("100%");
+        vl.setHeight("50%");
+        vl.setWidth("150px");
 
         vl.getContent().setHeight("100%");
         vl.getContent().setWidth("100%");

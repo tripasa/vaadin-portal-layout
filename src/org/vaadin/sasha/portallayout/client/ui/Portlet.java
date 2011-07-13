@@ -163,18 +163,10 @@ public class Portlet extends ComplexPanel implements SizeHandler {
   /**
    * 
    */
-  public void setWrapperWidth(int width)
+  public void setPortletWidth(int width)
   {
+    contentSizeInfo.setWidth(width);
     containerSizeInfo.setWidth(width);
-    updatePortletDOMSize();
-  }
-  
-  /**
-   * 
-   */
-  public void setWrapperHeight(int height)
-  {
-    containerSizeInfo.setHeight(height);
     updatePortletDOMSize();
   }
   
@@ -381,7 +373,8 @@ public class Portlet extends ComplexPanel implements SizeHandler {
   public int getRequiredHeight()
   {
     int result = header.getOffsetHeight();
-    if (!isCollapsed) 
+    if (!isCollapsed && 
+        !isHeightRelative) 
       result += contentSizeInfo.getHeight();
     return result;
   }
@@ -391,7 +384,8 @@ public class Portlet extends ComplexPanel implements SizeHandler {
    */
   @Override
   public float getRealtiveHeight() {
-    if (relativeSize != null)
+    if (relativeSize != null &&
+        !isCollapsed)
       return relativeSize.getHeight();
     return 0f;
   }

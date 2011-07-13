@@ -20,9 +20,11 @@
 
 	<stylesheet src="PortalLayout/portallayout.css"/>
 
+    
+
     <inherits name="org.vaadin.henrik.drawer.widgetset.DrawerApplicationWidgetset" />
 
-    <inherits name="com.vaadin.incubator.dashlayout.DashLayoutWidgetSet" />
+    
 
 
 	<replace-with
