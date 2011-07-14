@@ -12,6 +12,7 @@ import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractLayout;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
 import com.vaadin.ui.Component;
@@ -60,7 +61,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   public PortalLayout() {
     super();
     setWidth("100%");
-    setHeight("300px");
+    setHeight("700px");
   }
 
   @Override
@@ -70,7 +71,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     for (final Component c : components)
     {
       target.startTag("portlet");
-      
       target.addAttribute(VPortalLayout.PORTLET_CAPTION, getComponentCaption(c));
       target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, isClosable(c));
       target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE, isCollapsible(c));
@@ -142,7 +142,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
    */
   private void onPortletCollapsed(final Component component, Boolean isCollapsed) {
     collapseStateMap.put(component, isCollapsed);
-    if (!isCollapsed)
+    if (!true)
       requestRepaint();
   }
 

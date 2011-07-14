@@ -54,6 +54,8 @@ public class PortallayoutApplication extends Application {
     ll.setWidth("100%");
     final PortalLayout widePortal = new PortalLayout();
     addPortletWithContents(widePortal);
+    addPortletWithContents(widePortal);
+    addPortletWithContents(widePortal);
 
     ll.setSpacing(true);
     ll.addComponent(widePortal);
@@ -101,12 +103,16 @@ public class PortallayoutApplication extends Application {
     sidePanel.addComponent(sidePortal);
     addPortletWithContents(sidePortal);
 
-    windowLayout.addComponent(mainPanel);
-    windowLayout.setExpandRatio(mainPanel, 1.0f);
+    PortalTabSheet tabs = new PortalTabSheet();
+    tabs.setSizeFull();
+    windowLayout.addComponent(tabs);
+    windowLayout.setExpandRatio(tabs, 1.0f);
+    //windowLayout.addComponent(mainPanel);
+    //windowLayout.setExpandRatio(mainPanel, 1.0f);
 
    // windowLayout.addComponent(sidePanel);
 
-    // overrideWindowContentWIthTestData();
+    //soverrideWindowContentWIthTestData();
   }
 
   private void testGrid() {
@@ -155,7 +161,8 @@ public class PortallayoutApplication extends Application {
     TextArea ta = new TextArea();
     ta.setWidth("200px");
 
-    nestedLayout.addComponent(createTableTest());
+    for (int i =0 ; i < 10; i++)
+      nestedLayout.addComponent(createTableTest());
     dr.setDrawerComponent(nestedLayout);
 
     layout.addComponent(dr);
@@ -202,9 +209,13 @@ public class PortallayoutApplication extends Application {
       }
     } else {
       Component c = createTableTest();
-      portal.addComponent(c);
-      ((PortalLayout) portal).setComponentCaption(c, "Table dummy");
-      ((PortalLayout) portal).setClosable(c, false);
+      final Drawer dr = new Drawer();
+      dr.setWidth("100%");
+      dr.setDrawerComponent(c);
+      dr.setAnimationDurationMillis(0);
+      portal.addComponent(dr);
+      ((PortalLayout) portal).setComponentCaption(dr, "Table dummy");
+      ((PortalLayout) portal).setClosable(dr, false);
     }
     flag = !flag;
 

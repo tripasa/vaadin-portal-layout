@@ -225,19 +225,14 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     paintableId = uidl.getId();
 
     updateSpacingInfoFromUidl(uidl);
-   
-    Set<String> attrs  = uidl.getAttributeNames();
-    
-    for (String str : attrs)
-      System.out.println(str);
     
     int pos = 0;
     sizeInfo.setHeight(getElement().getClientHeight());
     
-    Widget parent = getParent();
+/*    Widget parent = getParent();
     
     if (parent != null)
-      sizeInfo.setHeight(parent.getOffsetHeight());
+      sizeInfo.setHeight(parent.getOffsetHeight());*/
     
     sizeInfo.setWidth(getElement().getClientWidth());
     final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet,UIDL>();
@@ -248,7 +243,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
           final String portletCaption = itUidl.getStringAttribute(PORTLET_CAPTION);
           final Boolean isClosable = itUidl.getBooleanAttribute(PORTLET_CLOSABLE);
           final Boolean isCollapsible = itUidl.getBooleanAttribute(PORTLET_COLLAPSIBLE);
-          
           final UIDL childUidl = (UIDL)itUidl.getChildUIDL(0);
           final Paintable child = client.getPaintable(childUidl);
           final Widget widget = (Widget) child;
@@ -372,7 +366,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
         else
             System.out.println("Dummy height " + newHeight);
       }
-      sizeHandler.setSizes(newWidth, newHeight);
+      sizeHandler.setPortletSizes(newWidth, newHeight);
     }
     if (client != null)
       client.runDescendentsLayout(this);
@@ -422,13 +416,14 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   public void onPortalClose(final Portlet portlet) {
     handlePortletRemoved(portlet);
+    recalculateLayoutAndPortletSizes();
   }
   
   /**
    * Handler for the portlet collapse state toggle.
    * @param portlet Target portlet.
    */
-  public void onPortalCollapseStateChanged(final Portlet portlet)
+  public void onPortletCollapseStateChanged(final Portlet portlet)
   {
     final Map<String, Object> params = new HashMap<String, Object>();
     
@@ -436,12 +431,18 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
     
     client.updateVariable(paintableId, PORTLET_COLLAPSE_STATE_CHANGED, params, true);
+    
+    //if (portlet.isHeightRelative())
     recalculateLayoutAndPortletSizes();
   }
   
   private void updatePortletInPosition(Portlet portlet, int i) {
-    portlet.removeFromParent();
-    addToRootElement(portlet, i);
+    int currentPosition = getWidgetIndex(portlet);
+    if (i != currentPosition)
+    {
+      portlet.removeFromParent();
+      addToRootElement(portlet, i);
+    }
   }
 
   /**
@@ -492,7 +493,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
     params.put(PORTLET_CLOSABLE, portlet.isClosable());
     params.put(PORTLET_COLLAPSIBLE, portlet.isCollapsible());
-    params.put(PORTLET_CAPTION, portlet.getCaption());
+    if (!portlet.getCaption().isEmpty())
+      params.put(PORTLET_CAPTION, portlet.getCaption());
     client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);    
     widgetToPortletContainer.put(portlet.getContent(), portlet);
   }
@@ -572,6 +574,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   @Override
   public boolean requestLayout(Set<Paintable> children) {
+    recalculateLayoutAndPortletSizes();
     return false;
   }
 

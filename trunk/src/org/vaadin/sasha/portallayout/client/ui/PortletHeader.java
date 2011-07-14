@@ -160,7 +160,9 @@ public class PortletHeader extends ComplexPanel {
     this.caption = caption;
     if (caption == null ||
         caption.isEmpty())
+    {
       captionWrapperHtml.getElement().setInnerHTML("&nbsp");
+    }
     else
       captionWrapperHtml.getElement().setInnerHTML(caption);
   }

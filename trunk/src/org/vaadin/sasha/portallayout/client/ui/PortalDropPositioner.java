@@ -35,7 +35,7 @@ public class PortalDropPositioner extends SimplePanel implements SizeHandler {
     setStyleName(CLASS_NAME);
     this.portlet = portlet;
     getElement().getStyle().setPropertyPx("marginTop", portlet.getSpacing());
-    setSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
+    setPortletSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
     setWidget(internalContent);
   }
 
@@ -63,7 +63,7 @@ public class PortalDropPositioner extends SimplePanel implements SizeHandler {
   }
 
   @Override
-  public void setSizes(int width, int height) {
+  public void setPortletSizes(int width, int height) {
     int innerWidth = width - DOMUtil.getHorizontalBorders(this);
     int innerHeight = height - DOMUtil.getVerticalBorders(this);
     
