@@ -36,5 +36,5 @@ public interface SizeHandler {
    * @param width
    * @param height
    */
-  public void setSizes(int width, int height);
+  public void setPortletSizes(int width, int height);
 }

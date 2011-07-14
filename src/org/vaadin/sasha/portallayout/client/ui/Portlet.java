@@ -1,6 +1,8 @@
 
 package org.vaadin.sasha.portallayout.client.ui;
 
+import org.apache.tools.ant.taskdefs.condition.IsReference;
+
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -160,6 +162,14 @@ public class Portlet extends ComplexPanel implements SizeHandler {
     updatePortletDOMSize();
   }
 
+  public void setPortletHeight(int height)
+  {
+    if (isHeightRelative)
+      contentSizeInfo.setHeight(height - header.getOffsetHeight());
+    containerSizeInfo.setHeight(height);
+    updatePortletDOMSize();
+  }
+  
   /**
    * 
    */
@@ -295,9 +305,9 @@ public class Portlet extends ComplexPanel implements SizeHandler {
    */
   public void toggleCollapseState() {
     setCollapsed(!isCollapsed);
-    setWrapperSizes(containerSizeInfo.getWidth(), getRequiredHeight());
+    setWrapperSizes(getOffsetWidth(), getRequiredHeight());
     updateCollapseStyle();
-    parentPortal.onPortalCollapseStateChanged(this);  
+    parentPortal.onPortletCollapseStateChanged(this);  
   }
   
   /**
@@ -400,9 +410,14 @@ public class Portlet extends ComplexPanel implements SizeHandler {
   }
   
   @Override
-  public void setSizes(int width, int height) {
+  public void setPortletSizes(int width, int height) {
     contentSizeInfo.setWidth(width);
-    contentSizeInfo.setHeight(height - header.getOffsetHeight());
+    /**
+     * Only relative height portlet contents follow the size of their wrapper.
+     * The fixed sized portlet knows it's height from DOM.
+     */
+    if (isHeightRelative)
+      contentSizeInfo.setHeight(height - header.getOffsetHeight());
     setWrapperSizes(width, height);
   }
   

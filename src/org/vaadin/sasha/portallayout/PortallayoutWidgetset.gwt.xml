@@ -56,4 +56,28 @@
 	
 
     <inherits name="com.vaadin.incubator.dashlayout.DashLayoutWidgetSet" />
+
+    <inherits name="com.invient.vaadin.charts.widgetset.InvientChartsWidgetset" />
+
+    <inherits name="org.vaadin.youtubeplayer.YouTubePlayerWidgetset" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.swfobject.SwfobjectWidgetset" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
 </module>
