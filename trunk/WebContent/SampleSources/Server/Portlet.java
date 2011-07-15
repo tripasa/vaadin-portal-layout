@@ -362,8 +362,7 @@ public class Portlet extends ComplexPanel implements SizeHandler {
   
   public void updateSpacing(int spacing)
   {
-    boolean isFirst = getPosition() == 0;
-    containerElement.getStyle().setPropertyPx("paddingTop", isFirst ? 0 : spacing);
+    containerElement.getStyle().setPropertyPx("paddingTop", spacing);
   }
 
   public int getSpacing() {

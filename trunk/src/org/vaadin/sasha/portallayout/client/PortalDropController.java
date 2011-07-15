@@ -5,20 +5,16 @@ import org.vaadin.sasha.portallayout.client.dnd.VetoDragException;
 import org.vaadin.sasha.portallayout.client.dnd.drop.AbstractPositioningDropController;
 import org.vaadin.sasha.portallayout.client.dnd.util.CoordinateLocation;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
-import org.vaadin.sasha.portallayout.client.dnd.util.DragClientBundle;
 import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
 import org.vaadin.sasha.portallayout.client.ui.PortalDropPositioner;
 import org.vaadin.sasha.portallayout.client.ui.Portlet;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 
 /**
- * Object that controlls the process of dropping in the portals 
+ * Object that controls the process of dropping the objects on portals.
  * @author p4elkin
  */
 public class PortalDropController extends AbstractPositioningDropController {
@@ -59,7 +55,7 @@ public class PortalDropController extends AbstractPositioningDropController {
      * trace of the removed portlet
      */
     if (!currentParent.equals(portal))
-      currentParent.handlePortletRemoved(portlet);
+      currentParent.onPortletMovedOut(portlet);
     
     /**
      * Do the the logic required by the new parent to add
