@@ -12,7 +12,6 @@ import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
 import com.vaadin.ui.Component;
@@ -57,6 +56,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
    */
   private Map<Component, Boolean> collapsibleMap = new HashMap<Component, Boolean>();
   
+  /**
+   * 
+   */
+  private Map<Component, Boolean> lockedMap = new HashMap<Component, Boolean>();
+  
   /// Constructor
   public PortalLayout() {
     super();
@@ -74,11 +78,19 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
       target.addAttribute(VPortalLayout.PORTLET_CAPTION, getComponentCaption(c));
       target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, isClosable(c));
       target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE, isCollapsible(c));
+      target.addAttribute(VPortalLayout.PORTLET_LOCKED, isLocked(c));
+      target.addAttribute(VPortalLayout.PORTLET_COLLAPSED, isCollapsed(c));
       c.paint(target);
       target.endTag("portlet");
     }
   }
 
+  public boolean isCollapsed(Component c)
+  {
+    Boolean result = collapseStateMap.get(c);
+    return result != null && result;
+  }
+  
   public boolean isCollapsible(Component c) {
     Boolean result = collapsibleMap.get(c);
     return result == null || result;
@@ -89,11 +101,69 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     return result == null || result;
   }
 
+  public boolean isLocked(Component c)
+  {
+    Boolean result = lockedMap.get(c); 
+    return result != null && result;
+  }
+  
   private String getComponentCaption(Component c) {
     final String caption = componentCaptions.get(c);
     return caption == null ? "" : caption;
   }
 
+  public void setComponentCaption(final Component c, final String caption)
+  {
+    if (!components.contains(c))
+      throw new IllegalArgumentException("Component is not attached to the portal!");
+    componentCaptions.put(c, caption);
+    requestRepaint();
+  }
+  
+  public void setClosable(final Component c, boolean closable)
+  {
+    Boolean currentState = closableMap.get(c);
+    if (currentState == null ||
+        !currentState.equals(closable))
+    {
+      closableMap.put(c, closable);
+      requestRepaint();
+    }
+  }
+  
+  public void setLocked(final Component c, boolean isPinned)
+  {
+    Boolean currentState = lockedMap.get(c);
+    if (currentState == null ||
+        !currentState.equals(isPinned))
+    {
+      lockedMap.put(c, isPinned);
+      requestRepaint();
+    }    
+  }
+  
+  public void setCollapsible(final Component c, boolean collapsible)
+  {
+    Boolean currentState = collapsibleMap.get(c);
+    if (currentState == null ||
+        !currentState.equals(collapsible))
+    {
+      collapsibleMap.put(c, collapsible);
+      requestRepaint();
+    }    
+  }
+  
+  public void setCollapsed(final Component c, boolean collapsed)
+  {
+    Boolean currentState = collapseStateMap.get(c);
+    if (currentState == null ||
+        !currentState.equals(collapsed))
+    {
+      collapseStateMap.put(c, collapsed);
+      requestRepaint();
+    }   
+  }
+  
   /**
    * Receive and handle events and other variable changes from the client.
    * {@inheritDoc}
@@ -115,6 +185,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
       
       onComponentPositionUpdated(component, portletPosition);
       
+      setCollapsed(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_COLLAPSED));
       setClosable(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_CLOSABLE));
       setCollapsible(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_COLLAPSIBLE));
       setComponentCaption(component, (String)newPortlet.get(VPortalLayout.PORTLET_CAPTION));
@@ -142,8 +213,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
    */
   private void onPortletCollapsed(final Component component, Boolean isCollapsed) {
     collapseStateMap.put(component, isCollapsed);
-    if (!true)
-      requestRepaint();
   }
 
   /**
@@ -179,6 +248,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
 
   private void doComponentRemoveLogic(final Component c)
   {
+    collapsibleMap.remove(c);
+    closableMap.remove(c);
+    collapseStateMap.remove(c);
+    lockedMap.remove(c);
     components.remove(c);
   }
   
@@ -217,36 +290,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     doComponentAddLogic(c, position);
     super.addComponent(c);
     requestRepaint();
-  }
-  
-  public void setComponentCaption(final Component c, final String caption)
-  {
-    if (!components.contains(c))
-      throw new IllegalArgumentException("Component is not attached to the portal!");
-    componentCaptions.put(c, caption);
-    requestRepaint();
-  }
-  
-  public void setClosable(final Component c, boolean closable)
-  {
-    Boolean currentState = closableMap.get(c);
-    if (currentState == null ||
-        !currentState.equals(closable))
-    {
-      closableMap.put(c, closable);
-      requestRepaint();
-    }
-  }
-  
-  public void setCollapsible(final Component c, boolean collapsible)
-  {
-    Boolean currentState = collapsibleMap.get(c);
-    if (currentState == null ||
-        !currentState.equals(collapsible))
-    {
-      collapsibleMap.put(c, collapsible);
-      requestRepaint();
-    }    
   }
   
   private void doComponentAddLogic(final Component c, int position) {

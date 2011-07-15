@@ -237,7 +237,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
           final Boolean isClosable = itUidl.getBooleanAttribute(PORTLET_CLOSABLE);
           final Boolean isCollapsible = itUidl.getBooleanAttribute(PORTLET_COLLAPSIBLE);
           final Boolean isLocked = itUidl.getBooleanAttribute(PORTLET_LOCKED);
-          final Boolean isCollapsed = itUidl.getBooleanAttribute(PORTLET_COLLAPSED);
           
           final UIDL childUidl = (UIDL)itUidl.getChildUIDL(0);
           final Paintable child = client.getPaintable(childUidl);
@@ -250,10 +249,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
           portlet.setCaption(portletCaption);
           portlet.setClosable(isClosable);
           portlet.setCollapsible(isCollapsible);
-          portlet.updateSpacing(activeSpacing.vSpacing);
+          portlet.updateSpacing(activeSpacing.vSpacing);       
           
-          if (!isCollapsed.equals(portlet.isCollapsed()))
-            portlet.toggleCollapseState();
          // widget.getElement().getStyle().setProperty("width", "100%");
           
           if (!Util.isCached(childUidl)) 
@@ -334,8 +331,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     }
     
     /// TODO set proper calcs after the padding problem fixed
-    if (getChildren().size() > 1)
-      consumedHeight += (getChildren().size() - 1) * activeSpacing.vSpacing;
+    consumedHeight += (getChildren().size()) * activeSpacing.vSpacing;
     System.out.println("Req height  " + consumedHeight);
     
     int newHeigth = Math.max(sizeInfo.getHeight(), consumedHeight);
