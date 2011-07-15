@@ -71,19 +71,23 @@ public class VideoPanelContainer extends HorizontalSplitPanel
   private void buildMainPanel() {
     mainPanel.setSizeFull();
     final HorizontalLayout mainPanelLayout = new HorizontalLayout();
+    mainPanelLayout.addStyleName("dark-background");
     mainPanelLayout.setSizeFull();
     mainPanel.setContent(mainPanelLayout);
 
     mainPanelLayout.setMargin(false);
     mainPanelLayout.setWidth("100%");
     final PortalLayout widePortal = new PortalLayout();
-
+    widePortal.setSpacing(false);
     widePortal.setSizeFull();
     mainPanelLayout.setSpacing(true);
     mainPanelLayout.addComponent(widePortal);
     mainPanelLayout.setExpandRatio(widePortal, 1f);
     addComponent(mainPanel);
   }
+  
+  
+  
   
  
   

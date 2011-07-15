@@ -254,7 +254,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
           
           if (!isCollapsed.equals(portlet.isCollapsed()))
             portlet.toggleCollapseState();
-         // widget.getElement().getStyle().setProperty("width", "100%");
           
           if (!Util.isCached(childUidl)) 
               portlet.tryDetectRelativeHeight(childUidl);
@@ -335,7 +334,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     
     /// TODO set proper calcs after the padding problem fixed
     if (getChildren().size() > 1)
-      consumedHeight += (getChildren().size() - 1) * activeSpacing.vSpacing;
+      consumedHeight += (getChildren().size() /*- 1*/) * activeSpacing.vSpacing;
     System.out.println("Req height  " + consumedHeight);
     
     int newHeigth = Math.max(sizeInfo.getHeight(), consumedHeight);
@@ -375,10 +374,11 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
       {
         float newRealtiveHeight = relativeHeightRatio * sizeHandler.getRealtiveHeight();
         newHeight += (int)(residualHeight * newRealtiveHeight / 100);
-        if (sizeHandler instanceof Portlet)
-            System.out.println("Portlet height " + newHeight);
-        else
-            System.out.println("Dummy height " + newHeight);
+      }
+      if (sizeHandler instanceof Portlet)
+      {
+        int position = getWidgetIndex((Portlet)sizeHandler);
+        ((Portlet) sizeHandler).updateSpacing(/*position == 0 ? 0 : */activeSpacing.vSpacing);
       }
       sizeHandler.setPortletSizes(newWidth, newHeight);
     }
@@ -446,7 +446,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     
     client.updateVariable(paintableId, PORTLET_COLLAPSE_STATE_CHANGED, params, true);
     
-    //if (portlet.isHeightRelative())
     recalculateLayoutAndPortletSizes();
   }
   
@@ -564,6 +563,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   @Override
   public void setHeight(String height) {
     super.setHeight(height);
+    sizeInfo.setHeight(parsePixel(height));
+    recalculateLayoutAndPortletSizes();
   }
   
   @Override

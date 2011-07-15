@@ -58,9 +58,13 @@ public class DashBoardPanel extends HorizontalSplitPanel {
       
       @Override
       public void itemClick(ItemClickEvent event) {
+        if (!event.isDoubleClick())
+          return;
+        
         Item item = event.getItem();
         if (item == null)
           return;
+        
         String path = item.getItemProperty("fullPath").getValue().toString();
         File f = new File(path);
         if (!f.isFile() ||
@@ -73,11 +77,14 @@ public class DashBoardPanel extends HorizontalSplitPanel {
         code.setPropertyDataSource(new TextFileProperty(f));
         
         panel.addComponent(code);
+        
         Iterator<Component> it = mainPortal.getComponentIterator();
         while (it.hasNext())
           mainPortal.setCollapsed(it.next(), true);
+        
         mainPortal.addComponent(panel);
         mainPortal.setComponentCaption(panel, f.getName());
+        mainPortal.setLocked(panel, true);
       }
     });
     sidePortal.setLocked(sourceTree, true);

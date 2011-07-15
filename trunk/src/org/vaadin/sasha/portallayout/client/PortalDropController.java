@@ -104,6 +104,10 @@ public class PortalDropController extends AbstractPositioningDropController {
     
     int dummyIndex = getDummyIndex(); 
     
+    //int spacing = portal.getSpacingInfo().vSpacing;
+   // System.out.println("Spacing" + spacing);
+   // dummy.getElement().getStyle().setPropertyPx("marginTop", targetIndex == 0 ? 0 : spacing);
+    
     if (dummyIndex != targetIndex && 
             (dummyIndex != targetIndex - 1 || 
                 targetIndex == 0)) {
@@ -136,7 +140,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     final Portlet portlet = (Portlet)context.selectedWidgets.get(0);
     if (portlet == null)
       return null;
-    final Widget result = new PortalDropPositioner(portlet); 
+    final Widget result = new PortalDropPositioner(portlet, this); 
     RootPanel.get().add(result, -500, -500);
     return result;
  }

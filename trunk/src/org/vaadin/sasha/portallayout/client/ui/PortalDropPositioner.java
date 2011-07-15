@@ -1,5 +1,6 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
+import org.vaadin.sasha.portallayout.client.PortalDropController;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -26,14 +27,17 @@ public class PortalDropPositioner extends SimplePanel implements SizeHandler {
    * 
    */
   private final Portlet portlet;
-  
+    
   /**
    * Constructor
    */
-  public PortalDropPositioner(final Portlet portlet) {
+  public PortalDropPositioner(final Portlet portlet, final PortalDropController controller) {
     super();
     setStyleName(CLASS_NAME);
     this.portlet = portlet;
+    int spacing = ((VPortalLayout)controller.getDropTarget()).getSpacingInfo().vSpacing;
+    System.out.println("Spacing" + spacing);
+    int position = portlet.getPosition();
     getElement().getStyle().setPropertyPx("marginTop", portlet.getSpacing());
     setPortletSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
     setWidget(internalContent);
