@@ -92,12 +92,12 @@ public class Portlet extends ComplexPanel implements SizeHandler {
   private boolean isCollapsed = false;
   
   /**
-   * 
+   * Flag indicatibg if the protlet can be dragged somewhere.
    */
-  private boolean isLocked = false;
+  private boolean isLocked = true;
   
   /**
-   * 
+   * Server-side communication channel.
    */
   private ApplicationConnection client;
   
@@ -363,7 +363,7 @@ public class Portlet extends ComplexPanel implements SizeHandler {
   public void updateSpacing(int spacing)
   {
     boolean isFirst = getPosition() == 0;
-    containerElement.getStyle().setPropertyPx("paddingTop", isFirst ? 0 : spacing);
+    containerElement.getStyle().setPropertyPx("paddingTop", /*isFirst ? 0 : */spacing);
   }
 
   public int getSpacing() {
