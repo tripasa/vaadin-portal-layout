@@ -1,11 +1,14 @@
 package org.vaadin.sasha.portallayout;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
@@ -19,49 +22,90 @@ import com.vaadin.ui.Layout.SpacingHandler;
 
 /**
  * Layout that presents its contents in a portal style.
+ * 
  * @author p4elkin
  */
 @SuppressWarnings("serial")
 @ClientWidget(value = VPortalLayout.class, loadStyle = LoadStyle.EAGER)
 public class PortalLayout extends AbstractLayout implements SpacingHandler {
-  
+
+  private class ComponentDetails implements Serializable {
+
+    private boolean isLocked = false;
+
+    private boolean isCollapsed = false;
+
+    private boolean isClosable = true;
+
+    private boolean isCollapsible = true;
+
+    private String caption;
+
+
+    public ComponentDetails() {
+    }
+
+    public boolean isLocked() {
+      return isLocked;
+    }
+
+    public void setLocked(boolean isLocked) {
+      this.isLocked = isLocked;
+    }
+
+    public boolean isCollapsed() {
+      return isCollapsed;
+    }
+
+    public void setCollapsed(boolean isCollapsed) {
+      this.isCollapsed = isCollapsed;
+    }
+
+    public boolean isClosable() {
+      return isClosable;
+    }
+
+    public void setClosable(boolean isClosable) {
+      this.isClosable = isClosable;
+    }
+
+    public boolean isCollapsible() {
+      return isCollapsible;
+    }
+
+    public void setCollapsible(boolean isCollapsible) {
+      this.isCollapsible = isCollapsible;
+    }
+
+    public String getCaption() {
+      return caption;
+    }
+
+    public void setCaption(String caption) {
+      this.caption = caption;
+    }
+
+  }
+
   /**
    * The flag indicating that spacing is enabled.
    */
   private boolean isSpacingEnabled = true;
-  
+
   /**
    * The components each of which is represented with the portlet inside the
    * portal
    */
-  private List<Component> components = new LinkedList<Component>();
+  private Map<Component, ComponentDetails> componentToDetails = new HashMap<Component, PortalLayout.ComponentDetails>();
 
   /**
-   * Captions of the corresponding portlets
-   */
-  private Map<Component, String> componentCaptions = new HashMap<Component, String>();
-  
-  /**
-   * The map containing the collapse states of the components.
-   */
-  private Map<Component, Boolean> collapseStateMap = new HashMap<Component, Boolean>();
-  
-  /**
    * 
    */
-  private Map<Component, Boolean> closableMap = new HashMap<Component, Boolean>();
+  private List<Component> components = new ArrayList<Component>();
   
   /**
-   * 
+   *  Constructor
    */
-  private Map<Component, Boolean> collapsibleMap = new HashMap<Component, Boolean>();
-  
-  /**
-   * 
-   */
-  private Map<Component, Boolean> lockedMap = new HashMap<Component, Boolean>();
-  
-  /// Constructor
   public PortalLayout() {
     super();
     setWidth("100%");
@@ -72,98 +116,147 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   public void paintContent(PaintTarget target) throws PaintException {
     super.paintContent(target);
     target.addAttribute("spacing", isSpacingEnabled);
-    for (final Component c : components)
-    {
+    final Iterator<Component> it = components.iterator();
+    while (it.hasNext()) {
+      final Component childComponent = it.next();
+      final ComponentDetails childComponentDetails = componentToDetails.get(childComponent);
+
       target.startTag("portlet");
-      target.addAttribute(VPortalLayout.PORTLET_CAPTION, getComponentCaption(c));
-      target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, isClosable(c));
-      target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE, isCollapsible(c));
-      target.addAttribute(VPortalLayout.PORTLET_LOCKED, isLocked(c));
-      target.addAttribute(VPortalLayout.PORTLET_COLLAPSED, isCollapsed(c));
-      c.paint(target);
+      target.addAttribute(VPortalLayout.PORTLET_CAPTION,
+          childComponentDetails.getCaption());
+      target.addAttribute(VPortalLayout.PORTLET_CLOSABLE,
+          childComponentDetails.isClosable());
+      target.addAttribute(VPortalLayout.PORTLET_LOCKED,
+          childComponentDetails.isLocked());
+      target.addAttribute(VPortalLayout.PORTLET_COLLAPSED,
+          childComponentDetails.isCollapsed());
+      target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE,
+          childComponentDetails.isCollapsible());
+      
+      childComponent.paint(target);
       target.endTag("portlet");
     }
   }
 
-  public boolean isCollapsed(Component c)
-  {
-    Boolean result = collapseStateMap.get(c);
-    return result != null && result;
+  public boolean isCollapsed(Component c) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    return details.isCollapsed();
   }
-  
+
   public boolean isCollapsible(Component c) {
-    Boolean result = collapsibleMap.get(c);
-    return result == null || result;
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    return details.isCollapsible();
   }
 
   public boolean isClosable(Component c) {
-    Boolean result = closableMap.get(c); 
-    return result == null || result;
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    return details.isClosable();
   }
 
-  public boolean isLocked(Component c)
-  {
-    Boolean result = lockedMap.get(c); 
-    return result != null && result;
-  }
-  
-  private String getComponentCaption(Component c) {
-    final String caption = componentCaptions.get(c);
-    return caption == null ? "" : caption;
+  public boolean isLocked(Component c) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    return details.isLocked();
   }
 
-  public void setComponentCaption(final Component c, final String caption)
-  {
-    if (!components.contains(c))
-      throw new IllegalArgumentException("Component is not attached to the portal!");
-    componentCaptions.put(c, caption);
+  public String getComponentCaption(Component c) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    return details.getCaption();
+  }
+
+  public void setComponentCaption(final Component c, final String caption) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    final String currentCaption = details.getCaption();
+
+    if (currentCaption != null && caption != null
+        && caption.equals(currentCaption))
+      return;
+
+    details.setCaption(caption);
     requestRepaint();
   }
-  
-  public void setClosable(final Component c, boolean closable)
-  {
-    Boolean currentState = closableMap.get(c);
-    if (currentState == null ||
-        !currentState.equals(closable))
-    {
-      closableMap.put(c, closable);
+
+  public void setClosable(final Component c, boolean closable) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    if (details.isClosable() != closable) {
+      details.setClosable(closable);
       requestRepaint();
     }
   }
-  
-  public void setLocked(final Component c, boolean isPinned)
-  {
-    Boolean currentState = lockedMap.get(c);
-    if (currentState == null ||
-        !currentState.equals(isPinned))
-    {
-      lockedMap.put(c, isPinned);
+
+  public void setLocked(final Component c, boolean isLocked) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    if (isLocked != details.isLocked()) {
+      details.setLocked(isLocked);
       requestRepaint();
-    }    
+    }
   }
-  
-  public void setCollapsible(final Component c, boolean collapsible)
-  {
-    Boolean currentState = collapsibleMap.get(c);
-    if (currentState == null ||
-        !currentState.equals(collapsible))
-    {
-      collapsibleMap.put(c, collapsible);
+
+  public void setCollapsible(final Component c, boolean isCollapsible) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    if (isCollapsible != details.isCollapsible()) {
+      details.setCollapsible(isCollapsible);
       requestRepaint();
-    }    
+    }
   }
-  
-  public void setCollapsed(final Component c, boolean collapsed)
-  {
-    Boolean currentState = collapseStateMap.get(c);
-    if (currentState == null ||
-        !currentState.equals(collapsed))
-    {
-      collapseStateMap.put(c, collapsed);
+
+  public void setCollapsed(final Component c, boolean isCollapsed) {
+    final ComponentDetails details = componentToDetails.get(c);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    if (isCollapsed == details.isCollapsed()) {
+      details.setCollapsed(isCollapsed);
       requestRepaint();
-    }   
+    }
   }
-  
+
   /**
    * Receive and handle events and other variable changes from the client.
    * {@inheritDoc}
@@ -171,58 +264,98 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   @SuppressWarnings("unchecked")
   @Override
   public void changeVariables(Object source, Map<String, Object> variables) {
-    
+
     super.changeVariables(source, variables);
-    
+
     if (variables.containsKey(VPortalLayout.PORTLET_POSITION_UPDATED)) {
-      Map<String, Object> newPortlet = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_POSITION_UPDATED);
-      
+      Map<String, Object> newPortlet = (Map<String, Object>) variables
+          .get(VPortalLayout.PORTLET_POSITION_UPDATED);
+
       final Component component = (Component) newPortlet
           .get(VPortalLayout.PAINTABLE_MAP_PARAM);
-      
+
       Integer portletPosition = (Integer) newPortlet
-          .get(VPortalLayout.PORTLET_POSITION_MAP_PARAM);
-      
+          .get(VPortalLayout.PORTLET_POSITION);
+
       onComponentPositionUpdated(component, portletPosition);
-      
-      setCollapsed(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_COLLAPSED));
-      setClosable(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_CLOSABLE));
-      setCollapsible(component, (Boolean)newPortlet.get(VPortalLayout.PORTLET_COLLAPSIBLE));
-      setComponentCaption(component, (String)newPortlet.get(VPortalLayout.PORTLET_CAPTION));
+
+      setCollapsed(component,
+          (Boolean) newPortlet.get(VPortalLayout.PORTLET_COLLAPSED));
+      setClosable(component,
+          (Boolean) newPortlet.get(VPortalLayout.PORTLET_CLOSABLE));
+      setCollapsible(component,
+          (Boolean) newPortlet.get(VPortalLayout.PORTLET_COLLAPSIBLE));
+      setComponentCaption(component,
+          (String) newPortlet.get(VPortalLayout.PORTLET_CAPTION));
+
     }
-    
-    if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED))
-    {
-      final Map<String, Object> params = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED);
-      
-      onPortletCollapsed((Component)params.get(VPortalLayout.PAINTABLE_MAP_PARAM), 
-          (Boolean)params.get(VPortalLayout.PORTLET_COLLAPSED));
+
+    if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED)) {
+      final Map<String, Object> params = (Map<String, Object>) variables
+          .get(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED);
+
+      onPortletCollapsed(
+          (Component) params.get(VPortalLayout.PAINTABLE_MAP_PARAM),
+          (Boolean) params.get(VPortalLayout.PORTLET_COLLAPSED));
     }
-    
-    if (variables.containsKey(VPortalLayout.COMPONENT_REMOVED))
-    {
-      final Component child = (Component) variables.get(VPortalLayout.COMPONENT_REMOVED);
+
+    if (variables.containsKey(VPortalLayout.COMPONENT_REMOVED)) {
+      final Component child = (Component) variables
+          .get(VPortalLayout.COMPONENT_REMOVED);
       doComponentRemoveLogic(child);
     }
   }
 
   /**
    * Handler that should be invoked when the components collapse state changes.
-   * @param component Component which collapse state has changed.
-   * @param isCollapsed True if the portlet was collapsed, false - expanded.
+   * 
+   * @param component
+   *          Component which collapse state has changed.
+   * @param isCollapsed
+   *          True if the portlet was collapsed, false - expanded.
    */
   private void onPortletCollapsed(final Component component, Boolean isCollapsed) {
-    collapseStateMap.put(component, isCollapsed);
+    final ComponentDetails details = componentToDetails.get(component);
+
+    if (details == null)
+      throw new IllegalArgumentException(
+          "Portal doesn not contain this component!");
+
+    details.setCollapsed(isCollapsed);
   }
 
   /**
-   * Handler that should be invoked when the components position in the portal 
+   * Handler that should be invoked when the components position in the portal
    * was changed.
-   * @param component Component whose position was updated
-   * @param portletPosition New position of the component.
+   * 
+   * @param component
+   *          Component whose position was updated
+   * @param newPosition
+   *          New position of the component.
    */
-  private void onComponentPositionUpdated(Component component, Integer portletPosition) {
-    moveComponent(component, portletPosition);
+  private void onComponentPositionUpdated(Component component,
+      int newPosition) {
+
+    // The client side reported that portlet is no longer there - remove
+    // component if so.
+    if (newPosition == -1) {
+      removeComponent(component);
+      return;
+    }
+
+    int oldPosition = components.indexOf(component);
+
+    if (oldPosition == -1) {
+      addComponent(component, newPosition);
+      return;
+    }
+
+    // / Component is in the right position - nothing to do.
+    if (newPosition == oldPosition)
+      return;
+    
+    components.remove(component);
+    components.add(newPosition, component);
   }
 
   @Override
@@ -231,71 +364,44 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
 
   @Override
   public Iterator<Component> getComponentIterator() {
-    return Collections.unmodifiableCollection(components).iterator();
+    return Collections.unmodifiableCollection(components)
+        .iterator();
   }
 
   @Override
   public void setWidth(float width, int unit) {
     super.setWidth(width, unit);
   }
-  
+
   @Override
   public void removeComponent(Component c) {
     doComponentRemoveLogic(c);
     super.removeComponent(c);
   }
 
+  private void doComponentRemoveLogic(final Component c) {
+    componentToDetails.remove(c);
+    components.remove(c);
+  }
 
-  private void doComponentRemoveLogic(final Component c)
-  {
-    collapsibleMap.remove(c);
-    closableMap.remove(c);
-    collapseStateMap.remove(c);
-    lockedMap.remove(c);
-    components.remove(c);
-  }
-  
-  
-  private void moveComponent(Component c, int position) {
-    /// The client side reported that portlet is no longer there - remove component if so.
-    if (position == -1)
-    {
-      removeComponent(c);
-      return;
-    }
-    
-    int currentComponentPosition = components.indexOf(c);
-    
-    /// Component is in the right position - nothing to do. 
-    if (position == currentComponentPosition)
-      return;
-    
-    /// Component has been added from other portal. We have to add in such case.
-    if (currentComponentPosition == -1)
-    {
-      addComponent(c, position);
-      return;
-    }
-    
-    /// Update component position in the list.
-    components.remove(c);
-    components.add(position, c);
-  }
-  
-  public void addComponent(Component c) {  
+  public void addComponent(Component c) {
     addComponent(c, 0);
   }
-  
+
   public void addComponent(Component c, int position) {
     doComponentAddLogic(c, position);
     super.addComponent(c);
     requestRepaint();
   }
-  
-  private void doComponentAddLogic(final Component c, int position) {
 
-    if (components.indexOf(c) != -1)
-      throw new IllegalArgumentException("Already added!");
+  private void doComponentAddLogic(final Component c, int position) {
+    int index = components.indexOf(c);
+
+    if (index != -1)
+      throw new IllegalArgumentException(
+          "Component has already been added to the portal!");
+    
+    componentToDetails.put(c, new ComponentDetails());
     components.add(position, c);
   }
 

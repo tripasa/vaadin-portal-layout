@@ -50,11 +50,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   /**
    * 
    */
-  public static final String PORTLET_POSITION_MAP_PARAM = "PORTLET_POSITION";
-
-  /**
-   * 
-   */
   public static final String PORTLET_COLLAPSED = "PORTLET_COLLAPSED";
   
   /**
@@ -80,7 +75,12 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   /**
    * 
    */
-  public static final String PORTLET_LOCKED = "PORTLET_PINNED";
+  public static final String PORTLET_LOCKED = "PORTLET_LOCKED";
+
+  /**
+   * 
+   */
+  public static final String PORTLET_POSITION = "PORTLET_POSITION";
   
   /**
    * Basic style name.
@@ -99,6 +99,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   private final static PickupDragController cs_dragControl = new PickupDragController(
       RootPanel.get(), false);
+
 
   /**
    * The mapping between the portlets and their contents.
@@ -503,7 +504,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put(PAINTABLE_MAP_PARAM, child);
-    params.put(PORTLET_POSITION_MAP_PARAM, newPosition);
+    params.put(PORTLET_POSITION, newPosition);
     params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
     params.put(PORTLET_CLOSABLE, portlet.isClosable());
     params.put(PORTLET_COLLAPSIBLE, portlet.isCollapsible());
