@@ -14,8 +14,6 @@
 package org.vaadin.sasha.portallayout.client.dnd.util;
 
 import org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl;
-import org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImplOpera;
-import org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImplStandard;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;

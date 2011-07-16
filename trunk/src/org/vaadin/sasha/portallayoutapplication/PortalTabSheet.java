@@ -3,16 +3,15 @@ package org.vaadin.sasha.portallayoutapplication;
 import org.vaadin.sasha.portallayoutapplication.chart.ChartPanelContainer;
 
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 
 @SuppressWarnings("serial")
 public class PortalTabSheet extends TabSheet{
   
-  private VideoPanelContainer videoTabPanel = new VideoPanelContainer();
+  private final VideoPanelContainer videoTabPanel = new VideoPanelContainer();
  
-  private ChartPanelContainer chartTabPanel = new ChartPanelContainer();
+  private final ChartPanelContainer chartTabPanel = new ChartPanelContainer();
   
-  private DashBoardPanel dashTab = new DashBoardPanel();
+  private final DashBoardPanel dashTab = new DashBoardPanel();
   
   /**
    * Constructor
