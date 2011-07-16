@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.vaadin.sasha.portallayout.client.PortalDropController;
 import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
+import org.vaadin.sasha.portallayout.client.ui.Portlet.PortletLockState;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -181,7 +182,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * 
    * @return PickupDragController.
    */
-  public static PickupDragController getDragController() {
+  public static PickupDragController getCommonDragController() {
     return cs_dragControl;
   }
 
@@ -196,7 +197,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     if (debugMode)
       getElement().getStyle().setProperty("border", "1px solid");
     dropController = new PortalDropController(this);
-    getDragController().registerDropController(dropController);
+    getCommonDragController().registerDropController(dropController);
 
     Style style = stub.getStyle();
     style.setProperty("width", "0px");
@@ -279,17 +280,22 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     
   }
 
-  private void setLock(final Portlet portlet, boolean isPinned) {
+  private void setLock(final Portlet portlet, boolean isLocked) {
     
-    boolean currentLockState = portlet.isLocked();
+    PortletLockState formerLockState = portlet.getLockState();
+    portlet.setLocked(isLocked);
     
-    if (currentLockState != isPinned)
-    {
-      if (isPinned)
-        cs_dragControl.makeNotDraggable(portlet);
-      else
-        cs_dragControl.makeDraggable(portlet, portlet.getDraggableArea());
-    }
+    if (isLocked &&
+        formerLockState == PortletLockState.PLS_NOT_SET)
+      return;
+    
+    if (!isLocked && 
+        formerLockState != PortletLockState.PLS_NOT_LOCKED)
+      getCommonDragController().makeDraggable(portlet, portlet.getDraggableArea());
+    else
+      if (isLocked &&
+          formerLockState == PortletLockState.PLS_NOT_LOCKED)
+        getCommonDragController().makeNotDraggable(portlet);
   }
 
   /**
@@ -419,7 +425,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   private final Portlet createPortlet(Widget widget) {
     final Portlet result = new Portlet(widget, client, this);
-    getDragController().makeDraggable(result, result.getDraggableArea());
     widgetToPortletContainer.put(widget, result);
     return result;
   }
