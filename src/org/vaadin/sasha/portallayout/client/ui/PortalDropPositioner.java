@@ -7,19 +7,19 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * 
+ * Dummy wire frame widget that is displayed 
+ * when the portlet is dragged within the portal.
  * @author p4elkin
- *
  */
-public class PortalDropPositioner extends SimplePanel implements SizeHandler {
+public class PortalDropPositioner extends SimplePanel implements RealtiveHeightCapable {
 
   /**
-   * 
+   * Basic style name for the widget. 
    */
   private static final String CLASS_NAME = "v-portallayout-positioner";
   
   /**
-   * 
+   * Internal contents.
    */
   private final SimplePanel internalContent = new SimplePanel();
   
@@ -39,7 +39,7 @@ public class PortalDropPositioner extends SimplePanel implements SizeHandler {
     System.out.println("Spacing" + spacing);
     int position = portlet.getPosition();
     getElement().getStyle().setPropertyPx("marginTop", portlet.getSpacing());
-    setPortletSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
+    setSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
     setWidget(internalContent);
   }
 
@@ -67,7 +67,7 @@ public class PortalDropPositioner extends SimplePanel implements SizeHandler {
   }
 
   @Override
-  public void setPortletSizes(int width, int height) {
+  public void setSizes(int width, int height) {
     int innerWidth = width - DOMUtil.getHorizontalBorders(this);
     int innerHeight = height - DOMUtil.getVerticalBorders(this);
     

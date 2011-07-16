@@ -1,10 +1,7 @@
 package org.vaadin.sasha.portallayoutapplication;
 
 import com.vaadin.Application;
-import com.vaadin.data.Item;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")

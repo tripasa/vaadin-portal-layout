@@ -108,7 +108,7 @@ public class PortalDropController extends AbstractPositioningDropController {
    * @return Target PortalLayout.
    */
   private VPortalLayout getDropTargetAsPortalLayout() {
-    return VPortalLayout.class.cast(getDropTarget());
+    return (VPortalLayout)getDropTarget();
   }
 
   /**

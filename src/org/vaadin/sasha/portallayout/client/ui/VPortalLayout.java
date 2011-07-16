@@ -319,12 +319,12 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     System.out.println("Calc for  " + getChildren().size());
     for (final Widget p : getChildren())
     {
-      if (!(p instanceof SizeHandler) ||
+      if (!(p instanceof RealtiveHeightCapable) ||
            (p instanceof PortalDropPositioner &&
              getChildren().contains(((PortalDropPositioner)p).getPortlet())))
       continue;
           
-      final SizeHandler portletCast = (SizeHandler)p;
+      final RealtiveHeightCapable portletCast = (RealtiveHeightCapable)p;
         
       consumedHeight += portletCast.getRequiredHeight();
         
@@ -362,10 +362,10 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     
     for (final Widget p : getChildren())
     {
-      if (!(p instanceof SizeHandler))
+      if (!(p instanceof RealtiveHeightCapable))
         continue;
           
-      final SizeHandler sizeHandler = (SizeHandler)p;
+      final RealtiveHeightCapable sizeHandler = (RealtiveHeightCapable)p;
       
       int newWidth = totalWidth;
       int newHeight = sizeHandler.getRequiredHeight();
@@ -380,7 +380,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
         int position = getWidgetIndex((Portlet)sizeHandler);
         ((Portlet) sizeHandler).updateSpacing(/*position == 0 ? 0 : */activeSpacing.vSpacing);
       }
-      sizeHandler.setPortletSizes(newWidth, newHeight);
+      sizeHandler.setSizes(newWidth, newHeight);
     }
     if (client != null)
       client.runDescendentsLayout(this);
@@ -494,7 +494,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * @param newPosition
    *          New position of the portlet.
    */
-  public void handlePortletPositionUpdated(Portlet portlet, int newPosition) {
+  public void onPortletPositionUpdated(Portlet portlet, int newPosition) {
     final Paintable child = portlet.getContentAsPaintable();
     if (child == null)
       return;

@@ -19,7 +19,7 @@ import com.vaadin.terminal.gwt.client.Util;
  * and the widget which plays the role of the portlet contents. 
  * @author p4elkin
  */
-public class Portlet extends ComplexPanel implements SizeHandler {
+public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
   
   /**
    * Style name used for the portlets.
@@ -430,7 +430,7 @@ public class Portlet extends ComplexPanel implements SizeHandler {
   }
   
   @Override
-  public void setPortletSizes(int width, int height) {
+  public void setSizes(int width, int height) {
     contentSizeInfo.setWidth(width);
     /**
      * Only relative height portlet contents follow the size of their wrapper.

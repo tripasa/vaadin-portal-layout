@@ -5,7 +5,7 @@ package org.vaadin.sasha.portallayout.client.ui;
  * @author p4elkin
  *
  */
-public interface SizeHandler {
+public interface RealtiveHeightCapable {
   
   /**
    * 
@@ -36,5 +36,5 @@ public interface SizeHandler {
    * @param width
    * @param height
    */
-  public void setPortletSizes(int width, int height);
+  public void setSizes(int width, int height);
 }
