@@ -21,6 +21,12 @@ import com.vaadin.terminal.gwt.client.Util;
  */
 public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
   
+  public enum PortletLockState {
+    PLS_NOT_SET,
+    PLS_LOCKED,
+    PLS_NOT_LOCKED;
+  }
+  
   /**
    * Style name used for the portlets.
    */
@@ -94,7 +100,7 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
   /**
    * Flag indicatibg if the protlet can be dragged somewhere.
    */
-  private boolean isLocked = true;
+  private PortletLockState isLocked = PortletLockState.PLS_NOT_SET;
   
   /**
    * Server-side communication channel.
@@ -296,7 +302,7 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
    * @param isLocked true if portlet cannot be dragged.
    */
   public void setLocked(boolean isLocked) {
-    this.isLocked = isLocked;
+    this.isLocked = isLocked ? PortletLockState.PLS_LOCKED : PortletLockState.PLS_NOT_LOCKED;
   }
 
   /**
@@ -304,6 +310,15 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
    * @return true if portlet is not draggable, false - otherwise.
    */
   public boolean isLocked() {
+    return isLocked == PortletLockState.PLS_LOCKED;
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public PortletLockState getLockState()
+  {
     return isLocked;
   }
   
