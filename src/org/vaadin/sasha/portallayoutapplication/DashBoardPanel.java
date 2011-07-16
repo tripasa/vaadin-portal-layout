@@ -87,9 +87,9 @@ public class DashBoardPanel extends HorizontalSplitPanel {
         mainPortal.setLocked(panel, true);
       }
     });
+    sidePortal.addComponent(sourceTree);
     sidePortal.setLocked(sourceTree, true);
     sidePortal.setClosable(sourceTree, false);
-    sidePortal.addComponent(sourceTree);
     sidePortal.setComponentCaption(sourceTree, "Source Tree");
     
     addComponent(sidePortal);
