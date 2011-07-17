@@ -4,42 +4,39 @@ import org.vaadin.sasha.portallayout.client.PortalDropController;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Dummy wire frame widget that is displayed 
- * when the portlet is dragged within the portal.
+ * Dummy wire frame widget that is displayed when the portlet is dragged within
+ * the portal.
+ * 
  * @author p4elkin
  */
-public class PortalDropPositioner extends SimplePanel implements RealtiveHeightCapable {
+public class PortalDropPositioner extends SimplePanel implements PortalObjectSizeHandler {
 
   /**
-   * Basic style name for the widget. 
+   * Basic style name for the widget.
    */
   private static final String CLASS_NAME = "v-portallayout-positioner";
-  
+
   /**
    * Internal contents.
    */
   private final SimplePanel internalContent = new SimplePanel();
-  
+
   /**
    * 
    */
   private final Portlet portlet;
-    
+
   /**
    * Constructor
    */
-  public PortalDropPositioner(final Portlet portlet, final PortalDropController controller) {
+  public PortalDropPositioner(final Portlet portlet,
+      final PortalDropController controller) {
     super();
     setStyleName(CLASS_NAME);
     this.portlet = portlet;
-    int spacing = ((VPortalLayout)controller.getDropTarget()).getSpacingInfo().vSpacing;
-    System.out.println("Spacing" + spacing);
-    int position = portlet.getPosition();
-    getElement().getStyle().setPropertyPx("marginTop", portlet.getSpacing());
-    setSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
+    setWidgetSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
     setWidget(internalContent);
   }
 
@@ -50,9 +47,9 @@ public class PortalDropPositioner extends SimplePanel implements RealtiveHeightC
   }
 
   @Override
-  public float getRealtiveHeight() {
+  public float getRealtiveHeightValue() {
     assert portlet != null;
-    return portlet.getRealtiveHeight();
+    return portlet.getRealtiveHeightValue();
   }
 
   @Override
@@ -62,21 +59,35 @@ public class PortalDropPositioner extends SimplePanel implements RealtiveHeightC
   }
 
   @Override
-  public void setRealtiveHeightValue(float heightValue) {
-    // NOP
-  }
-
-  @Override
-  public void setSizes(int width, int height) {
+  public void setWidgetSizes(int width, int height) {
     int innerWidth = width - DOMUtil.getHorizontalBorders(this);
     int innerHeight = height - DOMUtil.getVerticalBorders(this);
-    
+
     internalContent.setPixelSize(innerWidth, innerHeight);
   }
 
-    public Widget getPortlet() {
-        assert portlet != null;
-        return portlet;
-    }
- 
+  @Override
+  public void setWidgetHeight(int height) {
+    int innerHeight = height - DOMUtil.getVerticalBorders(this);
+    internalContent.getElement().getStyle().setPropertyPx("height", innerHeight);
+  }
+
+  @Override
+  public void setWidgetWidth(int width) {
+    int innerWidth = width - DOMUtil.getHorizontalBorders(this);
+    internalContent.getElement().getStyle().setPropertyPx("width", innerWidth);
+
+  }
+
+  @Override
+  public void setSpacingValue(int spacing) {
+    getElement().getStyle().setPropertyPx("marginTop", spacing);
+  }
+
+  @Override
+  public Portlet getPortalObjectReference() {
+    assert portlet != null;
+    return portlet;
+  }
+
 }

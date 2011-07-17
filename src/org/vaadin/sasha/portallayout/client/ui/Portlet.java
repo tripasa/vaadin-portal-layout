@@ -19,8 +19,12 @@ import com.vaadin.terminal.gwt.client.Util;
  * and the widget which plays the role of the portlet contents. 
  * @author p4elkin
  */
-public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
+public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
   
+  /**
+   * Enumeration for the lock states of the Portlet. 
+   * @author p4elkin
+   */
   public enum PortletLockState {
     PLS_NOT_SET,
     PLS_LOCKED,
@@ -165,27 +169,9 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
    * @param width The new width.
    * @param height The new height.
    */
-  public void setWrapperSizes(int width, int height) {
+  protected void setContainerElementSizes(int width, int height) {
     containerSizeInfo.setWidth(width);
     containerSizeInfo.setHeight(height);
-    updatePortletDOMSize();
-  }
-
-  public void setPortletHeight(int height)
-  {
-    if (isHeightRelative)
-      contentSizeInfo.setHeight(height - header.getOffsetHeight());
-    containerSizeInfo.setHeight(height);
-    updatePortletDOMSize();
-  }
-  
-  /**
-   * 
-   */
-  public void setPortletWidth(int width)
-  {
-    contentSizeInfo.setWidth(width);
-    containerSizeInfo.setWidth(width);
     updatePortletDOMSize();
   }
   
@@ -203,7 +189,7 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
    * @param width New width.
    * @param height New height.
    */
-  public void updatePortletDOMSize() {
+  protected void updatePortletDOMSize() {
     containerElement.getStyle().setPropertyPx("width", containerSizeInfo.getWidth());
     containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight());
   }
@@ -339,7 +325,7 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
    */
   public void toggleCollapseState() {
     setCollapsed(!isCollapsed);
-    setWrapperSizes(getOffsetWidth(), getRequiredHeight());
+    setContainerElementSizes(getOffsetWidth(), getRequiredHeight());
     updateCollapseStyle();
     parentPortal.onPortletCollapseStateChanged(this);  
   }
@@ -373,12 +359,6 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
   public void updateCollapseStyle() {
     contentDiv.getStyle().setProperty("visibility", isCollapsed ? "hidden" : "visible");
     contentDiv.getStyle().setPropertyPx("height", isCollapsed ? 0 : contentSizeInfo.getHeight());
-  }
-  
-  public void updateSpacing(int spacing)
-  {
-    boolean isFirst = getPosition() == 0;
-    containerElement.getStyle().setPropertyPx("paddingTop", /*isFirst ? 0 : */spacing);
   }
 
   public int getSpacing() {
@@ -428,7 +408,7 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
    * 
    */
   @Override
-  public float getRealtiveHeight() {
+  public float getRealtiveHeightValue() {
     if (relativeSize != null &&
         !isCollapsed)
       return relativeSize.getHeight();
@@ -445,7 +425,7 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
   }
   
   @Override
-  public void setSizes(int width, int height) {
+  public void setWidgetSizes(int width, int height) {
     contentSizeInfo.setWidth(width);
     /**
      * Only relative height portlet contents follow the size of their wrapper.
@@ -453,14 +433,38 @@ public class Portlet extends ComplexPanel implements RealtiveHeightCapable {
      */
     if (isHeightRelative)
       contentSizeInfo.setHeight(height - header.getOffsetHeight());
-    setWrapperSizes(width, height);
+    setContainerElementSizes(width, height);
   }
   
   @Override
-  public void setRealtiveHeightValue(float heightValue) {
-    if (relativeSize == null)
-      relativeSize = new FloatSize(0, 0);
-    relativeSize.setHeight(heightValue);
+  public void setWidgetHeight(int height)
+  {
+    if (isHeightRelative)
+      contentSizeInfo.setHeight(height - header.getOffsetHeight());
+    containerSizeInfo.setHeight(height);
+    updatePortletDOMSize();
+  }
+  
+  /**
+   * 
+   */
+  @Override
+  public void setWidgetWidth(int width)
+  {
+    contentSizeInfo.setWidth(width);
+    containerSizeInfo.setWidth(width);
+    updatePortletDOMSize();
+  }
+
+  @Override
+  public void setSpacingValue(int spacing)
+  {
+    containerElement.getStyle().setPropertyPx("paddingTop", spacing);    
+  }
+
+  @Override
+  public Portlet getPortalObjectReference() {
+    return this;
   }
 
 }

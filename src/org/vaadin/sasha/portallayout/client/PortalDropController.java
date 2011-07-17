@@ -7,6 +7,7 @@ import org.vaadin.sasha.portallayout.client.dnd.util.CoordinateLocation;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
 import org.vaadin.sasha.portallayout.client.ui.PortalDropPositioner;
+import org.vaadin.sasha.portallayout.client.ui.PortalObjectSizeHandler;
 import org.vaadin.sasha.portallayout.client.ui.Portlet;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
@@ -158,11 +159,6 @@ public class PortalDropController extends AbstractPositioningDropController {
 
     int dummyIndex = getDummyIndex();
 
-    // int spacing = portal.getSpacingInfo().vSpacing;
-    // System.out.println("Spacing" + spacing);
-    // dummy.getElement().getStyle().setPropertyPx("marginTop", targetIndex == 0
-    // ? 0 : spacing);
-
     if (dummyIndex != targetIndex
         && (dummyIndex != targetIndex - 1 || targetIndex == 0)) {
       if (dummyIndex == 0 && portal.getWidgetCount() == 1) {
@@ -171,6 +167,8 @@ public class PortalDropController extends AbstractPositioningDropController {
         dummy.removeFromParent();
       } else {
         portal.addToRootElement(dummy, targetIndex);
+        if (dummyIndex == 0)
+          ((PortalObjectSizeHandler)portal.getWidget(0)).setSpacingValue(0);
       }
     }
   }

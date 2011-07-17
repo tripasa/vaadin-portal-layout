@@ -37,4 +37,10 @@ public interface SizeHandler {
    * @param height
    */
   public void setPortletSizes(int width, int height);
+  
+  /**
+   * 
+   * @param spacing
+   */
+  public void updateSpacing(int spacing);
 }

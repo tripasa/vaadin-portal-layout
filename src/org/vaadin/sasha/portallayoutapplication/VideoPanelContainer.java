@@ -86,11 +86,6 @@ public class VideoPanelContainer extends HorizontalSplitPanel
     addComponent(mainPanel);
   }
   
-  
-  
-  
- 
-  
   private class ArtistCombo extends ComboBox
   {
     private Map<String, String> artistVideos = new HashMap<String, String>();
