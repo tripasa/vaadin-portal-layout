@@ -52,12 +52,12 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * 
    */
   public static final String PORTLET_COLLAPSED = "PORTLET_COLLAPSED";
-  
+
   /**
    * 
    */
   public static final String PORTLET_COLLAPSE_STATE_CHANGED = "PORTLET_COLLAPSE_STATE_CHANGE";
-  
+
   /**
    * 
    */
@@ -67,7 +67,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * 
    */
   public static final String PORTLET_CLOSABLE = "PORTLET_CLOSABLE";
- 
+
   /**
    * 
    */
@@ -82,7 +82,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * 
    */
   public static final String PORTLET_POSITION = "PORTLET_POSITION";
-  
+
   /**
    * Basic style name.
    */
@@ -92,7 +92,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * 
    */
   public static final String STYLENAME_SPACING = CLASSNAME + "-spacing";
-  
+
   /**
    * The common drag controller for all the portals in the application. Having
    * this drag controller static allows us to drag portlets between all the
@@ -100,7 +100,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   private final static PickupDragController cs_dragControl = new PickupDragController(
       RootPanel.get(), false);
-
 
   /**
    * The mapping between the portlets and their contents.
@@ -117,7 +116,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * Id of the current paintable.
    */
   protected String paintableId;
-  
+
   /**
    * Server side communication interface.
    */
@@ -140,12 +139,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   private boolean isRendering = false;
 
   /**
-   * Temporary variable that causes e.g. borders of the widgets to be rendered
-   * if set.
-   */
-  private boolean debugMode = false;
-  
-  /**
    * POrtal size info.
    */
   private Size sizeInfo = new Size(0, 0);
@@ -157,15 +150,15 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   private int consumedHeight;
 
   /**
-   * Flag indicating that spacing must be enabled. 
+   * Flag indicating that spacing must be enabled.
    */
   private boolean isSpacingEnabled = false;
-  
+
   /**
    * Info about portlet spacing.
    */
   protected final Spacing computedSpacing = new Spacing(0, 0);
-  
+
   /**
    * Info about portlet spacing.
    */
@@ -175,7 +168,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * 
    */
   private float sumRelativeHeight = 0f;
-  
+
   /**
    * Get the Common PickupDragController that should wire all the portals
    * together.
@@ -191,11 +184,10 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   public VPortalLayout() {
     super();
-    
+
     setStyleName(CLASSNAME);
     getElement().getStyle().setProperty("overflow", "hidden");
-    if (debugMode)
-      getElement().getStyle().setProperty("border", "1px solid");
+    getElement().getStyle().setProperty("margin", "20px 20px 20px 20px");
     dropController = new PortalDropController(this);
     getCommonDragController().registerDropController(dropController);
 
@@ -219,196 +211,194 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     paintableId = uidl.getId();
 
     updateSpacingInfoFromUidl(uidl);
-    
+
     int pos = 0;
     sizeInfo.setHeight(getElement().getClientHeight());
-    
-/*    Widget parent = getParent();
-    
-    if (parent != null)
-      sizeInfo.setHeight(parent.getOffsetHeight());*/
-    
+
+    /*
+     * Widget parent = getParent();
+     * 
+     * if (parent != null) sizeInfo.setHeight(parent.getOffsetHeight());
+     */
+
     sizeInfo.setWidth(getElement().getClientWidth());
-    final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet,UIDL>();
+    final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet, UIDL>();
     for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
       final UIDL itUidl = (UIDL) it.next();
-      if (itUidl.getTag().equals("portlet"))
-      {
-          final String portletCaption = itUidl.getStringAttribute(PORTLET_CAPTION);
-          
-          final Boolean isClosable = itUidl.getBooleanAttribute(PORTLET_CLOSABLE);
-          final Boolean isCollapsible = itUidl.getBooleanAttribute(PORTLET_COLLAPSIBLE);
-          final Boolean isLocked = itUidl.getBooleanAttribute(PORTLET_LOCKED);
-          final Boolean isCollapsed = itUidl.getBooleanAttribute(PORTLET_COLLAPSED);
-          
-          final UIDL childUidl = (UIDL)itUidl.getChildUIDL(0);
-          final Paintable child = client.getPaintable(childUidl);
-          final Widget widget = (Widget) child;
-          final Portlet portlet = findOrCreatePortlet(widget); 
-          
-          updatePortletInPosition(portlet, pos);
+      if (itUidl.getTag().equals("portlet")) {
+        final String portletCaption = itUidl
+            .getStringAttribute(PORTLET_CAPTION);
 
-          setLock(portlet, isLocked);
-          portlet.setCaption(portletCaption);
-          portlet.setClosable(isClosable);
-          portlet.setCollapsible(isCollapsible);
-          portlet.updateSpacing(activeSpacing.vSpacing);
-          
-          if (!isCollapsed.equals(portlet.isCollapsed()))
-            portlet.toggleCollapseState();
-          
-          if (!Util.isCached(childUidl)) 
-              portlet.tryDetectRelativeHeight(childUidl);
-              
-          if (portlet.isHeightRelative())    
-            realtiveSizePortletUIDLS.put(portlet, childUidl); 
-          else {
-            portlet.renderContent(childUidl);
-            portlet.updateContentSizeInfoFromDOM();
-          }
-   
+        final Boolean isClosable = itUidl.getBooleanAttribute(PORTLET_CLOSABLE);
+        final Boolean isCollapsible = itUidl
+            .getBooleanAttribute(PORTLET_COLLAPSIBLE);
+        final Boolean isLocked = itUidl.getBooleanAttribute(PORTLET_LOCKED);
+        final Boolean isCollapsed = itUidl
+            .getBooleanAttribute(PORTLET_COLLAPSED);
+
+        final UIDL childUidl = (UIDL) itUidl.getChildUIDL(0);
+        final Paintable child = client.getPaintable(childUidl);
+        final Widget widget = (Widget) child;
+        final Portlet portlet = findOrCreatePortlet(widget);
+
+        updatePortletInPosition(portlet, pos);
+
+        setLock(portlet, isLocked);
+        portlet.setCaption(portletCaption);
+        portlet.setClosable(isClosable);
+        portlet.setCollapsible(isCollapsible);
+
+        if (!isCollapsed.equals(portlet.isCollapsed()))
+          portlet.toggleCollapseState();
+
+        if (!Util.isCached(childUidl))
+          portlet.tryDetectRelativeHeight(childUidl);
+
+        if (portlet.isHeightRelative())
+          realtiveSizePortletUIDLS.put(portlet, childUidl);
+        else {
+          portlet.renderContent(childUidl);
+          portlet.updateContentSizeInfoFromDOM();
+        }
+
       }
     }
 
     recalculateLayoutAndPortletSizes();
-    
-    for (final Portlet p : realtiveSizePortletUIDLS.keySet())
-    {
+
+    for (final Portlet p : realtiveSizePortletUIDLS.keySet()) {
       final UIDL relUidl = realtiveSizePortletUIDLS.get(p);
       p.renderContent(relUidl);
     }
-    
+
   }
 
   private void setLock(final Portlet portlet, boolean isLocked) {
-    
+
     PortletLockState formerLockState = portlet.getLockState();
     portlet.setLocked(isLocked);
-    
-    if (isLocked &&
-        formerLockState == PortletLockState.PLS_NOT_SET)
-      return;
-    
-    if (!isLocked && 
-        formerLockState != PortletLockState.PLS_NOT_LOCKED)
-      getCommonDragController().makeDraggable(portlet, portlet.getDraggableArea());
-    else
-      if (isLocked &&
-          formerLockState == PortletLockState.PLS_NOT_LOCKED)
-        getCommonDragController().makeNotDraggable(portlet);
+
+    if (!isLocked && formerLockState != PortletLockState.PLS_NOT_LOCKED)
+      getCommonDragController().makeDraggable(portlet,
+          portlet.getDraggableArea());
+    else if (isLocked && formerLockState == PortletLockState.PLS_NOT_LOCKED)
+      getCommonDragController().makeNotDraggable(portlet);
   }
 
   /**
-   * Check if spacing was enabled/disabled on the server side and update 
-   * spacing info accordingly.
-   * @param uidl Server payload.
+   * Check if spacing was enabled/disabled on the server side and update spacing
+   * info accordingly.
+   * 
+   * @param uidl
+   *          Server payload.
    */
   private void updateSpacingInfoFromUidl(final UIDL uidl) {
     boolean newSpacingEnabledState = uidl.getBooleanAttribute("spacing");
-    if (isSpacingEnabled != newSpacingEnabledState)
-    {
+    if (isSpacingEnabled != newSpacingEnabledState) {
       isSpacingEnabled = newSpacingEnabledState;
       activeSpacing.vSpacing = isSpacingEnabled ? computedSpacing.vSpacing : 0;
     }
   }
 
   /**
-   * Calculate height consumed by the fixed sized portlets and
-   * distribute the remaining height between the relative sized portlets.
-   * When the relative height comes to consideration - if the total sum of 
-   * percentages overflows 100, that value is normalized, so every relative height 
-   * portlet would get its piece of space. 
+   * Calculate height consumed by the fixed sized portlets and distribute the
+   * remaining height between the relative sized portlets. When the relative
+   * height comes to consideration - if the total sum of percentages overflows
+   * 100, that value is normalized, so every relative height portlet would get
+   * its piece of space.
    */
-  public void recalculateLayoutAndPortletSizes() {    
+  public void recalculateLayoutAndPortletSizes() {
     consumedHeight = 0;
     sumRelativeHeight = 0;
-    
-    System.out.println("Calc for  " + getChildren().size());
-    for (final Widget p : getChildren())
-    {
-      if (!(p instanceof RealtiveHeightCapable) ||
-           (p instanceof PortalDropPositioner &&
-             getChildren().contains(((PortalDropPositioner)p).getPortlet())))
-      continue;
-          
-      final RealtiveHeightCapable portletCast = (RealtiveHeightCapable)p;
-        
-      consumedHeight += portletCast.getRequiredHeight();
-        
-      if (portletCast.isHeightRelative())
-          sumRelativeHeight += portletCast.getRealtiveHeight();  
+
+    for (final Widget p : getChildren()) {
+      if (!(p instanceof PortalObjectSizeHandler))
+        continue;
+
+      final PortalObjectSizeHandler sizeHandlerCast = (PortalObjectSizeHandler) p;
+      final Portlet corresponingPortlet = sizeHandlerCast
+          .getPortalObjectReference();
+
+      if (getChildren().contains(corresponingPortlet)
+          && getWidgetIndex(corresponingPortlet) != getWidgetIndex((Widget) sizeHandlerCast))
+        continue;
+
+      consumedHeight += sizeHandlerCast.getRequiredHeight();
+
+      if (sizeHandlerCast.isHeightRelative())
+        sumRelativeHeight += sizeHandlerCast.getRealtiveHeightValue();
     }
-    
-    /// TODO set proper calcs after the padding problem fixed
+
+    // / TODO set proper calcs after the padding problem fixed
     if (getChildren().size() > 1)
-      consumedHeight += (getChildren().size() /*- 1*/) * activeSpacing.vSpacing;
-    System.out.println("Req height  " + consumedHeight);
-    
+      consumedHeight += (getChildren().size() /*- 1*/)
+          * activeSpacing.vSpacing;
+
     int newHeigth = Math.max(sizeInfo.getHeight(), consumedHeight);
 
-    if (newHeigth != getOffsetHeight())
-    {
+    if (newHeigth != getOffsetHeight()) {
       getElement().getStyle().setPropertyPx("height", newHeigth);
       Util.notifyParentOfSizeChange(this, false);
     }
-    
+
     calculatePortletSizes();
   }
 
   /**
-   * Calculate and accordingly update the size info of the portlets. In case of relative 
-   * height portlets the contents need to be re-laid out.
+   * Calculate and accordingly update the size info of the portlets. In case of
+   * relative height portlets the contents need to be re-laid out.
    */
   private void calculatePortletSizes() {
     int totalHeight = getOffsetHeight();
     int totalWidth = getOffsetWidth();
-    
+
     int residualHeight = totalHeight - consumedHeight;
-    
+
     float relativeHeightRatio = normalizedRealtiveRatio();
-    
-    for (final Widget p : getChildren())
-    {
-      if (!(p instanceof RealtiveHeightCapable))
+
+    for (final Widget p : getChildren()) {
+      if (!(p instanceof PortalObjectSizeHandler))
         continue;
-          
-      final RealtiveHeightCapable sizeHandler = (RealtiveHeightCapable)p;
-      
+
+      final PortalObjectSizeHandler sizeHandler = (PortalObjectSizeHandler) p;
+
       int newWidth = totalWidth;
       int newHeight = sizeHandler.getRequiredHeight();
-      
-      if (sizeHandler.isHeightRelative()) 
-      {
-        float newRealtiveHeight = relativeHeightRatio * sizeHandler.getRealtiveHeight();
-        newHeight += (int)(residualHeight * newRealtiveHeight / 100);
+
+      if (sizeHandler.isHeightRelative()) {
+        float newRealtiveHeight = relativeHeightRatio
+            * sizeHandler.getRealtiveHeightValue();
+        newHeight += (int) (residualHeight * newRealtiveHeight / 100);
       }
-      if (sizeHandler instanceof Portlet)
-      {
-        int position = getWidgetIndex((Portlet)sizeHandler);
-        ((Portlet) sizeHandler).updateSpacing(/*position == 0 ? 0 : */activeSpacing.vSpacing);
-      }
-      sizeHandler.setSizes(newWidth, newHeight);
+
+      int position = getWidgetIndex((Widget) sizeHandler);
+      sizeHandler.setSpacingValue(position == 0 ? 0 : activeSpacing.vSpacing);
+      sizeHandler.setWidgetSizes(newWidth, newHeight);
     }
     if (client != null)
       client.runDescendentsLayout(this);
   }
 
   /**
-   * Calculated a ratio that would be used in the calculation of how much height the relative sized
-   * portlet can consume. 
-   * @return 1 if the sum of the relative heights is less or equal to 100, 100 / SUM if sum is more than 100.
+   * Calculated a ratio that would be used in the calculation of how much height
+   * the relative sized portlet can consume.
+   * 
+   * @return 1 if the sum of the relative heights is less or equal to 100, 100 /
+   *         SUM if sum is more than 100.
    */
   private float normalizedRealtiveRatio() {
     float result = 0;
     if (sumRelativeHeight != 0f)
-      result = (sumRelativeHeight <= 100) ? 1 : 100 / sumRelativeHeight;  
+      result = (sumRelativeHeight <= 100) ? 1 : 100 / sumRelativeHeight;
     return result;
   }
 
   /**
-   * Search for the portlet corresponding to the widget. If it does not
-   * exist - create it.
-   * @param widget Search criteria.
+   * Search for the portlet corresponding to the widget. If it does not exist -
+   * create it.
+   * 
+   * @param widget
+   *          Search criteria.
    * @return Found or created portlet.
    */
   private Portlet findOrCreatePortlet(Widget widget) {
@@ -420,7 +410,9 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   /**
    * Create new portlet, make it draggable and save it in the map.
-   * @param widget Contents for the new portlet.
+   * 
+   * @param widget
+   *          Contents for the new portlet.
    * @return Created portlet.
    */
   private final Portlet createPortlet(Widget widget) {
@@ -430,35 +422,39 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   }
 
   /**
-   * If the portlet was closed somewhere outsuide - this method should be called, 
-   * so portal would do all the required logic on client and server sides. 
-   * @param portlet The portlet that has been closed.
+   * If the portlet was closed somewhere outsuide - this method should be
+   * called, so portal would do all the required logic on client and server
+   * sides.
+   * 
+   * @param portlet
+   *          The portlet that has been closed.
    */
   public void onPortletClose(final Portlet portlet) {
     onPortletMovedOut(portlet);
     recalculateLayoutAndPortletSizes();
   }
-  
+
   /**
    * Handler for the portlet collapse state toggle.
-   * @param portlet Target portlet.
+   * 
+   * @param portlet
+   *          Target portlet.
    */
-  public void onPortletCollapseStateChanged(final Portlet portlet)
-  {
+  public void onPortletCollapseStateChanged(final Portlet portlet) {
     final Map<String, Object> params = new HashMap<String, Object>();
-    
+
     params.put(PAINTABLE_MAP_PARAM, portlet.getContentAsPaintable());
     params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
-    
-    client.updateVariable(paintableId, PORTLET_COLLAPSE_STATE_CHANGED, params, true);
-    
+
+    client.updateVariable(paintableId, PORTLET_COLLAPSE_STATE_CHANGED, params,
+        true);
+
     recalculateLayoutAndPortletSizes();
   }
-  
+
   private void updatePortletInPosition(Portlet portlet, int i) {
     int currentPosition = getWidgetIndex(portlet);
-    if (i != currentPosition)
-    {
+    if (i != currentPosition) {
       portlet.removeFromParent();
       addToRootElement(portlet, i);
     }
@@ -472,6 +468,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   public void addToRootElement(final Widget widget, int position) {
     super.insert(widget, position);
+    if (widget instanceof PortalObjectSizeHandler)
+      ((PortalObjectSizeHandler)widget).setSpacingValue(position == 0 ? 0 : activeSpacing.vSpacing);
   }
 
   /**
@@ -506,7 +504,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
       return;
 
     portlet.setParentPortal(this);
-    
+
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put(PAINTABLE_MAP_PARAM, child);
     params.put(PORTLET_POSITION, newPosition);
@@ -515,7 +513,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     params.put(PORTLET_COLLAPSIBLE, portlet.isCollapsible());
     if (!portlet.getCaption().isEmpty())
       params.put(PORTLET_CAPTION, portlet.getCaption());
-    client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);    
+    client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);
     widgetToPortletContainer.put(portlet.getContent(), portlet);
   }
 
@@ -527,13 +525,13 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   public int getPortletCount() {
     return widgetToPortletContainer.size();
   }
-  
-  public int getConsumedHeightCache()
-  {
+
+  public int getConsumedHeightCache() {
     if (!isHeightCacheValid())
       recalculateLayoutAndPortletSizes();
     return consumedHeight;
   }
+
   /**
    * Check if heightCahe is valid.
    */
@@ -551,16 +549,16 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   @Override
   public void setWidth(String width) {
     super.setWidth(width);
-    int widthPx  = parsePixel(width);
+    int widthPx = parsePixel(width);
     sizeInfo.setWidth(widthPx);
     int intWidth = getOffsetWidth();
     for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it
         .hasNext();) {
-        Portlet p = (Portlet)it.next(); 
-        p.setPortletWidth(intWidth);
-//      Util.setWidthExcludingPaddingAndBorder(p, "100%", 0);
-//      if (client != null)
-//      client.handleComponentRelativeSize(p);
+      Portlet p = (Portlet) it.next();
+      p.setWidgetWidth(intWidth);
+      // Util.setWidthExcludingPaddingAndBorder(p, "100%", 0);
+      // if (client != null)
+      // client.handleComponentRelativeSize(p);
     }
     if (client != null)
       client.runDescendentsLayout(this);
@@ -572,7 +570,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     sizeInfo.setHeight(parsePixel(height));
     recalculateLayoutAndPortletSizes();
   }
-  
+
   @Override
   public void replaceChildComponent(Widget oldComponent, Widget newComponent) {
     final Portlet portlet = widgetToPortletContainer.remove(oldComponent);
@@ -591,7 +589,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   @Override
   public void updateCaption(Paintable component, UIDL uidl) {
-    /// Captions not supported.
+    // / Captions not supported.
   }
 
   @Override
@@ -602,19 +600,20 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
   @Override
   public RenderSpace getAllocatedSpace(Widget child) {
-    
+
     final Portlet portlet = widgetToPortletContainer.get(child);
     final Size sizeInfo = portlet.getContentSizeInfo();
-    
+
     int height = sizeInfo.getHeight();
     /**
-     * Due to the logic of the portal layout realtive height portlets 
-     * consume the according amount of free space (if 50% portlet height is specified - a half of free space 
-     * goes to that portlet). Here we ensure that the rendering routines get the correct information about how much space 
-     * can be consumed. 
+     * Due to the logic of the portal layout realtive height portlets consume
+     * the according amount of free space (if 50% portlet height is specified -
+     * a half of free space goes to that portlet). Here we ensure that the
+     * rendering routines get the correct information about how much space can
+     * be consumed.
      */
     if (portlet.isHeightRelative())
-      height = (int)(((float)height) * 100 /portlet.getRealtiveHeight());
+      height = (int) (((float) height) * 100 / portlet.getRealtiveHeightValue());
     return new RenderSpace(sizeInfo.getWidth(), height);
   }
 
@@ -623,7 +622,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     super.setStyleName(style);
     measureSpacing();
   }
- 
 
   public void setCapacity(int capacity) {
     this.capacity = capacity;
@@ -636,53 +634,55 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   public Spacing getSpacingInfo() {
     return activeSpacing;
   }
-  
+
   /**
    * Takes a String value e.g. "12px" and parses that to int 12
    * 
    * @param String
-   *            value with "px" ending
+   *          value with "px" ending
    * @return int the value from the string before "px", converted to int
    */
   public static int parsePixel(String value) {
-      if (value == "" || value == null) {
-          return 0;
-      }
-      Float ret;
-      if (value.length() > 2) {
-          ret = Float.parseFloat(value.substring(0, value.length() - 2));
-      } else {
-          ret = Float.parseFloat(value);
-      }
-      return (int) Math.ceil(ret);
+    if (value == "" || value == null) {
+      return 0;
+    }
+    Float ret;
+    if (value.length() > 2) {
+      ret = Float.parseFloat(value.substring(0, value.length() - 2));
+    } else {
+      ret = Float.parseFloat(value);
+    }
+    return (int) Math.ceil(ret);
   }
-  
+
   private static DivElement measurement;
+
   private static DivElement helper;
 
   static {
-      helper = Document.get().createDivElement();
-      helper.setInnerHTML("<div style=\"position:absolute;top:0;left:0;height:0;visibility:hidden;overflow:hidden;\">"
-              + "<div style=\"width:0;height:0;visibility:hidden;overflow:hidden;\">"
-              + "</div></div>"
-              + "<div style=\"position:absolute;height:0;overflow:hidden;\"></div>");
-      NodeList<Node> childNodes = helper.getChildNodes();
-      measurement = (DivElement) childNodes.getItem(1);
+    helper = Document.get().createDivElement();
+    helper
+        .setInnerHTML("<div style=\"position:absolute;top:0;left:0;height:0;visibility:hidden;overflow:hidden;\">"
+            + "<div style=\"width:0;height:0;visibility:hidden;overflow:hidden;\">"
+            + "</div></div>"
+            + "<div style=\"position:absolute;height:0;overflow:hidden;\"></div>");
+    NodeList<Node> childNodes = helper.getChildNodes();
+    measurement = (DivElement) childNodes.getItem(1);
   }
 
   protected boolean measureSpacing() {
-      if (!isAttached()) {
-          return false;
-      }
+    if (!isAttached()) {
+      return false;
+    }
 
-      // Measure spacing (actually CSS padding)
-      measurement.setClassName(STYLENAME_SPACING);
-      getElement().appendChild(helper);
-    
-      computedSpacing.vSpacing = measurement.getOffsetWidth();
-      computedSpacing.hSpacing = measurement.getOffsetWidth();
-      getElement().removeChild(helper);
-      return true;
+    // Measure spacing (actually CSS padding)
+    measurement.setClassName(STYLENAME_SPACING);
+    getElement().appendChild(helper);
+
+    computedSpacing.vSpacing = measurement.getOffsetWidth();
+    computedSpacing.hSpacing = measurement.getOffsetWidth();
+    getElement().removeChild(helper);
+    return true;
   }
 
 }
