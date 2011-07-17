@@ -14,16 +14,22 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Container;
+import com.vaadin.terminal.gwt.client.EventId;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.RenderSpace;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.terminal.gwt.client.ui.LayoutClickEventHandler;
 import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
 
 /**
@@ -179,6 +185,21 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     return cs_dragControl;
   }
 
+  private LayoutClickEventHandler clickEventHandler = new LayoutClickEventHandler(
+      this, EventId.LAYOUT_CLICK) {
+
+    @Override
+    protected Paintable getChildComponent(Element element) {
+      return getComponent(element);
+    }
+
+    @Override
+    protected <H extends EventHandler> HandlerRegistration registerHandler(
+        H handler, Type<H> type) {
+      return addDomHandler(handler, type);
+    }
+  };
+
   /**
    * Constructor.
    */
@@ -204,24 +225,17 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     if (client.updateComponent(this, uidl, true)) {
       return;
     }
-
+    
     isRendering = true;
 
     this.client = client;
     paintableId = uidl.getId();
 
     updateSpacingInfoFromUidl(uidl);
-
-    int pos = 0;
+    clickEventHandler.handleEventHandlerRegistration(client);
     sizeInfo.setHeight(getElement().getClientHeight());
-
-    /*
-     * Widget parent = getParent();
-     * 
-     * if (parent != null) sizeInfo.setHeight(parent.getOffsetHeight());
-     */
-
     sizeInfo.setWidth(getElement().getClientWidth());
+    int pos = 0;
     final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet, UIDL>();
     for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
       final UIDL itUidl = (UIDL) it.next();
@@ -684,5 +698,8 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     getElement().removeChild(helper);
     return true;
   }
-
+  
+  private Paintable getComponent(Element element) {
+    return Util.getPaintableForElement(client, this, element);
+}
 }

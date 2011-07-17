@@ -13,6 +13,8 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.TextFileProperty;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.LayoutEvents.LayoutClickEvent;
+import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
@@ -91,7 +93,6 @@ public class DashBoardPanel extends HorizontalSplitPanel {
     sidePortal.setLocked(sourceTree, true);
     sidePortal.setClosable(sourceTree, false);
     sidePortal.setComponentCaption(sourceTree, "Source Tree");
-    
     addComponent(sidePortal);
   }
 
