@@ -10,8 +10,12 @@ import java.util.Map;
 
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
+import com.vaadin.event.LayoutEvents.LayoutClickEvent;
+import com.vaadin.event.LayoutEvents.LayoutClickListener;
+import com.vaadin.event.LayoutEvents.LayoutClickNotifier;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
+import com.vaadin.terminal.gwt.client.EventId;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
@@ -25,8 +29,13 @@ import com.vaadin.ui.Layout.SpacingHandler;
  */
 @SuppressWarnings("serial")
 @ClientWidget(value = VPortalLayout.class, loadStyle = LoadStyle.EAGER)
-public class PortalLayout extends AbstractLayout implements SpacingHandler {
+public class PortalLayout extends AbstractLayout implements SpacingHandler, LayoutClickNotifier {
 
+  /**
+   * Helper class that holds Portlet information about the object.
+   * 
+   * @author p4elkin
+   */
   private class ComponentDetails implements Serializable {
 
     private boolean isLocked = false;
@@ -38,7 +47,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     private boolean isCollapsible = true;
 
     private String caption;
-
 
     public ComponentDetails() {
     }
@@ -86,23 +94,27 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   }
 
   /**
+   * Identifier for the click event.
+   */
+  private static final String CLICK_EVENT = EventId.LAYOUT_CLICK;
+
+  /**
    * The flag indicating that spacing is enabled.
    */
   private boolean isSpacingEnabled = true;
 
   /**
-   * The components each of which is represented with the portlet inside the
-   * portal
+   * Mapping between the components and their details.
    */
-  private Map<Component, ComponentDetails> componentToDetails = new HashMap<Component, PortalLayout.ComponentDetails>();
+  private Map<Component, ComponentDetails> componentToDetails = new HashMap<Component, ComponentDetails>();
 
   /**
-   * 
+   * List of components in the order of their appearance in the Portal.
    */
   private List<Component> components = new ArrayList<Component>();
-  
+
   /**
-   *  Constructor
+   * Constructor
    */
   public PortalLayout() {
     super();
@@ -117,7 +129,8 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     final Iterator<Component> it = components.iterator();
     while (it.hasNext()) {
       final Component childComponent = it.next();
-      final ComponentDetails childComponentDetails = componentToDetails.get(childComponent);
+      final ComponentDetails childComponentDetails = componentToDetails
+          .get(childComponent);
 
       target.startTag("portlet");
       target.addAttribute(VPortalLayout.PORTLET_CAPTION,
@@ -130,12 +143,17 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
           childComponentDetails.isCollapsed());
       target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE,
           childComponentDetails.isCollapsible());
-      
+
       childComponent.paint(target);
       target.endTag("portlet");
     }
   }
 
+  /**
+   * 
+   * @param c
+   * @return
+   */
   public boolean isCollapsed(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -146,6 +164,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     return details.isCollapsed();
   }
 
+  /**
+   * 
+   * @param c
+   * @return
+   */
   public boolean isCollapsible(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -156,6 +179,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     return details.isCollapsible();
   }
 
+  /**
+   * 
+   * @param c
+   * @return
+   */
   public boolean isClosable(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -166,6 +194,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     return details.isClosable();
   }
 
+  /**
+   * 
+   * @param c
+   * @return
+   */
   public boolean isLocked(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -176,6 +209,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     return details.isLocked();
   }
 
+  /**
+   * 
+   * @param c
+   * @return
+   */
   public String getComponentCaption(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -186,6 +224,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     return details.getCaption();
   }
 
+  /**
+   * 
+   * @param c
+   * @param caption
+   */
   public void setComponentCaption(final Component c, final String caption) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -203,6 +246,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     requestRepaint();
   }
 
+  /**
+   * 
+   * @param c
+   * @param closable
+   */
   public void setClosable(final Component c, boolean closable) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -216,6 +264,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     }
   }
 
+  /**
+   * 
+   * @param c
+   * @param isLocked
+   */
   public void setLocked(final Component c, boolean isLocked) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -229,6 +282,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     }
   }
 
+  /**
+   * 
+   * @param c
+   * @param isCollapsible
+   */
   public void setCollapsible(final Component c, boolean isCollapsible) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -242,6 +300,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     }
   }
 
+  /**
+   * 
+   * @param c
+   * @param isCollapsed
+   */
   public void setCollapsed(final Component c, boolean isCollapsed) {
     final ComponentDetails details = componentToDetails.get(c);
 
@@ -331,8 +394,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
    * @param newPosition
    *          New position of the component.
    */
-  private void onComponentPositionUpdated(Component component,
-      int newPosition) {
+  private void onComponentPositionUpdated(Component component, int newPosition) {
 
     // The client side reported that portlet is no longer there - remove
     // component if so.
@@ -351,7 +413,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     // / Component is in the right position - nothing to do.
     if (newPosition == oldPosition)
       return;
-    
+
     components.remove(component);
     components.add(newPosition, component);
   }
@@ -362,8 +424,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
 
   @Override
   public Iterator<Component> getComponentIterator() {
-    return Collections.unmodifiableCollection(components)
-        .iterator();
+    return Collections.unmodifiableCollection(components).iterator();
   }
 
   @Override
@@ -377,6 +438,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     super.removeComponent(c);
   }
 
+  /**
+   * 
+   * @param c
+   */
   private void doComponentRemoveLogic(final Component c) {
     componentToDetails.remove(c);
     components.remove(c);
@@ -392,13 +457,18 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
     requestRepaint();
   }
 
+  /**
+   * 
+   * @param c
+   * @param position
+   */
   private void doComponentAddLogic(final Component c, int position) {
     int index = components.indexOf(c);
 
     if (index != -1)
       throw new IllegalArgumentException(
           "Component has already been added to the portal!");
-    
+
     componentToDetails.put(c, new ComponentDetails());
     components.add(position, c);
   }
@@ -417,5 +487,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler {
   @Override
   public boolean isSpacing() {
     return isSpacingEnabled;
+  }
+
+  public void addListener(LayoutClickListener listener) {
+    addListener(CLICK_EVENT, LayoutClickEvent.class, listener,
+        LayoutClickListener.clickMethod);
+  }
+
+  public void removeListener(LayoutClickListener listener) {
+    removeListener(CLICK_EVENT, LayoutClickEvent.class, listener);
   }
 }
