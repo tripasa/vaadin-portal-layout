@@ -269,7 +269,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     paintableId = uidl.getId();
     updateSpacingInfoFromUidl(uidl);
     clickEventHandler.handleEventHandlerRegistration(client);
-    System.out.println("Update from UIDL " + getElement().getClientHeight() + " " + parsePixel(uidl.getStringAttribute("height")));
+   // System.out.println("Update from UIDL " + getElement().getClientHeight() + " " + parsePixel(uidl.getStringAttribute("height")));
     
     final FloatSize relaiveSize = Util.parseRelativeSize(uidl);
     if (relaiveSize == null ||
@@ -384,33 +384,32 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * its piece of space.
    */
   public void recalculateLayoutAndPortletSizes() {
+    long time = System.currentTimeMillis();
     consumedHeight = 0;
     sumRelativeHeight = 0;
 
     for (final Widget p : getChildren()) {
-      if (!(p instanceof PortalObjectSizeHandler))
-        continue;
-
       final PortalObjectSizeHandler sizeHandlerCast = (PortalObjectSizeHandler) p;
       final Portlet corresponingPortlet = sizeHandlerCast
           .getPortalObjectReference();
 
       if (getChildren().contains(corresponingPortlet)
-          && getWidgetIndex(corresponingPortlet) != getWidgetIndex((Widget) sizeHandlerCast))
-        continue;
+         && getWidgetIndex(corresponingPortlet) != getWidgetIndex((Widget) sizeHandlerCast))
+     continue;
 
-      consumedHeight += sizeHandlerCast.getRequiredHeight();
+    consumedHeight += sizeHandlerCast.getRequiredHeight();
 
       if (sizeHandlerCast.isHeightRelative())
         sumRelativeHeight += sizeHandlerCast.getRealtiveHeightValue();
     }
 
+    //System.out.println("Time elapsed fixed height: " + (System.currentTimeMillis() - time));
     // / TODO set proper calcs after the padding problem fixed
     if (getChildren().size() > 1)
       consumedHeight += (getChildren().size() - 1)
           * activeSpacing.vSpacing;
 
-    System.out.println("Size info " + actualSizeInfo.getHeight() + " consumed " + consumedHeight + " offset " + getOffsetHeight());
+    //System.out.println("Size info " + actualSizeInfo.getHeight() + " consumed " + consumedHeight + " offset " + getOffsetHeight());
     int newHeight = 0;
     if (sizeInfoFromUidl != null &&
         consumedHeight < sizeInfoFromUidl.getHeight())
@@ -421,11 +420,12 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
     if (newHeight != getOffsetHeight()) {
       getElement().getStyle().setPropertyPx("height", newHeight);
-      System.out.println("Size change!");
+      //System.out.println("Size change!");
       Util.notifyParentOfSizeChange(this, false);
     }
 
     calculatePortletSizes();
+    //System.out.println("Time elapsed total: " + (System.currentTimeMillis() - time));
   }
 
   /**
@@ -608,12 +608,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    */
   public int getPortletCount() {
     return widgetToPortletContainer.size();
-  }
-
-  public int getConsumedHeightCache() {
-    if (!isHeightCacheValid())
-      recalculateLayoutAndPortletSizes();
-    return consumedHeight;
   }
 
   /**

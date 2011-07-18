@@ -69,14 +69,16 @@ public class DashBoardPanel extends HorizontalSplitPanel {
         Panel panel = new Panel();
         panel.setSizeFull();
         
-        Label code = new CodeLabel();
-        code.setPropertyDataSource(new TextFileProperty(f));
-        
+        Label code = new Label(new TextFileProperty(f), Label.CONTENT_XHTML);
         panel.addComponent(code);
         
         Iterator<Component> it = mainPortal.getComponentIterator();
         while (it.hasNext())
-          mainPortal.setCollapsed(it.next(), true);
+        {
+          Component c = it.next();
+          if (!mainPortal.isCollapsed(c))
+            mainPortal.setCollapsed(c, true);
+        }
         
         mainPortal.addComponent(panel);
         mainPortal.setComponentCaption(panel, f.getName());
@@ -145,7 +147,7 @@ public class DashBoardPanel extends HorizontalSplitPanel {
         String path = pathname.getAbsolutePath();
         int mid = path.lastIndexOf(".");
         String ext = path.substring(mid + 1, path.length());
-        return "java".equals(ext);
+        return "html".equals(ext);
       }
     });
 

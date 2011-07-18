@@ -53,4 +53,18 @@
 		<when-type-is class="org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl" />
 		<when-property-is name="user.agent" value="gecko1_8" />
 	</replace-with>
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.youtubeplayer.YouTubePlayerWidgetset" />
+
+    <inherits name="org.vaadin.swfobject.SwfobjectWidgetset" />
+
+    <inherits name="org.vaadin.codelabel.CodelabelWidgetset" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
 </module>

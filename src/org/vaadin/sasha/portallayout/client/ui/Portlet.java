@@ -112,13 +112,9 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
   private ApplicationConnection client;
   
   /**
-   * Constructor.
-   * @param widget The contents of the portlets.
+   * 
    */
-  public Portlet(final Widget widget, final ApplicationConnection client) {
-    this(widget, client, null);
-    this.client = client;
-  }
+  private int headerHeight = -1;
   
   /**
    * Constructor.
@@ -397,7 +393,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
   @Override
   public int getRequiredHeight()
   {
-    int result = header.getOffsetHeight();
+    int result = getHeaderHeight();
     if (!isCollapsed && 
         !isHeightRelative) 
       result += contentSizeInfo.getHeight();
@@ -465,6 +461,13 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
   @Override
   public Portlet getPortalObjectReference() {
     return this;
+  }
+  
+  private int getHeaderHeight()
+  {
+    if (headerHeight == -1)
+      headerHeight = header.getOffsetHeight();
+    return headerHeight;
   }
 
 }

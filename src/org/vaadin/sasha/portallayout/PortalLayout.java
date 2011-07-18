@@ -319,7 +319,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
       throw new IllegalArgumentException(
           "Portal doesn not contain this component!");
 
-    if (isCollapsed == details.isCollapsed()) {
+    if (isCollapsed != details.isCollapsed()) {
       details.setCollapsed(isCollapsed);
       requestRepaint();
     }
