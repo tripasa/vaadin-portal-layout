@@ -45,12 +45,6 @@ public class DashBoardPanel extends HorizontalSplitPanel {
 
   private void buildRightSide() {
     sidePortal.setSizeFull();
-    TextArea tx = new TextArea();
-    tx.setSizeFull();
-    sidePortal.addComponent(tx);
-    sidePortal.setLocked(tx, true);
-    sidePortal.setClosable(tx, false);
-    sidePortal.setComponentCaption(tx, "Console");
     
     buildFileSystemContainer(null, 0);
     sourceTree.setContainerDataSource(fsContainer);
@@ -86,7 +80,6 @@ public class DashBoardPanel extends HorizontalSplitPanel {
         
         mainPortal.addComponent(panel);
         mainPortal.setComponentCaption(panel, f.getName());
-        mainPortal.setLocked(panel, true);
       }
     });
     sidePortal.addComponent(sourceTree);
@@ -94,6 +87,17 @@ public class DashBoardPanel extends HorizontalSplitPanel {
     sidePortal.setClosable(sourceTree, false);
     sidePortal.setComponentCaption(sourceTree, "Source Tree");
     addComponent(sidePortal);
+    
+    Label tx = new Label("<b>Here You can browse some random source files double clicking their" +
+    		" titles in the tree. You can notice three portals contained on the view: source browsing portal, " +
+    		" table portal in the bottom and navigation portal on the right side. As source browsing portal created as " +
+    		" not communicative - You cannot drag portlets out of it. The right and bottom portlets are fixed, so You can't" +
+    		" drag them at all. They are also not closable.</b>", Label.CONTENT_XHTML);
+    tx.setSizeFull();
+    sidePortal.addComponent(tx);
+    sidePortal.setLocked(tx, true);
+    sidePortal.setClosable(tx, false);
+    sidePortal.setComponentCaption(tx, "CONSOLE");
   }
 
   private void buildLeftSide() {
@@ -103,6 +107,7 @@ public class DashBoardPanel extends HorizontalSplitPanel {
     layout.setSpacing(true);
     mainPortal.setSizeFull();
     mainPortal.setSpacing(false);
+    mainPortal.setCommunicative(false);
     bottomPortal.setSizeUndefined();
     bottomPortal.setWidth("100%");
     Component c = createTableTest();

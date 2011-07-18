@@ -1,4 +1,4 @@
-package org.vaadin.sasha.portallayout.client;
+package org.vaadin.sasha.portallayout.client.ui;
 
 import org.vaadin.sasha.portallayout.client.dnd.DragContext;
 import org.vaadin.sasha.portallayout.client.dnd.VetoDragException;
@@ -6,10 +6,6 @@ import org.vaadin.sasha.portallayout.client.dnd.drop.AbstractPositioningDropCont
 import org.vaadin.sasha.portallayout.client.dnd.util.CoordinateLocation;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
-import org.vaadin.sasha.portallayout.client.ui.PortalDropPositioner;
-import org.vaadin.sasha.portallayout.client.ui.PortalObjectSizeHandler;
-import org.vaadin.sasha.portallayout.client.ui.Portlet;
-import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -169,6 +165,8 @@ public class PortalDropController extends AbstractPositioningDropController {
         portal.addToRootElement(dummy, targetIndex);
         if (dummyIndex == 0)
           ((PortalObjectSizeHandler)portal.getWidget(0)).setSpacingValue(0);
+        if (dummyIndex == 1 && portal.getPortletCount() > 1)
+          ((PortalObjectSizeHandler)portal.getWidget(1)).setSpacingValue(portal.getVSacing());
       }
     }
   }

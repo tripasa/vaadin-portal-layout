@@ -104,6 +104,12 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   private boolean isSpacingEnabled = true;
 
   /**
+   * Flag indicating whether this portal can accept portlets from other portals and
+   * its portlets can be dragged to the other Portals. 
+   */
+  private boolean isCommunicative = true;
+  
+  /**
    * Mapping between the components and their details.
    */
   private Map<Component, ComponentDetails> componentToDetails = new HashMap<Component, ComponentDetails>();
@@ -119,13 +125,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   public PortalLayout() {
     super();
     setWidth("100%");
-    setHeight("700px");
+    setHeight("100%");
   }
 
   @Override
   public void paintContent(PaintTarget target) throws PaintException {
     super.paintContent(target);
     target.addAttribute("spacing", isSpacingEnabled);
+    target.addAttribute(VPortalLayout.PORTAL_COMMUNICATIVE, isCommunicative);
     final Iterator<Component> it = components.iterator();
     while (it.hasNext()) {
       final Component childComponent = it.next();
@@ -318,6 +325,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     }
   }
 
+  public boolean isCommunicative() {
+    return isCommunicative;
+  }
+
+  public void setCommunicative(boolean isCommunicative) {
+    this.isCommunicative = isCommunicative;
+  }
+  
   /**
    * Receive and handle events and other variable changes from the client.
    * {@inheritDoc}
@@ -422,21 +437,13 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   public void replaceComponent(Component oldComponent, Component newComponent) {
   }
 
+  
   @Override
   public Iterator<Component> getComponentIterator() {
     return Collections.unmodifiableCollection(components).iterator();
   }
-
-  @Override
-  public void setWidth(float width, int unit) {
-    super.setWidth(width, unit);
-  }
-
-  @Override
-  public void removeComponent(Component c) {
-    doComponentRemoveLogic(c);
-    super.removeComponent(c);
-  }
+  
+  
 
   /**
    * 
@@ -448,7 +455,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   public void addComponent(Component c) {
-    addComponent(c, 0);
+    addComponent(c, components.size());
   }
 
   public void addComponent(Component c, int position) {
@@ -469,8 +476,12 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
       throw new IllegalArgumentException(
           "Component has already been added to the portal!");
 
+    c.setWidth("100%");
     componentToDetails.put(c, new ComponentDetails());
-    components.add(position, c);
+    if (position == components.size())
+      components.add(c);
+    else
+      components.add(position, c);
   }
 
   @Override

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.vaadin.sasha.portallayout.client.PortalDropController;
 import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
 import org.vaadin.sasha.portallayout.client.ui.Portlet.PortletLockState;
 
@@ -17,6 +16,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -25,12 +25,15 @@ import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Container;
 import com.vaadin.terminal.gwt.client.EventId;
 import com.vaadin.terminal.gwt.client.Paintable;
+import com.vaadin.terminal.gwt.client.RenderInformation.FloatSize;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.RenderSpace;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.ui.LayoutClickEventHandler;
+import com.vaadin.terminal.gwt.client.ui.VMarginInfo;
 import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
+import com.vaadin.terminal.gwt.client.ui.layout.Margins;
 
 /**
  * Client-side implementation of the portal layout.
@@ -90,6 +93,11 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   public static final String PORTLET_POSITION = "PORTLET_POSITION";
 
   /**
+   * 
+   */
+  public static final String PORTAL_COMMUNICATIVE = "PORTAL_COMMUNCATIVE";
+  
+  /**
    * Basic style name.
    */
   public static final String CLASSNAME = "v-portallayout";
@@ -104,9 +112,19 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * this drag controller static allows us to drag portlets between all the
    * possible portals.
    */
-  private final static PickupDragController cs_dragControl = new PickupDragController(
+  private final static PickupDragController commonDragController = new PickupDragController(
       RootPanel.get(), false);
 
+  /**
+   * 
+   */
+  private PickupDragController localDragController = null;
+  
+  /**
+   * 
+   */
+  private boolean isCommunicative = true;
+  
   /**
    * The mapping between the portlets and their contents.
    */
@@ -145,10 +163,14 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   private boolean isRendering = false;
 
   /**
-   * POrtal size info.
+   * Portal size info.
    */
-  private Size sizeInfo = new Size(0, 0);
+  private Size actualSizeInfo = new Size(0, 0);
 
+  /**
+   * 
+   */
+  private Size sizeInfoFromUidl = null;
   /**
    * Total height required for rendering fixed sized portlets and headers of
    * relative heighted portlets.
@@ -173,16 +195,28 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   /**
    * 
    */
+  private final Element contentElement = DOM.createDiv();
+  /**
+   * 
+   */
   private float sumRelativeHeight = 0f;
 
+  private VMarginInfo marginInfo = null;
+  
+  private Margins margins = new Margins(0,0,0,0);
+  
   /**
    * Get the Common PickupDragController that should wire all the portals
    * together.
    * 
    * @return PickupDragController.
    */
-  public static PickupDragController getCommonDragController() {
-    return cs_dragControl;
+  public PickupDragController getDragController() {
+    if (isCommunicative)
+      return commonDragController;
+    if (localDragController == null)
+      localDragController = new PickupDragController(RootPanel.get(), false);
+    return localDragController;
   }
 
   private LayoutClickEventHandler clickEventHandler = new LayoutClickEventHandler(
@@ -208,16 +242,19 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
     setStyleName(CLASSNAME);
     getElement().getStyle().setProperty("overflow", "hidden");
-    getElement().getStyle().setProperty("margin", "20px 20px 20px 20px");
+    
+    //contentElement.getStyle().setProperty("overflow", "hidden");
+    //getElement().appendChild(contentElement);
+    
     dropController = new PortalDropController(this);
-    getCommonDragController().registerDropController(dropController);
+    getDragController().registerDropController(dropController);
 
     Style style = stub.getStyle();
     style.setProperty("width", "0px");
     style.setProperty("height", "0px");
     style.setProperty("clear", "both");
     style.setProperty("overflow", "hidden");
-    getElement().appendChild(stub);
+    //contentElement.appendChild(stub);
 
   }
 
@@ -227,14 +264,20 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     }
     
     isRendering = true;
-
+    sizeInfoFromUidl = null;
     this.client = client;
     paintableId = uidl.getId();
-
     updateSpacingInfoFromUidl(uidl);
     clickEventHandler.handleEventHandlerRegistration(client);
-    sizeInfo.setHeight(getElement().getClientHeight());
-    sizeInfo.setWidth(getElement().getClientWidth());
+    System.out.println("Update from UIDL " + getElement().getClientHeight() + " " + parsePixel(uidl.getStringAttribute("height")));
+    
+    final FloatSize relaiveSize = Util.parseRelativeSize(uidl);
+    if (relaiveSize == null ||
+        relaiveSize.getHeight() == -1)
+      sizeInfoFromUidl = new Size(parsePixel(uidl.getStringAttribute("width")), parsePixel(uidl.getStringAttribute("height")));
+    
+    actualSizeInfo.setHeight(getElement().getClientHeight());
+    actualSizeInfo.setWidth(getElement().getClientWidth());
     int pos = 0;
     final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet, UIDL>();
     for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
@@ -284,7 +327,26 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
       final UIDL relUidl = realtiveSizePortletUIDLS.get(p);
       p.renderContent(relUidl);
     }
+    
+    updateCommunicationAbility(uidl);
+  }
 
+  private void updateCommunicationAbility(final UIDL uidl) {
+    Boolean canCommunicate = uidl.getBooleanAttribute(PORTAL_COMMUNICATIVE);
+    final PickupDragController currentController = getDragController();
+    if (canCommunicate != isCommunicative)
+    {
+      currentController.unregisterDropController(dropController);
+      isCommunicative = canCommunicate;
+      final PickupDragController  newController = getDragController();
+      newController.registerDropController(dropController);
+      for (final Portlet portlet : widgetToPortletContainer.values())
+        if (!portlet.isLocked())
+        {
+          currentController.makeNotDraggable(portlet);
+          newController.makeDraggable(portlet, portlet.getDraggableArea());
+        }
+    }
   }
 
   private void setLock(final Portlet portlet, boolean isLocked) {
@@ -293,10 +355,10 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     portlet.setLocked(isLocked);
 
     if (!isLocked && formerLockState != PortletLockState.PLS_NOT_LOCKED)
-      getCommonDragController().makeDraggable(portlet,
+      getDragController().makeDraggable(portlet,
           portlet.getDraggableArea());
     else if (isLocked && formerLockState == PortletLockState.PLS_NOT_LOCKED)
-      getCommonDragController().makeNotDraggable(portlet);
+      getDragController().makeNotDraggable(portlet);
   }
 
   /**
@@ -345,13 +407,21 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
     // / TODO set proper calcs after the padding problem fixed
     if (getChildren().size() > 1)
-      consumedHeight += (getChildren().size() /*- 1*/)
+      consumedHeight += (getChildren().size() - 1)
           * activeSpacing.vSpacing;
 
-    int newHeigth = Math.max(sizeInfo.getHeight(), consumedHeight);
+    System.out.println("Size info " + actualSizeInfo.getHeight() + " consumed " + consumedHeight + " offset " + getOffsetHeight());
+    int newHeight = 0;
+    if (sizeInfoFromUidl != null &&
+        consumedHeight < sizeInfoFromUidl.getHeight())
+      newHeight = sizeInfoFromUidl.getHeight();
+    else
+      newHeight = Math.max(actualSizeInfo.getHeight(), consumedHeight);
 
-    if (newHeigth != getOffsetHeight()) {
-      getElement().getStyle().setPropertyPx("height", newHeigth);
+
+    if (newHeight != getOffsetHeight()) {
+      getElement().getStyle().setPropertyPx("height", newHeight);
+      System.out.println("Size change!");
       Util.notifyParentOfSizeChange(this, false);
     }
 
@@ -564,7 +634,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   public void setWidth(String width) {
     super.setWidth(width);
     int widthPx = parsePixel(width);
-    sizeInfo.setWidth(widthPx);
+    actualSizeInfo.setWidth(widthPx);
     int intWidth = getOffsetWidth();
     for (Iterator<Portlet> it = widgetToPortletContainer.values().iterator(); it
         .hasNext();) {
@@ -581,7 +651,7 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   @Override
   public void setHeight(String height) {
     super.setHeight(height);
-    sizeInfo.setHeight(parsePixel(height));
+    actualSizeInfo.setHeight(parsePixel(height));
     recalculateLayoutAndPortletSizes();
   }
 
@@ -649,6 +719,10 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
     return activeSpacing;
   }
 
+  public int getVSacing()
+  {
+    return activeSpacing.vSpacing;
+  }
   /**
    * Takes a String value e.g. "12px" and parses that to int 12
    * 
@@ -701,5 +775,35 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
   
   private Paintable getComponent(Element element) {
     return Util.getPaintableForElement(client, this, element);
-}
+  }
+  
+  
+  private void updateMargins() {
+// TODO!
+    //margin = CSSUtil.collectMargin(getElement());
+//    if (marginInfo.hasTop()) {
+//        getElement().getStyle().setProperty("marginTop", "");
+//    } else {
+//        getElement().getStyle().setProperty("marginTop", "0");
+//        margin[0] = 0;
+//    }
+//    if (marginInfo.hasRight()) {
+//        getElement().getStyle().setProperty("marginRight", "");
+//    } else {
+//        getElement().getStyle().setProperty("marginRight", "0");
+//        margin[1] = 0;
+//    }
+//    if (marginInfo.hasBottom()) {
+//        getElement().getStyle().setProperty("marginBottom", "");
+//    } else {
+//        getElement().getStyle().setProperty("marginBottom", "0");
+//        margin[2] = 0;
+//    }
+//    if (marginInfo.hasLeft()) {
+//        getElement().getStyle().setProperty("marginLeft", "");
+//    } else {
+//        getElement().getStyle().setProperty("marginLeft", "0");
+//        margin[3] = 0;
+//    }
+  }
 }
