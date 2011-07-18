@@ -1,4 +1,4 @@
-package org.vaadin.sasha.portallayoutapplication;
+package org.vaadin.sasha.portalappdemo;
 
 import java.util.HashMap;
 import java.util.Map;

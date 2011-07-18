@@ -1,4 +1,4 @@
-package org.vaadin.sasha.portallayoutapplication;
+package org.vaadin.sasha.portalappdemo;
 
 import com.vaadin.Application;
 import com.vaadin.ui.HorizontalLayout;
