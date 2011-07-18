@@ -65,7 +65,7 @@ public class VideoPanelContainer extends HorizontalSplitPanel
     pl.setHeight("100%");
     pl.setVideoId(str);
     rightPortal.addComponent(pl);
-  //  rightPortal.setComponentCaption(pl, name);
+    rightPortal.setComponentCaption(pl, name);
   }
 
   private void buildMainPanel() {

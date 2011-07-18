@@ -116,12 +116,10 @@ public class PortalDropController extends AbstractPositioningDropController {
    * @return New wire frame object.
    */
   protected Widget newPositioner(DragContext context) {
-
     final Portlet portlet = (Portlet) context.selectedWidgets.get(0);
     if (portlet == null)
       return null;
-    final Widget result = new PortalDropPositioner(portlet, this);
-    RootPanel.get().add(result, -500, -500);
+    final Widget result = new PortalDropPositioner(portlet);
     return result;
   }
 
@@ -176,7 +174,8 @@ public class PortalDropController extends AbstractPositioningDropController {
     super.onEnter(context);
     dummy = newPositioner(context);
     final VPortalLayout portal = getDropTargetAsPortalLayout();
-    portal.addToRootElement(dummy, updateDropPosition(context));
+    int dummyIndex = updateDropPosition(context);
+    portal.addToRootElement(dummy, dummyIndex);
     portal.recalculateLayoutAndPortletSizes();
   }
 

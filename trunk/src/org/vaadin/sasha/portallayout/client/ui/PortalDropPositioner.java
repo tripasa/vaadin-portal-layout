@@ -30,12 +30,17 @@ public class PortalDropPositioner extends SimplePanel implements PortalObjectSiz
   /**
    * Constructor
    */
-  public PortalDropPositioner(final Portlet portlet,
-      final PortalDropController controller) {
+  public PortalDropPositioner(final Portlet portlet) {
     super();
     setStyleName(CLASS_NAME);
     this.portlet = portlet;
-    setWidgetSizes(portlet.getOffsetWidth(), portlet.getRequiredHeight());
+    long time = System.currentTimeMillis();
+    int width = portlet.getContainerSizeInfo().getWidth();
+    System.out.println("Found width " + width + "in" + (System.currentTimeMillis() - time));
+    time = System.currentTimeMillis();
+    int height = portlet.getRequiredHeight();
+    System.out.println("Found height" + height +  "in" + (System.currentTimeMillis() - time));
+    setWidgetSizes(width, height);
     setWidget(internalContent);
   }
 
