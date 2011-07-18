@@ -18,16 +18,21 @@ public class ChartPanelContainer extends VerticalLayout {
   public ChartPanelContainer() {
     super();
     setSizeFull();
-    buildPortal();
-    PortalLayout topPortal = new PortalLayout();
-    topPortal.setHeight("250px");
-    topPortal.setWidth("70%");
-    addComponent(topPortal);
-    setComponentAlignment(topPortal, Alignment.BOTTOM_CENTER);
+    buildMainPortal();
+    Panel bottomPanel = new Panel();
+    bottomPanel.setSizeFull();
+    bottomPanel.getContent().setWidth("100%");
+    PortalLayout bottomPortal = new PortalLayout();
+    bottomPortal.setHeight("250px");
+    bottomPortal.setWidth("70%");
+    bottomPanel.getContent().addComponent(bottomPortal);
+    ((VerticalLayout)bottomPanel.getContent()).setComponentAlignment(bottomPortal, Alignment.BOTTOM_CENTER);
+    addComponent(bottomPanel);
+    setExpandRatio(bottomPanel, 1f);
   }
 
   
-  private void buildPortal() {
+  private void buildMainPortal() {
     portalContainer.setContent(panelLayout);
     portalContainer.setSizeFull();
     
@@ -51,6 +56,6 @@ public class ChartPanelContainer extends VerticalLayout {
       panelLayout.setExpandRatio(portal, 1f);
     }
     addComponent(portalContainer);
-    setExpandRatio(portalContainer, 1f);
+    setExpandRatio(portalContainer, 2.5f);
   }
 }

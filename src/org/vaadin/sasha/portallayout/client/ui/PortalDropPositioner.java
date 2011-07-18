@@ -1,6 +1,5 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
-import org.vaadin.sasha.portallayout.client.PortalDropController;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 
 import com.google.gwt.user.client.ui.SimplePanel;
