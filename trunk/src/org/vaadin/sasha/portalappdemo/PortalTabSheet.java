@@ -1,6 +1,6 @@
 package org.vaadin.sasha.portalappdemo;
 
-import org.vaadin.sasha.portallayoutapplication.chart.ChartPanelContainer;
+import org.vaadin.sasha.portalappdemo.chart.ChartPanelContainer;
 
 import com.vaadin.ui.TabSheet;
 
