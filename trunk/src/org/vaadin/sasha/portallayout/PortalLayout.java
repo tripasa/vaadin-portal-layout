@@ -84,7 +84,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     }
 
     public String getCaption() {
-      return caption;
+      return caption == null ? "" : caption;
     }
 
     public void setCaption(String caption) {
@@ -157,9 +157,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @return
+   * Check if portlet containing this component is collapsed.
+   * @param c Component
+   * @return true if the portlet is collapsed
    */
   public boolean isCollapsed(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -172,9 +172,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @return
+   * Check if the portlet containing this component can be collapsed.
+   * @param c Component
+   * @return true if can be collpsed
    */
   public boolean isCollapsible(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -187,9 +187,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @return
+   * Check if the portlet containing this component can be closed.
+   * @param c Component
+   * @return true if portlet can be closed.
    */
   public boolean isClosable(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -202,9 +202,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @return
+   * Check if the portlet containing this component is locked (cannot be dragged).
+   * @param c Component
+   * @return true if portlet is locked.
    */
   public boolean isLocked(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -217,9 +217,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @return
+   * Get caption of the portlet containing this component. 
+   * @param c Component
+   * @return Caption.
    */
   public String getComponentCaption(Component c) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -232,9 +232,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @param caption
+   * Set caption of the portlet containing this component.
+   * @param c Component.
+   * @param caption Caption.
    */
   public void setComponentCaption(final Component c, final String caption) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -254,9 +254,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @param closable
+   * Make portlet closable or not closable.
+   * @param c Component.
+   * @param closable true if portlet can be closed.
    */
   public void setClosable(final Component c, boolean closable) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -272,9 +272,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @param isLocked
+   * Set lock state of the portlet containing this component.
+   * @param c Component.
+   * @param isLocked true if locked.
    */
   public void setLocked(final Component c, boolean isLocked) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -308,9 +308,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
   }
 
   /**
-   * 
-   * @param c
-   * @param isCollapsed
+   * Set collapse state of the portlet.
+   * @param c Component.
+   * @param isCollapsed true if portlet is collapsed.
    */
   public void setCollapsed(final Component c, boolean isCollapsed) {
     final ComponentDetails details = componentToDetails.get(c);
@@ -325,10 +325,18 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     }
   }
 
+  /**
+   * Check if portal accepts portlets from other portals and its portlets can be dragged to other portals.
+   * @return true if can share portlets.
+   */
   public boolean isCommunicative() {
     return isCommunicative;
   }
 
+  /**
+   * Set if portal accepts portlets from other portals and its portlets can be dragged to other portals.
+   * @param isCommunicative true if portlets can be dragged to other portals.
+   */
   public void setCommunicative(boolean isCommunicative) {
     this.isCommunicative = isCommunicative;
   }
@@ -443,12 +451,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     return Collections.unmodifiableCollection(components).iterator();
   }
   
-  
-
-  /**
-   * 
-   * @param c
-   */
   private void doComponentRemoveLogic(final Component c) {
     componentToDetails.remove(c);
     components.remove(c);
@@ -464,11 +466,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     requestRepaint();
   }
 
-  /**
-   * 
-   * @param c
-   * @param position
-   */
   private void doComponentAddLogic(final Component c, int position) {
     int index = components.indexOf(c);
 
