@@ -14,7 +14,7 @@
 			<description>
 			Vaadin application class to start</description>
 			<param-name>application</param-name>
-			<param-value>org.vaadin.sasha.portallayoutapplication.PortallayoutApplication</param-value>
+			<param-value>org.vaadin.sasha.portalappdemo.PortallayoutApplication</param-value>
 		</init-param>
 		<init-param>
 			<description>
