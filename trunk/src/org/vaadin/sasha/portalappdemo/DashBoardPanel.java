@@ -1,4 +1,4 @@
-package org.vaadin.sasha.portallayoutapplication;
+package org.vaadin.sasha.portalappdemo;
 
 import java.io.File;
 import java.io.FileFilter;

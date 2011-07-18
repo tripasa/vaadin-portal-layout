@@ -1,4 +1,4 @@
-package org.vaadin.sasha.portallayoutapplication;
+package org.vaadin.sasha.portalappdemo;
 
 import org.vaadin.sasha.portallayoutapplication.chart.ChartPanelContainer;
 
