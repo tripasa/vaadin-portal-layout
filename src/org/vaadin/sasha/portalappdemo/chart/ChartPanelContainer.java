@@ -1,4 +1,4 @@
-package org.vaadin.sasha.portallayoutapplication.chart;
+package org.vaadin.sasha.portalappdemo.chart;
 
 import org.vaadin.sasha.portallayout.PortalLayout;
 
