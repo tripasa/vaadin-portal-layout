@@ -8,6 +8,8 @@ import java.util.Set;
 import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
 import org.vaadin.sasha.portallayout.client.ui.Portlet.PortletLockState;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Node;
@@ -384,7 +386,6 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
    * its piece of space.
    */
   public void recalculateLayoutAndPortletSizes() {
-    long time = System.currentTimeMillis();
     consumedHeight = 0;
     sumRelativeHeight = 0;
 
@@ -420,8 +421,14 @@ public class VPortalLayout extends FlowPanel implements Paintable, Container {
 
     if (newHeight != getOffsetHeight()) {
       getElement().getStyle().setPropertyPx("height", newHeight);
-      //System.out.println("Size change!");
-      Util.notifyParentOfSizeChange(this, false);
+      Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+        @Override
+        public void execute() {
+          //System.out.println("Size change!");
+          Util.notifyParentOfSizeChange(VPortalLayout.this, false);
+          
+        }
+      });
     }
 
     calculatePortletSizes();

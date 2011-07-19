@@ -7,6 +7,8 @@ import org.vaadin.sasha.portallayout.client.dnd.util.CoordinateLocation;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -141,6 +143,13 @@ public class PortalDropController extends AbstractPositioningDropController {
     dummy.removeFromParent();
     dummy = null;
     getDropTargetAsPortalLayout().recalculateLayoutAndPortletSizes();
+//    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+//      
+//      @Override
+//      public void execute() {
+//
+//      }
+//    });
   }
 
   @Override
@@ -176,7 +185,9 @@ public class PortalDropController extends AbstractPositioningDropController {
     final VPortalLayout portal = getDropTargetAsPortalLayout();
     int dummyIndex = updateDropPosition(context);
     portal.addToRootElement(dummy, dummyIndex);
-    portal.recalculateLayoutAndPortletSizes();
+    
+        portal.recalculateLayoutAndPortletSizes();
+    
   }
 
   @Override
