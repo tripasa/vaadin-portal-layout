@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Iterator;
 
-import org.vaadin.codelabel.CodeLabel;
 import org.vaadin.sasha.portallayout.PortalLayout;
 
 import com.vaadin.data.Item;
@@ -13,14 +12,11 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.TextFileProperty;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 
@@ -79,9 +75,9 @@ public class DashBoardPanel extends HorizontalSplitPanel {
           if (!mainPortal.isCollapsed(c))
             mainPortal.setCollapsed(c, true);
         }
-        
-        mainPortal.addComponent(panel);
-        mainPortal.setComponentCaption(panel, f.getName());
+        Component c = createTableTest();
+        mainPortal.addComponent(c);
+        mainPortal.setComponentCaption(c, f.getName());
       }
     });
     sidePortal.addComponent(sourceTree);
@@ -184,9 +180,12 @@ public class DashBoardPanel extends HorizontalSplitPanel {
       super();
       addContainerProperty("test1", String.class, "0");
       addContainerProperty("test2", String.class, "0");
-      Item item = getItem(addItem());
-      item.getItemProperty("test1").setValue("test1");
-      item.getItemProperty("test2").setValue("test2");
+      for (int i = 0; i < 100; ++i)
+      {
+        Item item = getItem(addItem());
+        item.getItemProperty("test1").setValue("test1");
+        item.getItemProperty("test2").setValue("test2");
+      }
     }
   }
 }
