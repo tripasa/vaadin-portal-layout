@@ -1,6 +1,19 @@
 .v-portallayout {
 }
 
+.v-portallayout-margin-top {
+	padding-top: 12px;	
+}
+.v-portallayout-margin-bottom {
+	padding-bottom: 12px;	
+}
+.v-portallayout-margin-left {
+	padding-left: 12px;	
+}
+.v-portallayout-margin-right {
+	padding-right: 12px;	
+}
+
 .v-portallayout-spacing {
 	height: 8px;
 	width: 8px;
