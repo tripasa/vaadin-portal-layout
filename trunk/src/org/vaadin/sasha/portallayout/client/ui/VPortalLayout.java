@@ -725,7 +725,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
 
     @Override
     public boolean requestLayout(Set<Paintable> children) {
-        VConsole.log("Requesting layout!");
         recalculateLayoutAndPortletSizes();
         return false;
     }
