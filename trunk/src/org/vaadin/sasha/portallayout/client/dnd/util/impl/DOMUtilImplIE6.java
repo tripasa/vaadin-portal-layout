@@ -60,4 +60,5 @@ public class DOMUtilImplIE6 extends DOMUtilImpl {
   /*-{
     return elem.clientWidth;
   }-*/;
+  
 }
