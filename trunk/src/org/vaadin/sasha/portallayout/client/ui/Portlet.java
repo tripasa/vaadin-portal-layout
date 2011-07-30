@@ -264,8 +264,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
      * @return Portlet index.
      */
     public int getPosition() {
-        final VPortalLayout portal = getParentPortal();
-        return portal == null ? -1 : portal.getWidgetIndex(this);
+        return parentPortal == null ? -1 : parentPortal.getChildPosition(this);
     }
 
     /**
@@ -381,7 +380,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     }
 
     public int getSpacing() {
-        return parentPortal.getSpacingInfo().vSpacing;
+        return parentPortal.getVerticalSpacing();
     }
 
     public void setCaption(final String portletCaption) {

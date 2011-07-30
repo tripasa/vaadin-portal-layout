@@ -62,7 +62,7 @@ public abstract class DOMUtilImplStandard extends DOMUtilImpl {
       return elem.clientHeight;
     } catch(e) { throw new Error("getClientHeight exception:\n" + e); }
   }-*/;
-
+  
   @Override
   public native int getClientWidth(Element elem)
   /*-{

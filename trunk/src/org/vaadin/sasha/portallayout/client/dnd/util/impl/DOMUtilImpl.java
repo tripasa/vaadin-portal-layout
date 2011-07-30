@@ -63,4 +63,40 @@ public abstract class DOMUtilImpl {
     return null;
   }-*/;
 
+  public native int getPaddingLeft(Element elem)
+  /*-{
+    try {
+      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
+      var paddingLeftWidth = computedStyle.getPropertyValue("padding-left");
+      return paddingLeftWidth.indexOf("px") == -1 ? 0 : parseInt(paddingLeftWidth.substr(0, paddingLeftWidth.length - 2));
+    } catch(e) { throw new Error("getPaddingLeft exception:\n" + e); }
+  }-*/;
+
+  public native int getPaddingRight(Element elem)
+  /*-{
+    try {
+      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
+      var padding = computedStyle.getPropertyValue("padding-right");
+      return padding.indexOf("px") == -1 ? 0 : parseInt(padding.substr(0, padding.length - 2));
+    } catch(e) { throw new Error("getPaddingRight exception:\n" + e); }
+  }-*/;
+
+  public native int getPaddingBottom(Element elem)
+  /*-{
+    try {
+      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
+      var padding = computedStyle.getPropertyValue("padding-bottom");
+      return padding.indexOf("px") == -1 ? 0 : parseInt(padding.substr(0, padding.length - 2));
+    } catch(e) { throw new Error("getPaddingBottom exception:\n" + e); }
+  }-*/;
+
+  public native int getPaddingTop(Element elem)
+  /*-{
+    try {
+      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
+      var padding = computedStyle.getPropertyValue("padding-top");
+      return padding.indexOf("px") == -1 ? 0 : parseInt(padding.substr(0, padding.length - 2));
+    } catch(e) { throw new Error("getPaddingTop exception:\n" + e); }
+  }-*/;
+
 }

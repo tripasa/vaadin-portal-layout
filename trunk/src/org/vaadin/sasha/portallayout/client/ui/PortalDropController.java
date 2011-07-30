@@ -9,7 +9,6 @@ import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.VConsole;
 
@@ -26,6 +25,11 @@ public class PortalDropController extends AbstractPositioningDropController {
     private PortalDropPositioner dummy;
 
     /**
+     * Portal.
+     */
+    private VPortalLayout portal;
+
+    /**
      * Target index for the dropped portlet.
      */
     private int targetDropIndex = -1;
@@ -36,8 +40,9 @@ public class PortalDropController extends AbstractPositioningDropController {
      * @param dropTarget
      *            Drop Area.
      */
-    public PortalDropController(Panel dropTarget) {
-        super(dropTarget);
+    public PortalDropController(final VPortalLayout portal) {
+        super(portal.getContentPanel());
+        this.portal = portal;
     }
 
     /**
@@ -58,22 +63,21 @@ public class PortalDropController extends AbstractPositioningDropController {
      *            Portlet that is dropped.
      */
     private void updatePortletLocationOnDrop(final Portlet portlet) {
-        final VPortalLayout dropTargetPortal = getDropTargetAsPortalLayout();
         final VPortalLayout currentParent = portlet.getParentPortal();
 
         /**
          * Do the logic required for the former parent to clean up the trace of
          * the removed portlet
          */
-        if (!currentParent.equals(dropTargetPortal))
+        if (!currentParent.equals(portal))
             currentParent.onPortletMovedOut(portlet);
 
         /**
          * Do the the logic required by the new parent to add the new portlet
          */
-        if (dropTargetPortal.getWidgetIndex(portlet) != targetDropIndex) {
-            portlet.setParentPortal(dropTargetPortal);
-            dropTargetPortal.onPortletPositionUpdated(portlet, targetDropIndex);
+        if (portal.getChildPosition(portlet) != targetDropIndex) {
+            portlet.setParentPortal(portal);
+            portal.onPortletPositionUpdated(portlet, targetDropIndex);
         }
     }
 
@@ -84,11 +88,10 @@ public class PortalDropController extends AbstractPositioningDropController {
      * @return true if the target drop panel was changed.
      */
     private int updateDropPosition(final DragContext context) {
-
-        int targetDropIndex = DOMUtil.findIntersect(
-                getDropTargetAsPortalLayout(), new CoordinateLocation(
-                        context.mouseX, context.mouseY),
-                getLocationWidgetComparator());
+        final CoordinateLocation curLocation = new CoordinateLocation(
+                context.mouseX, context.mouseY);
+        int targetDropIndex = DOMUtil.findIntersect(portal.getContentPanel(),
+                curLocation, getLocationWidgetComparator());
         return targetDropIndex;
     }
 
@@ -98,17 +101,7 @@ public class PortalDropController extends AbstractPositioningDropController {
      * @return Dummy object index.
      */
     private int getDummyIndex() {
-        return (dummy == null) ? -1 : getDropTargetAsPortalLayout()
-                .getWidgetIndex(dummy);
-    }
-
-    /**
-     * Get drop area casted to VPortalLayout.
-     * 
-     * @return Target PortalLayout.
-     */
-    private VPortalLayout getDropTargetAsPortalLayout() {
-        return (VPortalLayout) getDropTarget();
+        return (dummy == null) ? -1 : portal.getChildPosition(dummy);
     }
 
     /**
@@ -131,7 +124,6 @@ public class PortalDropController extends AbstractPositioningDropController {
         long time = System.currentTimeMillis();
         super.onDrop(context);
         assert targetDropIndex != -1 : "Should not happen after onPreviewDrop did not veto";
-        final VPortalLayout portal = getDropTargetAsPortalLayout();
         final Widget widget = context.selectedWidgets.get(0);
         updatePortletLocationOnDrop((Portlet) widget);
         portal.addToRootElement((Portlet) widget, targetDropIndex);
@@ -143,7 +135,7 @@ public class PortalDropController extends AbstractPositioningDropController {
         long time = System.currentTimeMillis();
         dummy.removeFromParent();
         dummy = null;
-        getDropTargetAsPortalLayout().recalculateLayoutAndPortletSizes();
+        portal.recalculateLayoutAndPortletSizes();
         VConsole.log("Leave " + (System.currentTimeMillis() - time));
     }
 
@@ -157,7 +149,6 @@ public class PortalDropController extends AbstractPositioningDropController {
             public void execute() {
                 if (dummy == null)
                     return;
-                final VPortalLayout portal = getDropTargetAsPortalLayout();
 
                 int targetIndex = updateDropPosition(context);
 
@@ -165,18 +156,17 @@ public class PortalDropController extends AbstractPositioningDropController {
 
                 if (dummyIndex != targetIndex
                         && (dummyIndex != targetIndex - 1 || targetIndex == 0)) {
-                    if (dummyIndex == 0 && portal.getWidgetCount() == 1) {
+                    if (dummyIndex == 0 && portal.getChildCount() == 1) {
                         // Do nothing...
                     } else if (targetIndex == -1) {
                         dummy.removeFromParent();
                     } else {
                         portal.addToRootElement(dummy, targetIndex);
                         if (dummyIndex == 0)
-                            ((PortalObjectSizeHandler) portal.getWidget(0))
-                                    .setSpacingValue(0);
+                            portal.getChildAt(0).setSpacingValue(0);
                         if (dummyIndex == 1 && portal.getPortletCount() > 1)
-                            ((PortalObjectSizeHandler) portal.getWidget(1))
-                                    .setSpacingValue(portal.getVSacing());
+                            portal.getChildAt(1).setSpacingValue(
+                                    portal.getVerticalSpacing());
                     }
                 }
             }
@@ -186,7 +176,6 @@ public class PortalDropController extends AbstractPositioningDropController {
     @Override
     public void onEnter(final DragContext context) {
         dummy = newPositioner(context);
-        final VPortalLayout portal = getDropTargetAsPortalLayout();
         int dummyIndex = updateDropPosition(context);
         portal.addToRootElement(dummy, dummyIndex);
         portal.recalculateLayoutAndPortletSizes();
