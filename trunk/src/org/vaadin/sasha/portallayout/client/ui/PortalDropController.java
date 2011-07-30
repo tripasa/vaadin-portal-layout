@@ -10,8 +10,8 @@ import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.terminal.gwt.client.VConsole;
 
 /**
  * Drop process controller for the portlets.
@@ -20,181 +20,183 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class PortalDropController extends AbstractPositioningDropController {
 
-  /**
-   * Wire frame object that is displayed when portlet is dragged.
-   */
-  private Widget dummy;
-
-  /**
-   * Target index for the dropped portlet.
-   */
-  private int targetDropIndex = -1;
-
-  /**
-   * Constructor.
-   * 
-   * @param dropTarget
-   *          Drop Area.
-   */
-  public PortalDropController(Panel dropTarget) {
-    super(dropTarget);
-  }
-
-  /**
-   * Get the location comparison policy object. Currently the portlets swap if
-   * the target is below the line y = x.
-   * 
-   * @return Comparsion policy object.
-   */
-  protected LocationWidgetComparator getLocationWidgetComparator() {
-    return LocationWidgetComparator.BOTTOM_RIGHT_COMPARATOR;
-  }
-
-  /**
-   * When the portlet is dropped, the actual parent portal might change. Anyway
-   * the parent should update its data accordingly.
-   * 
-   * @param portlet
-   *          Portlet that is dropped.
-   */
-  private void updatePortletLocationOnDrop(final Portlet portlet) {
-    final VPortalLayout dropTargetPortal = getDropTargetAsPortalLayout();
-    final VPortalLayout currentParent = portlet.getParentPortal();
+    /**
+     * Wire frame object that is displayed when portlet is dragged.
+     */
+    private PortalDropPositioner dummy;
 
     /**
-     * Do the logic required for the former parent to clean up the trace of the
-     * removed portlet
+     * Target index for the dropped portlet.
      */
-    if (!currentParent.equals(dropTargetPortal))
-      currentParent.onPortletMovedOut(portlet);
+    private int targetDropIndex = -1;
 
     /**
-     * Do the the logic required by the new parent to add the new portlet
+     * Constructor.
+     * 
+     * @param dropTarget
+     *            Drop Area.
      */
-    if (dropTargetPortal.getWidgetIndex(portlet) != targetDropIndex) {
-      portlet.setParentPortal(dropTargetPortal);
-      dropTargetPortal.onPortletPositionUpdated(portlet, targetDropIndex);
+    public PortalDropController(Panel dropTarget) {
+        super(dropTarget);
     }
-  }
 
-  /**
-   * Updates the current drop panel and the index inside of it.
-   * 
-   * @param context
-   * @return true if the target drop panel was changed.
-   */
-  private int updateDropPosition(final DragContext context) {
-
-    int targetDropIndex = DOMUtil.findIntersect(getDropTargetAsPortalLayout(),
-        new CoordinateLocation(context.mouseX, context.mouseY),
-        getLocationWidgetComparator());
-    return targetDropIndex;
-  }
-
-  /**
-   * Get current index of the wire frame object.
-   * 
-   * @return Dummy object index.
-   */
-  private int getDummyIndex() {
-    return (dummy == null) ? -1 : getDropTargetAsPortalLayout().getWidgetIndex(
-        dummy);
-  }
-
-  /**
-   * Get drop area casted to VPortalLayout.
-   * 
-   * @return Target PortalLayout.
-   */
-  private VPortalLayout getDropTargetAsPortalLayout() {
-    return (VPortalLayout)getDropTarget();
-  }
-
-  /**
-   * Create a wire frame object.
-   * 
-   * @param context
-   *          Drop Context.
-   * @return New wire frame object.
-   */
-  protected Widget newPositioner(DragContext context) {
-    final Portlet portlet = (Portlet) context.selectedWidgets.get(0);
-    if (portlet == null)
-      return null;
-    final Widget result = new PortalDropPositioner(portlet);
-    return result;
-  }
-
-  @Override
-  public void onDrop(DragContext context) {
-    super.onDrop(context);
-    assert targetDropIndex != -1 : "Should not happen after onPreviewDrop did not veto";
-    final VPortalLayout portal = getDropTargetAsPortalLayout();
-    final Widget widget = context.selectedWidgets.get(0);
-    if (widget instanceof Portlet) {
-      updatePortletLocationOnDrop((Portlet) widget);
-      portal.addToRootElement(widget, targetDropIndex);
+    /**
+     * Get the location comparison policy object. Currently the portlets swap if
+     * the target is below the line y = x.
+     * 
+     * @return Comparsion policy object.
+     */
+    protected LocationWidgetComparator getLocationWidgetComparator() {
+        return LocationWidgetComparator.BOTTOM_RIGHT_COMPARATOR;
     }
-  }
 
-  @Override
-  public void onLeave(DragContext context) {
-    super.onLeave(context);
-    dummy.removeFromParent();
-    dummy = null;
-    getDropTargetAsPortalLayout().recalculateLayoutAndPortletSizes();
-//    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-//      
-//      @Override
-//      public void execute() {
-//
-//      }
-//    });
-  }
+    /**
+     * When the portlet is dropped, the actual parent portal might change.
+     * Anyway the parent should update its data accordingly.
+     * 
+     * @param portlet
+     *            Portlet that is dropped.
+     */
+    private void updatePortletLocationOnDrop(final Portlet portlet) {
+        final VPortalLayout dropTargetPortal = getDropTargetAsPortalLayout();
+        final VPortalLayout currentParent = portlet.getParentPortal();
 
-  @Override
-  public void onMove(DragContext context) {
-    super.onMove(context);
+        /**
+         * Do the logic required for the former parent to clean up the trace of
+         * the removed portlet
+         */
+        if (!currentParent.equals(dropTargetPortal))
+            currentParent.onPortletMovedOut(portlet);
 
-    final VPortalLayout portal = getDropTargetAsPortalLayout();
+        /**
+         * Do the the logic required by the new parent to add the new portlet
+         */
+        if (dropTargetPortal.getWidgetIndex(portlet) != targetDropIndex) {
+            portlet.setParentPortal(dropTargetPortal);
+            dropTargetPortal.onPortletPositionUpdated(portlet, targetDropIndex);
+        }
+    }
 
-    int targetIndex = updateDropPosition(context);
+    /**
+     * Updates the current drop panel and the index inside of it.
+     * 
+     * @param context
+     * @return true if the target drop panel was changed.
+     */
+    private int updateDropPosition(final DragContext context) {
 
-    int dummyIndex = getDummyIndex();
+        int targetDropIndex = DOMUtil.findIntersect(
+                getDropTargetAsPortalLayout(), new CoordinateLocation(
+                        context.mouseX, context.mouseY),
+                getLocationWidgetComparator());
+        return targetDropIndex;
+    }
 
-    if (dummyIndex != targetIndex
-        && (dummyIndex != targetIndex - 1 || targetIndex == 0)) {
-      if (dummyIndex == 0 && portal.getWidgetCount() == 1) {
-        // Do nothing...
-      } else if (targetIndex == -1) {
+    /**
+     * Get current index of the wire frame object.
+     * 
+     * @return Dummy object index.
+     */
+    private int getDummyIndex() {
+        return (dummy == null) ? -1 : getDropTargetAsPortalLayout()
+                .getWidgetIndex(dummy);
+    }
+
+    /**
+     * Get drop area casted to VPortalLayout.
+     * 
+     * @return Target PortalLayout.
+     */
+    private VPortalLayout getDropTargetAsPortalLayout() {
+        return (VPortalLayout) getDropTarget();
+    }
+
+    /**
+     * Create a wire frame object.
+     * 
+     * @param context
+     *            Drop Context.
+     * @return New wire frame object.
+     */
+    protected PortalDropPositioner newPositioner(DragContext context) {
+        final Portlet portlet = (Portlet) context.selectedWidgets.get(0);
+        if (portlet == null)
+            return null;
+        final PortalDropPositioner result = new PortalDropPositioner(portlet);
+        return result;
+    }
+
+    @Override
+    public void onDrop(DragContext context) {
+        long time = System.currentTimeMillis();
+        super.onDrop(context);
+        assert targetDropIndex != -1 : "Should not happen after onPreviewDrop did not veto";
+        final VPortalLayout portal = getDropTargetAsPortalLayout();
+        final Widget widget = context.selectedWidgets.get(0);
+        updatePortletLocationOnDrop((Portlet) widget);
+        portal.addToRootElement((Portlet) widget, targetDropIndex);
+        VConsole.log("Drop " + (System.currentTimeMillis() - time));
+    }
+
+    @Override
+    public void onLeave(DragContext context) {
+        long time = System.currentTimeMillis();
         dummy.removeFromParent();
-      } else {
-        portal.addToRootElement(dummy, targetIndex);
-        if (dummyIndex == 0)
-          ((PortalObjectSizeHandler)portal.getWidget(0)).setSpacingValue(0);
-        if (dummyIndex == 1 && portal.getPortletCount() > 1)
-          ((PortalObjectSizeHandler)portal.getWidget(1)).setSpacingValue(portal.getVSacing());
-      }
+        dummy = null;
+        getDropTargetAsPortalLayout().recalculateLayoutAndPortletSizes();
+        VConsole.log("Leave " + (System.currentTimeMillis() - time));
     }
-  }
 
-  @Override
-  public void onEnter(DragContext context) {
-    super.onEnter(context);
-    dummy = newPositioner(context);
-    final VPortalLayout portal = getDropTargetAsPortalLayout();
-    int dummyIndex = updateDropPosition(context);
-    portal.addToRootElement(dummy, dummyIndex);
-    
+    @Override
+    public void onMove(final DragContext context) {
+        super.onMove(context);
+
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                if (dummy == null)
+                    return;
+                final VPortalLayout portal = getDropTargetAsPortalLayout();
+
+                int targetIndex = updateDropPosition(context);
+
+                int dummyIndex = getDummyIndex();
+
+                if (dummyIndex != targetIndex
+                        && (dummyIndex != targetIndex - 1 || targetIndex == 0)) {
+                    if (dummyIndex == 0 && portal.getWidgetCount() == 1) {
+                        // Do nothing...
+                    } else if (targetIndex == -1) {
+                        dummy.removeFromParent();
+                    } else {
+                        portal.addToRootElement(dummy, targetIndex);
+                        if (dummyIndex == 0)
+                            ((PortalObjectSizeHandler) portal.getWidget(0))
+                                    .setSpacingValue(0);
+                        if (dummyIndex == 1 && portal.getPortletCount() > 1)
+                            ((PortalObjectSizeHandler) portal.getWidget(1))
+                                    .setSpacingValue(portal.getVSacing());
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onEnter(final DragContext context) {
+        dummy = newPositioner(context);
+        final VPortalLayout portal = getDropTargetAsPortalLayout();
+        int dummyIndex = updateDropPosition(context);
+        portal.addToRootElement(dummy, dummyIndex);
         portal.recalculateLayoutAndPortletSizes();
-    
-  }
+    }
 
-  @Override
-  public void onPreviewDrop(DragContext context) throws VetoDragException {
-    super.onPreviewDrop(context);
-    targetDropIndex = getDummyIndex();
-    if (targetDropIndex == -1)
-      throw new VetoDragException();
-  }
+    @Override
+    public void onPreviewDrop(DragContext context) throws VetoDragException {
+        super.onPreviewDrop(context);
+        targetDropIndex = getDummyIndex();
+        if (targetDropIndex == -1)
+            throw new VetoDragException();
+    }
 }
