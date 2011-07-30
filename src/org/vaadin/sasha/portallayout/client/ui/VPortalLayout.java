@@ -484,9 +484,9 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
      * of relative height portlets the contents need to be re-laid out.
      */
     private void calculatePortletSizes() {
-        int totalHeight = getOffsetHeight();
+        int totalHeight = getClientHeight();
         int totalWidth = getClientWidth();
-        int residualHeight = totalHeight - consumedHeight;
+        int residualHeight = totalHeight - consumedHeight - getVerticalMargins();
         float relativeHeightRatio = normalizedRealtiveRatio();
         final Iterator<Widget> it = getPortalContentIterator();
         

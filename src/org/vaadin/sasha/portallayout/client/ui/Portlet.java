@@ -347,8 +347,8 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     }
 
     /**
-     * Get information about the size of this portlet.
-     * 
+     * Get information about the size of this portlet
+     * (both contents and header).
      * @return Size information of the wrapping container element.
      */
     public Size getContainerSizeInfo() {
@@ -356,8 +356,8 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     }
 
     /**
-     * 
-     * @return
+     * Get size information about portlet contents.
+     * @return Content size information.
      */
     public Size getContentSizeInfo() {
         return contentSizeInfo;
