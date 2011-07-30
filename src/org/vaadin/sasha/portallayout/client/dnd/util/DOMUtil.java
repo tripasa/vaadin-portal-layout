@@ -99,12 +99,6 @@ public class DOMUtil {
       return 0;
     }
 
-    if (DEBUG) {
-      for (int i = 0; i < widgetCount; i++) {
-        debugWidgetWithColor(parent, i, "white");
-      }
-    }
-
     // binary search over range of widgets to find intersection
     int low = 0;
     int high = widgetCount;
@@ -117,38 +111,21 @@ public class DOMUtil {
       WidgetArea midArea = new WidgetArea(widget, null);
       if (mid == low) {
         if (mid == 0) {
-          if (comparator.locationIndicatesIndexFollowingWidget(midArea, location)) {
-            debugWidgetWithColor(parent, high, "green");
-            return high;
-          } else {
-            debugWidgetWithColor(parent, mid, "green");
-            return mid;
-          }
+          return (comparator.locationIndicatesIndexFollowingWidget(midArea, location)) ? high : mid;
         } else {
-          debugWidgetWithColor(parent, high, "green");
           return high;
         }
       }
       if (midArea.getBottom() < location.getTop()) {
-        debugWidgetWithColor(parent, mid, "blue");
         low = mid;
       } else if (midArea.getTop() > location.getTop()) {
-        debugWidgetWithColor(parent, mid, "red");
         high = mid;
       } else if (midArea.getRight() < location.getLeft()) {
-        debugWidgetWithColor(parent, mid, "blue");
         low = mid;
       } else if (midArea.getLeft() > location.getLeft()) {
-        debugWidgetWithColor(parent, mid, "red");
         high = mid;
       } else {
-        if (comparator.locationIndicatesIndexFollowingWidget(midArea, location)) {
-          debugWidgetWithColor(parent, mid + 1, "green");
-          return mid + 1;
-        } else {
-          debugWidgetWithColor(parent, mid, "green");
-          return mid;
-        }
+        return (comparator.locationIndicatesIndexFollowingWidget(midArea, location)) ? mid + 1 : mid;
       }
     }
   }
@@ -254,6 +231,7 @@ public class DOMUtil {
   /**
    * TODO Change IndexedPanel -> InsertPanel
    */
+  @SuppressWarnings("unused")
   private static void debugWidgetWithColor(IndexedPanel parent, int index, String color) {
     if (DEBUG) {
       if (index >= parent.getWidgetCount()) {

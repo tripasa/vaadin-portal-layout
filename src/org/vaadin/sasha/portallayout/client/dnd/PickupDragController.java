@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.InsertPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.terminal.gwt.client.VConsole;
 
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class PickupDragController extends AbstractDragController {
   /**
    * TODO Decide if 100ms is a good number
    */
-  private static final int CACHE_TIME_MILLIS = 100;
+  private static final int CACHE_TIME_MILLIS = 100000;
 
   /**
    * The implicit boundary drop controller.
@@ -176,6 +177,7 @@ public class PickupDragController extends AbstractDragController {
     if (context.dropController != null) {
       context.dropController.onMove(context);
     }
+    VConsole.log("On move! " + (System.currentTimeMillis() - timeMillis));
   }
 
   private final static String APPLICATION_STYLE_NAME = "v-app";
@@ -211,16 +213,16 @@ public class PickupDragController extends AbstractDragController {
             new CoordinateLocation(widget.getAbsoluteLeft(), widget.getAbsoluteTop()));
       }
 
-      context.dropController = getIntersectDropController(context.mouseX, context.mouseY);
-      if (context.dropController != null) {
-        context.dropController.onEnter(context);
-      }
-
       for (Widget widget : context.selectedWidgets) {
         Location location = widgetLocation.get(widget);
         int relativeX = location.getLeft() - draggableAbsoluteLeft;
         int relativeY = location.getTop() - draggableAbsoluteTop;
         container.add(widget, relativeX, relativeY);
+      }
+      
+      context.dropController = getIntersectDropController(context.mouseX, context.mouseY);
+      if (context.dropController != null) {
+        context.dropController.onEnter(context);
       }
       movablePanel = container;
     }
@@ -294,8 +296,10 @@ public class PickupDragController extends AbstractDragController {
 
   @Override
   public void resetCache() {
+    long time = System.currentTimeMillis();
     super.resetCache();
     dropControllerCollection.resetCache(boundaryPanel, context);
+    VConsole.log("Cache invalidated in " + (System.currentTimeMillis() - time));
   }
 
   /**

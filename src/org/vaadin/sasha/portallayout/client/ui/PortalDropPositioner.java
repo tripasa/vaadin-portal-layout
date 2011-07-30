@@ -10,88 +10,87 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * 
  * @author p4elkin
  */
-public class PortalDropPositioner extends SimplePanel implements PortalObjectSizeHandler {
+public class PortalDropPositioner extends SimplePanel implements
+        PortalObjectSizeHandler {
 
-  /**
-   * Basic style name for the widget.
-   */
-  private static final String CLASS_NAME = "v-portallayout-positioner";
+    /**
+     * Basic style name for the widget.
+     */
+    private static final String CLASS_NAME = "v-portallayout-positioner";
 
-  /**
-   * Internal contents.
-   */
-  private final SimplePanel internalContent = new SimplePanel();
+    /**
+     * Internal contents.
+     */
+    private final SimplePanel internalContent = new SimplePanel();
 
-  /**
+    /**
    * 
    */
-  private final Portlet portlet;
+    private final Portlet portlet;
 
-  /**
-   * Constructor
-   */
-  public PortalDropPositioner(final Portlet portlet) {
-    super();
-    setStyleName(CLASS_NAME);
-    this.portlet = portlet;
-    long time = System.currentTimeMillis();
-    int width = portlet.getContainerSizeInfo().getWidth();
-    System.out.println("Found width " + width + "in" + (System.currentTimeMillis() - time));
-    time = System.currentTimeMillis();
-    int height = portlet.getRequiredHeight();
-    System.out.println("Found height" + height +  "in" + (System.currentTimeMillis() - time));
-    setWidgetSizes(width, height);
-    setWidget(internalContent);
-  }
+    /**
+     * Constructor
+     */
+    public PortalDropPositioner(final Portlet portlet) {
+        super();
+        setStyleName(CLASS_NAME);
+        this.portlet = portlet;
+        int width = portlet.getContainerSizeInfo().getWidth();
+        int height = portlet.getRequiredHeight();
+        setWidgetSizes(width, height);
+        setWidget(internalContent);
+    }
 
-  @Override
-  public boolean isHeightRelative() {
-    assert portlet != null;
-    return portlet.isHeightRelative();
-  }
+    @Override
+    public boolean isHeightRelative() {
+        assert portlet != null;
+        return portlet.isHeightRelative();
+    }
 
-  @Override
-  public float getRealtiveHeightValue() {
-    assert portlet != null;
-    return portlet.getRealtiveHeightValue();
-  }
+    @Override
+    public float getRealtiveHeightValue() {
+        assert portlet != null;
+        return portlet.getRealtiveHeightValue();
+    }
 
-  @Override
-  public int getRequiredHeight() {
-    assert portlet != null;
-    return portlet.getRequiredHeight();
-  }
+    @Override
+    public int getRequiredHeight() {
+        assert portlet != null;
+        return portlet.getRequiredHeight();
+    }
 
-  @Override
-  public void setWidgetSizes(int width, int height) {
-    int innerWidth = width - DOMUtil.getHorizontalBorders(this);
-    int innerHeight = height - DOMUtil.getVerticalBorders(this);
+    @Override
+    public void setWidgetSizes(int width, int height) {
+        int innerWidth = width - DOMUtil.getHorizontalBorders(this);
+        int innerHeight = height - DOMUtil.getVerticalBorders(this);
 
-    internalContent.setPixelSize(innerWidth, innerHeight);
-  }
+        internalContent.setPixelSize(innerWidth, innerHeight);
+    }
 
-  @Override
-  public void setWidgetHeight(int height) {
-    int innerHeight = height - DOMUtil.getVerticalBorders(this);
-    internalContent.getElement().getStyle().setPropertyPx("height", innerHeight);
-  }
+    @Override
+    public void setWidgetHeight(int height) {
+        int innerHeight = height - DOMUtil.getVerticalBorders(this);
+        internalContent.getElement().getStyle()
+                .setPropertyPx("height", innerHeight);
+    }
 
-  @Override
-  public void setWidgetWidth(int width) {
-    int innerWidth = width - DOMUtil.getHorizontalBorders(this);
-    internalContent.getElement().getStyle().setPropertyPx("width", innerWidth);
+    @Override
+    public void setWidgetWidth(int width) {
+        int innerWidth = width - DOMUtil.getHorizontalBorders(this);
+        internalContent.getElement().getStyle()
+                .setPropertyPx("width", innerWidth);
 
-  }
+    }
 
-  @Override
-  public void setSpacingValue(int spacing) {
-    getElement().getStyle().setPropertyPx("marginTop", spacing);
-  }
+    @Override
+    public void setSpacingValue(int spacing) {
+        getElement().getStyle().setPropertyPx("marginTop", spacing);
+    }
 
-  @Override
-  public Portlet getPortalObjectReference() {
-    assert portlet != null;
-    return portlet;
-  }
+    @Override
+    public Portlet getPortalObjectReference() {
+        assert portlet != null;
+        return portlet;
+    }
 
 }

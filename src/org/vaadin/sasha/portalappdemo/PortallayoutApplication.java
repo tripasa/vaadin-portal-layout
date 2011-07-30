@@ -7,32 +7,32 @@ import com.vaadin.ui.Window;
 @SuppressWarnings("serial")
 public class PortallayoutApplication extends Application {
 
-  boolean debugMode = false;
+    boolean debugMode = false;
 
-  private Window mainWindow;
+    private Window mainWindow;
 
-  @Override
-  public void init() {
+    @Override
+    public void init() {
 
-    setTheme("portallayouttheme");
-    mainWindow = new Window("Portallayout Application");
-    testInit();
-    setMainWindow(mainWindow);
-  }
+        setTheme("portallayouttheme");
+        mainWindow = new Window("Portallayout Application");
+        testInit();
+        setMainWindow(mainWindow);
+    }
 
-  public void testInit() {
-    HorizontalLayout windowLayout = new HorizontalLayout();
-    windowLayout.setSizeFull();
+    public void testInit() {
+        HorizontalLayout windowLayout = new HorizontalLayout();
+        windowLayout.setSizeFull();
 
-    mainWindow.setContent(windowLayout);
+        mainWindow.setContent(windowLayout);
 
-    PortalTabSheet tabs = new PortalTabSheet();
-    tabs.setSizeFull();
-    windowLayout.addComponent(tabs);
-    windowLayout.setExpandRatio(tabs, 1.0f);
+        PortalTabSheet tabs = new PortalTabSheet();
+        tabs.setSizeFull();
+        windowLayout.addComponent(tabs);
+        windowLayout.setExpandRatio(tabs, 1.0f);
 
-   // windowLayout.addComponent(sidePanel);
+        // windowLayout.addComponent(sidePanel);
 
-  }
+    }
 
 }
