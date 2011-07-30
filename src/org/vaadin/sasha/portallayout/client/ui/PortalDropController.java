@@ -10,7 +10,6 @@ import org.vaadin.sasha.portallayout.client.dnd.util.LocationWidgetComparator;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.terminal.gwt.client.VConsole;
 
 /**
  * Drop process controller for the portlets.
@@ -121,22 +120,22 @@ public class PortalDropController extends AbstractPositioningDropController {
 
     @Override
     public void onDrop(DragContext context) {
-        long time = System.currentTimeMillis();
+        //long time = System.currentTimeMillis();
         super.onDrop(context);
         assert targetDropIndex != -1 : "Should not happen after onPreviewDrop did not veto";
         final Widget widget = context.selectedWidgets.get(0);
         updatePortletLocationOnDrop((Portlet) widget);
         portal.addToRootElement((Portlet) widget, targetDropIndex);
-        VConsole.log("Drop " + (System.currentTimeMillis() - time));
+        //VConsole.log("Drop " + (System.currentTimeMillis() - time));
     }
 
     @Override
     public void onLeave(DragContext context) {
-        long time = System.currentTimeMillis();
+        //long time = System.currentTimeMillis();
         dummy.removeFromParent();
         dummy = null;
         portal.recalculateLayoutAndPortletSizes();
-        VConsole.log("Leave " + (System.currentTimeMillis() - time));
+        //VConsole.log("Leave " + (System.currentTimeMillis() - time));
     }
 
     @Override
