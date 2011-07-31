@@ -1,5 +1,10 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,6 +17,7 @@ import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.terminal.gwt.client.ValueMap;
 
 /**
  * Portlet header. COntains the controls for the basic operations with portlet
@@ -121,6 +127,16 @@ public class PortletHeader extends ComplexPanel {
     private boolean collapsible = true;
 
     /**
+     * 
+     */
+    private Map<String, Button> actionIdToButton = new HashMap<String, Button>();
+    
+    /**
+     * 
+     */
+    private Map<String, String> actionIdToIcon = new HashMap<String, String>();
+    
+    /**
      * Handler for close button click.
      */
     private ClickHandler closeButtonClickHandler = new ClickHandler() {
@@ -225,5 +241,31 @@ public class PortletHeader extends ComplexPanel {
 
     public String getCaption() {
         return captionHtml.getText();
+    }
+
+    public void updateActions(ValueMap actions) {
+        final Set<String> keys = actions.getKeySet();
+        final Iterator<String> it = keys.iterator();
+        while (it.hasNext()) {
+            final String key = it.next();
+            final String icon = actions.getString(key);
+            final String currentIcon = actionIdToIcon.get(key);
+            if (currentIcon == null ||
+                !currentIcon.equals(icon)) {
+                Button button = actionIdToButton.get(key);
+                if (button == null) {
+                    button = new Button();
+                    button.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            parentPortlet.onActionTriggered(key);
+                        }
+                    });
+                }
+                button.getElement().getStyle().setBackgroundImage(icon);
+                actionIdToButton.put(key, button);
+                actionIdToIcon.put(key, icon);
+            }
+        }
     }
 }
