@@ -14,7 +14,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -34,12 +33,9 @@ import com.vaadin.terminal.gwt.client.RenderSpace;
 import com.vaadin.terminal.gwt.client.StyleConstants;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.VConsole;
-import com.vaadin.terminal.gwt.client.ValueMap;
 import com.vaadin.terminal.gwt.client.ui.LayoutClickEventHandler;
 import com.vaadin.terminal.gwt.client.ui.VMarginInfo;
 import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
-import com.vaadin.terminal.gwt.client.ui.layout.Margins;
 
 /**
  * Client-side implementation of the portal layout.
@@ -303,6 +299,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         
         int pos = 0;
         final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet, UIDL>();
+        final Map<Widget, Portlet> oldMap = new HashMap<Widget, Portlet>(widgetToPortletContainer);
         for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
             final UIDL itUidl = (UIDL) it.next();
             if (itUidl.getTag().equals("portlet")) {
@@ -321,8 +318,11 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                 final UIDL childUidl = (UIDL) itUidl.getChildUIDL(0);
                 final Paintable child = client.getPaintable(childUidl);
                 final Widget widget = (Widget) child;
+                
+                if (oldMap.containsKey(widget))
+                    oldMap.remove(widget);
+                
                 final Portlet portlet = findOrCreatePortlet(widget);
-
                 updatePortletInPosition(portlet, pos);
 
                 setLock(portlet, isLocked);
@@ -364,6 +364,13 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         }
 
         updateCommunicationAbility(uidl);
+        
+        for (final Widget w : oldMap.keySet()) {
+            final Portlet p = oldMap.get(w);
+            portalContent.remove(p);
+            widgetToPortletContainer.remove(w);
+            client.unregisterPaintable((Paintable)w);
+        }
     }
 
     private int getClientWidth() {
@@ -479,19 +486,18 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         final int newHeight = (sizeInfoFromUidl != null && 
                 consumedHeight < sizeInfoFromUidl.getHeight()) ? sizeInfoFromUidl.getHeight() : Math.max(
                 actualSizeInfo.getHeight(), consumedHeight);
-                
-        if (newHeight != getClientHeight()) {
-            Util.notifyParentOfSizeChange(VPortalLayout.this, true);
-        }
-        
+        int oldHeight = getClientHeight();
         setDOMHeight(newHeight + getVerticalMargins());
         calculatePortletSizes();
+        if (newHeight != oldHeight) {
+            Util.notifyParentOfSizeChange(this, false);
+        }        
     }
 
     private void setDOMHeight(int height) {
         getElement().getStyle().setPropertyPx("height", height);
         marginWrapper.getStyle().setPropertyPx("height", height);
-        portalContent.setHeight(height + "px");
+        portalContent.getElement().getStyle().setPropertyPx("height", height);
     }
 
     public PortalObjectSizeHandler getChildAt(int i) {
