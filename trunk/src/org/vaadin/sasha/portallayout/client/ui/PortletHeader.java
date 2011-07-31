@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.terminal.gwt.client.ValueMap;
 
 /**
  * Portlet header. COntains the controls for the basic operations with portlet
@@ -185,8 +184,7 @@ public class PortletHeader extends ComplexPanel {
         collapseButton.addClickHandler(collapseButtonClickHandler);
         captionHtml.addMouseDownHandler(mouseDownHandler);
 
-        add(captionHtml,
-                (com.google.gwt.user.client.Element) captionWrapper);
+        add(captionHtml, (com.google.gwt.user.client.Element) captionWrapper);
         add(collapseButton, (com.google.gwt.user.client.Element) buttonBar);
         add(closeButton, (com.google.gwt.user.client.Element) buttonBar);
 
@@ -243,12 +241,12 @@ public class PortletHeader extends ComplexPanel {
         return captionHtml.getText();
     }
 
-    public void updateActions(ValueMap actions) {
-        final Set<String> keys = actions.getKeySet();
+    public void updateActions(final Map<String, String> actions) {
+        final Set<String> keys = actions.keySet();
         final Iterator<String> it = keys.iterator();
         while (it.hasNext()) {
             final String key = it.next();
-            final String icon = actions.getString(key);
+            final String icon = actions.get(key);
             final String currentIcon = actionIdToIcon.get(key);
             if (currentIcon == null ||
                 !currentIcon.equals(icon)) {
@@ -261,11 +259,25 @@ public class PortletHeader extends ComplexPanel {
                             parentPortlet.onActionTriggered(key);
                         }
                     });
+                    insert(button, (com.google.gwt.user.client.Element) buttonBar, 0, true);
                 }
-                button.getElement().getStyle().setBackgroundImage(icon);
+                button.getElement().getStyle().setBackgroundImage("url("+ icon +")");
+                button.setStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX);
                 actionIdToButton.put(key, button);
                 actionIdToIcon.put(key, icon);
             }
         }
+        for (final String id : actionIdToIcon.keySet()) {
+            if (!actions.containsKey(id)) {
+                final Button b = actionIdToButton.get(id);
+                if (b != null) {
+                    b.removeFromParent();
+                    orphan(b);
+                }
+                actionIdToButton.remove(id);
+                actionIdToIcon.remove(id);
+            }
+        }
     }
+
 }

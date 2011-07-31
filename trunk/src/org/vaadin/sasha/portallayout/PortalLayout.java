@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,8 +15,10 @@ import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.event.LayoutEvents.LayoutClickNotifier;
+import com.vaadin.terminal.ExternalResource;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
+import com.vaadin.terminal.ThemeResource;
 import com.vaadin.terminal.gwt.client.EventId;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.ClientWidget;
@@ -33,14 +36,14 @@ import com.vaadin.ui.Layout.SpacingHandler;
 public class PortalLayout extends AbstractLayout implements SpacingHandler,
         LayoutClickNotifier {
 
-    public abstract class ToolbarAction {
-        private String iconFileName;
+    public static abstract class ToolbarAction {
+        private ThemeResource icon;
         public abstract void execute();
-        public ToolbarAction(final String icon) {
-            this.iconFileName = icon;
+        public ToolbarAction(final ThemeResource icon) {
+            this.icon = icon;
         }
-        public String getIconFileName() {
-            return iconFileName;
+        public ThemeResource getIcon() {
+            return icon;
         }
     }
     
@@ -108,13 +111,18 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
 
         public String addAction(final ToolbarAction action) {
             if (actions == null)
-                actions = new HashMap<String, ToolbarAction>();
-            actions.put("", action);
-            return "";
+                actions = new LinkedHashMap<String, ToolbarAction>();
+            final String randomId = "TB_ACTION" + Math.random();
+            actions.put(randomId, action);
+            return randomId;
         }
         
         public Map<String, ToolbarAction> getActions() {
             return actions;
+        }
+        
+        ToolbarAction getActionById(final String id) {
+            return actions.get(id);
         }
     }
 
@@ -177,17 +185,22 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                     childComponentDetails.isCollapsible());
 
             final Map<String, ToolbarAction> actions = childComponentDetails.getActions();
-            if (actions != null) {
+            if (actions != null &&
+                actions.entrySet().size() > 0) {
                 final Iterator<?> actionIt = actions.entrySet().iterator();
-                final Map<String, String> actionMap = new HashMap<String, String>();
+                final String[] ids = new String[actions.entrySet().size()];
+                final String[] iconUrls = new String[actions.entrySet().size()];
+                int pos = 0;
                 while (actionIt.hasNext()) {
                     final Map.Entry<?, ?> entry = (Entry<?, ?>) actionIt.next();
                     final String id = (String)entry.getKey();
-                    final String icon = ((ToolbarAction)entry.getValue()).getIconFileName();
-                    actionMap.put(id, icon);
+                    final ThemeResource r = ((ToolbarAction)entry.getValue()).getIcon(); 
+                    final String icon = "theme://" + r.getResourceId();
+                    ids[pos]= id;
+                    iconUrls[pos++] = icon;
                 }
-                if (!actionMap.isEmpty())
-                    target.addAttribute(VPortalLayout.PORTLET_ACTIONS, actionMap);
+                target.addAttribute(VPortalLayout.PORTLET_ACTION_IDS, ids);
+                target.addAttribute(VPortalLayout.PORTLET_ACTION_ICONS, iconUrls);
             }
             childComponent.paint(target);
             target.endTag("portlet");
@@ -417,27 +430,27 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
 
         super.changeVariables(source, variables);
 
+        if (variables.containsKey(VPortalLayout.PORTLET_ACTION_TRIGGERED)) {
+            final Map<String, Object> portletParameters = (Map<String, Object>) variables
+                .get(VPortalLayout.PORTLET_ACTION_TRIGGERED);
+            final Component component = (Component) portletParameters
+                .get(VPortalLayout.PAINTABLE_MAP_PARAM);
+            final String actionId = (String) portletParameters
+                .get(VPortalLayout.PORTLET_ACTION_ID);
+            onActionTriggered(component, actionId);
+        }
+        
         if (variables.containsKey(VPortalLayout.PORTLET_POSITION_UPDATED)) {
-            Map<String, Object> newPortlet = (Map<String, Object>) variables
+            final Map<String, Object> portletParameters = (Map<String, Object>) variables
                     .get(VPortalLayout.PORTLET_POSITION_UPDATED);
 
-            final Component component = (Component) newPortlet
+            final Component component = (Component) portletParameters
                     .get(VPortalLayout.PAINTABLE_MAP_PARAM);
 
-            Integer portletPosition = (Integer) newPortlet
+            final Integer portletPosition = (Integer) portletParameters
                     .get(VPortalLayout.PORTLET_POSITION);
 
             onComponentPositionUpdated(component, portletPosition);
-
-            setCollapsed(component,
-                    (Boolean) newPortlet.get(VPortalLayout.PORTLET_COLLAPSED));
-            setClosable(component,
-                    (Boolean) newPortlet.get(VPortalLayout.PORTLET_CLOSABLE));
-            setCollapsible(component,
-                    (Boolean) newPortlet.get(VPortalLayout.PORTLET_COLLAPSIBLE));
-            setComponentCaption(component,
-                    (String) newPortlet.get(VPortalLayout.PORTLET_CAPTION));
-
         }
 
         if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED)) {
@@ -454,6 +467,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                     .get(VPortalLayout.COMPONENT_REMOVED);
             doComponentRemoveLogic(child);
         }
+    }
+
+    private void onActionTriggered(final Component component, final String actionId) {
+        final ComponentDetails details = componentToDetails.get(component);
+        if (details == null)
+            throw new IllegalArgumentException("Wrong Component! Action Trigger Failed!");
+        final ToolbarAction action = details.getActionById(actionId);
+        action.execute();
     }
 
     /**
@@ -485,7 +506,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
      * @param newPosition
      *            New position of the component.
      */
-    private void onComponentPositionUpdated(Component component, int newPosition) {
+    private void onComponentPositionUpdated(final Component component, int newPosition) {
 
         // The client side reported that portlet is no longer there - remove
         // component if so.
@@ -509,8 +530,12 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         components.add(newPosition, component);
     }
 
+    private ComponentDetails getDetails(final Component c) {
+        return componentToDetails.get(c);
+    }
+    
     @Override
-    public void replaceComponent(Component oldComponent, Component newComponent) {
+    public void replaceComponent(final Component oldComponent, final Component newComponent) {
     }
 
     @Override
@@ -540,13 +565,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                     "Component has already been added to the portal!");
 
         c.setWidth("100%");
-        componentToDetails.put(c, new ComponentDetails());
-
+        final ComponentDetails details = 
+            c.getParent() instanceof PortalLayout ?
+                ((PortalLayout)c.getParent()).getDetails(c) : new ComponentDetails();
+        componentToDetails.put(c, details);
         if (position == components.size())
             components.add(c);
         else
             components.add(position, c);
-
         super.addComponent(c);
     }
 

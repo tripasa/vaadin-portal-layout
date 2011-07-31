@@ -2,6 +2,7 @@ package org.vaadin.sasha.portallayout.client.ui;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -103,7 +104,22 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     /**
      * 
      */
-    public static final String PORTLET_ACTIONS = "PORTLET_ACTIONS";
+    public static final String PORTLET_ACTION_IDS = "PORTLET_ACTION_IDS";
+    
+    /**
+     * 
+     */
+    public static final String PORTLET_ACTION_ICONS = "PORTLET_ACTION_ICONS";
+    
+    /**
+     *  
+     */
+    public static final String PORTLET_ACTION_TRIGGERED = "PORTLET_ACTION_TRIGGERED";
+    
+    /**
+     * 
+     */
+    public static final String PORTLET_ACTION_ID = "PORTLET_ACTION_ID";
     
     /**
      * Client-server parameter that sets this portals' ability to share
@@ -276,7 +292,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         updateSpacingInfoFromUidl(uidl);
         updateMarginsFromUidl(uidl);
         clickEventHandler.handleEventHandlerRegistration(client);
-
         final FloatSize relaiveSize = Util.parseRelativeSize(uidl);
         if (relaiveSize == null || relaiveSize.getHeight() == -1)
             sizeInfoFromUidl = new Size(
@@ -315,8 +330,14 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                 portlet.setClosable(isClosable);
                 portlet.setCollapsible(isCollapsible);
                 
-                if (itUidl.hasAttribute(PORTLET_ACTIONS)) {
-                    portlet.updateActions(itUidl.getMapAttribute(PORTLET_CAPTION));
+                if (itUidl.hasAttribute(PORTLET_ACTION_IDS)) {
+                    final String[] actions = itUidl.getStringArrayAttribute(PORTLET_ACTION_IDS);
+                    final String[] icons = itUidl.getStringArrayAttribute(PORTLET_ACTION_ICONS);
+                    assert icons.length == actions.length;
+                    final Map<String, String> idToIconUrl = new LinkedHashMap<String, String>();
+                    for (int i = 0; i < actions.length; ++i)
+                        idToIconUrl.put(actions[i], client.translateVaadinUri(icons[i]));
+                    portlet.updateActions(idToIconUrl);
                 }
                 
                 if (!isCollapsed.equals(portlet.isCollapsed()))
@@ -581,7 +602,10 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     }
 
     public void onActionTriggered(final Portlet portlet, String key) {
-        
+        final Map<String, Object> params = new HashMap<String, Object>();
+        params.put(PAINTABLE_MAP_PARAM, portlet.getContentAsPaintable());
+        params.put(PORTLET_ACTION_ID, key);
+        client.updateVariable(paintableId, PORTLET_ACTION_TRIGGERED, params, true);
     }
     
     /**
@@ -656,17 +680,10 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             return;
 
         portlet.setParentPortal(this);
-
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put(PAINTABLE_MAP_PARAM, child);
         params.put(PORTLET_POSITION, newPosition);
-        params.put(PORTLET_COLLAPSED, portlet.isCollapsed());
-        params.put(PORTLET_CLOSABLE, portlet.isClosable());
-        params.put(PORTLET_COLLAPSIBLE, portlet.isCollapsible());
-        if (!portlet.getCaption().isEmpty())
-            params.put(PORTLET_CAPTION, portlet.getCaption());
-        client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params,
-                true);
+        client.updateVariable(paintableId, PORTLET_POSITION_UPDATED, params, true);
         widgetToPortletContainer.put(portlet.getContent(), portlet);
     }
 
