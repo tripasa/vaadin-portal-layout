@@ -1,5 +1,7 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
+import java.util.Map;
+
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -11,7 +13,6 @@ import com.vaadin.terminal.gwt.client.RenderInformation.FloatSize;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.ValueMap;
 
 /**
  * The class representing the portlet in the portal. Basically has the header
@@ -486,7 +487,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         return headerHeight;
     }
 
-    public void updateActions(final ValueMap actions) {
+    public void updateActions(final Map<String, String> actions) {
         header.updateActions(actions);
     }
 

@@ -69,6 +69,10 @@
 	-ms-text-overflow: ellipsis;
 }
 
+.v-portlet .v-portlet-header-button:hover {
+	cursor: pointer;
+}
+
 .v-portlet. .v-portlet-header-caption {
 	
 }
@@ -82,10 +86,6 @@
 
 .v-portlet .v-portlet-header-button-close:hover {
 	background-image: url(close-hover.png);
-	cursor: pointer;
-}
-
-.v-portlet .v-portlet-header-button-collapse:hover {
 	cursor: pointer;
 }
 

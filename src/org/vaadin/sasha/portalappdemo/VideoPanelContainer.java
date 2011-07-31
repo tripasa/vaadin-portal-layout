@@ -4,14 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.vaadin.sasha.portallayout.PortalLayout;
+import org.vaadin.sasha.portallayout.PortalLayout.ToolbarAction;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
+import com.vaadin.terminal.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
 public class VideoPanelContainer extends HorizontalSplitPanel {
@@ -63,8 +66,39 @@ public class VideoPanelContainer extends HorizontalSplitPanel {
         pl.setWidth("100%");
         pl.setHeight("100%");
         pl.setVideoId(str);
+        pl.setImmediate(true);
         rightPortal.addComponent(pl);
         rightPortal.setComponentCaption(pl, name);
+        rightPortal.addAction(pl, new ToolbarAction(new ThemeResource("stop.png")) {
+            @Override
+            public void execute() {
+                pl.stop();
+                final Notification n = new Notification("Stop! If didn't stop - DO NOT use YouTube add-on and FF!");
+                n.setDelayMsec(1000);
+                getWindow().showNotification(n);
+            }
+        });
+        
+        rightPortal.addAction(pl, new ToolbarAction(new ThemeResource("pause.png")) {
+            @Override
+            public void execute() {
+                pl.pause();
+                final Notification n = new Notification("Pause! If didn't pause - DO NOT use YouTube add-on and FF!");
+                n.setDelayMsec(1000);
+                getWindow().showNotification(n);
+            }
+        });
+        
+        rightPortal.addAction(pl, new ToolbarAction(new ThemeResource("play.png")) {
+            @Override
+            public void execute() {
+                pl.requestRepaint();
+                pl.play();
+                final Notification n = new Notification("Play! If didn't start - DO NOT use YouTube add-on and FF!");
+                n.setDelayMsec(1000);
+                getWindow().showNotification(n);
+            }
+        });
     }
 
     private void buildMainPanel() {

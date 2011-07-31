@@ -51,6 +51,7 @@ public class ChartPanelContainer extends VerticalLayout {
         for (int i = 0; i < 10; i = i + 2) {
             final PortalLayout portal = new PortalLayout();
             portal.setHeight("500px");
+            portal.setMargin(true);
             Component chart = ChartUtil.getChartByIndex(i);
             // portal.addComponent(chart);
             portal.addComponent(chart);

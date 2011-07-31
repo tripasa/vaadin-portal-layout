@@ -65,19 +65,19 @@ public class PortalDropController extends AbstractPositioningDropController {
         final VPortalLayout currentParent = portlet.getParentPortal();
 
         /**
-         * Do the logic required for the former parent to clean up the trace of
-         * the removed portlet
-         */
-        if (!currentParent.equals(portal))
-            currentParent.onPortletMovedOut(portlet);
-
-        /**
          * Do the the logic required by the new parent to add the new portlet
          */
         if (portal.getChildPosition(portlet) != targetDropIndex) {
             portlet.setParentPortal(portal);
             portal.onPortletPositionUpdated(portlet, targetDropIndex);
         }
+        
+        /**
+         * Do the logic required for the former parent to clean up the trace of
+         * the removed portlet
+         */
+        if (!currentParent.equals(portal))
+            currentParent.onPortletMovedOut(portlet);
     }
 
     /**
