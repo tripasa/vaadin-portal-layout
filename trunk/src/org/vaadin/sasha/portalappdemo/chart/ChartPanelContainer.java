@@ -2,11 +2,9 @@ package org.vaadin.sasha.portalappdemo.chart;
 
 import org.vaadin.sasha.portallayout.PortalLayout;
 
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -20,24 +18,6 @@ public class ChartPanelContainer extends VerticalLayout {
         super();
         setSizeFull();
         buildMainPortal();
-        // Panel bottomPanel = new Panel();
-        // bottomPanel.setSizeFull();
-        // bottomPanel.getContent().setWidth("100%");
-        // PortalLayout bottomPortal = new PortalLayout();
-        // bottomPortal.setHeight("250px");
-        // bottomPortal.setWidth("70%");
-        // bottomPanel.getContent().addComponent(bottomPortal);
-        // ((VerticalLayout)bottomPanel.getContent()).setComponentAlignment(bottomPortal,
-        // Alignment.BOTTOM_CENTER);
-        // addComponent(bottomPanel);
-        // setExpandRatio(bottomPanel, 1f);
-    }
-
-    private Component textText() {
-        TextArea tx = new TextArea();
-        tx.setSizeFull();
-        tx.setHeight("200px");
-        return tx;
     }
 
     private void buildMainPortal() {
