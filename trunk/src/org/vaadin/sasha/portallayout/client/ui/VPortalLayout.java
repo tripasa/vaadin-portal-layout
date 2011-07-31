@@ -34,6 +34,7 @@ import com.vaadin.terminal.gwt.client.StyleConstants;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
 import com.vaadin.terminal.gwt.client.VConsole;
+import com.vaadin.terminal.gwt.client.ValueMap;
 import com.vaadin.terminal.gwt.client.ui.LayoutClickEventHandler;
 import com.vaadin.terminal.gwt.client.ui.VMarginInfo;
 import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
@@ -99,6 +100,11 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
      */
     public static final String PORTLET_POSITION = "PORTLET_POSITION";
 
+    /**
+     * 
+     */
+    public static final String PORTLET_ACTIONS = "PORTLET_ACTIONS";
+    
     /**
      * Client-server parameter that sets this portals' ability to share
      * portlets.
@@ -308,7 +314,11 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                 portlet.setCaption(portletCaption);
                 portlet.setClosable(isClosable);
                 portlet.setCollapsible(isCollapsible);
-
+                
+                if (itUidl.hasAttribute(PORTLET_ACTIONS)) {
+                    portlet.updateActions(itUidl.getMapAttribute(PORTLET_CAPTION));
+                }
+                
                 if (!isCollapsed.equals(portlet.isCollapsed()))
                     portlet.toggleCollapseState();
 
@@ -355,13 +365,13 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         VMarginInfo marginInfo = new VMarginInfo(
                 uidl.getIntAttribute("margins"));
         setStyleName(marginWrapper, CLASSNAME + "-" + StyleConstants.MARGIN_TOP, 
-                true);
+                marginInfo.hasTop());
         setStyleName(marginWrapper, CLASSNAME + "-" + StyleConstants.MARGIN_RIGHT,
-                true);
+                marginInfo.hasRight());
         setStyleName(marginWrapper, CLASSNAME + "-" + StyleConstants.MARGIN_BOTTOM,
-                true);
+                marginInfo.hasBottom());
         setStyleName(marginWrapper, CLASSNAME + "-" + StyleConstants.MARGIN_LEFT,
-                true);
+                marginInfo.hasLeft());
     }
 
     @Override
@@ -570,6 +580,10 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         recalculateLayoutAndPortletSizes();
     }
 
+    public void onActionTriggered(final Portlet portlet, String key) {
+        
+    }
+    
     /**
      * Handler for the portlet collapse state toggle.
      * 
@@ -814,9 +828,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
 
     private Paintable getComponent(Element element) {
         return Util.getPaintableForElement(client, this, element);
-    }
-
-    private void updateMargins() {
     }
 
 }

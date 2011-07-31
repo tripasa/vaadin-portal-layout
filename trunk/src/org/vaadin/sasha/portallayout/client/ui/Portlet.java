@@ -11,6 +11,7 @@ import com.vaadin.terminal.gwt.client.RenderInformation.FloatSize;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.terminal.gwt.client.ValueMap;
 
 /**
  * The class representing the portlet in the portal. Basically has the header
@@ -485,4 +486,11 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         return headerHeight;
     }
 
+    public void updateActions(final ValueMap actions) {
+        header.updateActions(actions);
+    }
+
+    public void onActionTriggered(final String actionId) {
+        parentPortal.onActionTriggered(this, actionId);
+    }
 }

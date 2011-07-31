@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
@@ -32,12 +33,23 @@ import com.vaadin.ui.Layout.SpacingHandler;
 public class PortalLayout extends AbstractLayout implements SpacingHandler,
         LayoutClickNotifier {
 
+    public abstract class ToolbarAction {
+        private String iconFileName;
+        public abstract void execute();
+        public ToolbarAction(final String icon) {
+            this.iconFileName = icon;
+        }
+        public String getIconFileName() {
+            return iconFileName;
+        }
+    }
+    
     /**
      * Helper class that holds Portlet information about the object.
      * 
      * @author p4elkin
      */
-    private class ComponentDetails implements Serializable {
+    public class ComponentDetails implements Serializable {
 
         private boolean isLocked = false;
 
@@ -49,6 +61,8 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
 
         private String caption;
 
+        private Map<String, ToolbarAction> actions;
+        
         public ComponentDetails() {
         }
 
@@ -88,10 +102,20 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
             return caption == null ? "" : caption;
         }
 
-        public void setCaption(String caption) {
+        public void setCaption(final String caption) {
             this.caption = caption;
         }
 
+        public String addAction(final ToolbarAction action) {
+            if (actions == null)
+                actions = new HashMap<String, ToolbarAction>();
+            actions.put("", action);
+            return "";
+        }
+        
+        public Map<String, ToolbarAction> getActions() {
+            return actions;
+        }
     }
 
     /**
@@ -152,6 +176,19 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
             target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE,
                     childComponentDetails.isCollapsible());
 
+            final Map<String, ToolbarAction> actions = childComponentDetails.getActions();
+            if (actions != null) {
+                final Iterator<?> actionIt = actions.entrySet().iterator();
+                final Map<String, String> actionMap = new HashMap<String, String>();
+                while (actionIt.hasNext()) {
+                    final Map.Entry<?, ?> entry = (Entry<?, ?>) actionIt.next();
+                    final String id = (String)entry.getKey();
+                    final String icon = ((ToolbarAction)entry.getValue()).getIconFileName();
+                    actionMap.put(id, icon);
+                }
+                if (!actionMap.isEmpty())
+                    target.addAttribute(VPortalLayout.PORTLET_ACTIONS, actionMap);
+            }
             childComponent.paint(target);
             target.endTag("portlet");
         }
@@ -529,6 +566,13 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         return isSpacingEnabled;
     }
 
+    public void addAction(final Component c, final ToolbarAction action) {
+        final ComponentDetails details = componentToDetails.get(c);
+        if (details == null)
+            throw new IllegalArgumentException("Component does not belong to this portal!");
+        details.addAction(action);
+    }
+    
     public void addListener(LayoutClickListener listener) {
         addListener(CLICK_EVENT, LayoutClickEvent.class, listener,
                 LayoutClickListener.clickMethod);
