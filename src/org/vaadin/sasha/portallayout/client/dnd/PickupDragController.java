@@ -13,15 +13,6 @@
  */
 package org.vaadin.sasha.portallayout.client.dnd;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.InsertPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.terminal.gwt.client.VConsole;
-
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -33,6 +24,13 @@ import org.vaadin.sasha.portallayout.client.dnd.util.DragClientBundle;
 import org.vaadin.sasha.portallayout.client.dnd.util.Location;
 import org.vaadin.sasha.portallayout.client.dnd.util.WidgetArea;
 import org.vaadin.sasha.portallayout.client.dnd.util.WidgetLocation;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.InsertPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /*
  * DragController used for drag-and-drop operations where a draggable widget or drag proxy is
@@ -177,7 +175,7 @@ public class PickupDragController extends AbstractDragController {
     if (context.dropController != null) {
       context.dropController.onMove(context);
     }
-    VConsole.log("On move! " + (System.currentTimeMillis() - timeMillis));
+    //VConsole.log("On move! " + (System.currentTimeMillis() - timeMillis));
   }
 
   private final static String APPLICATION_STYLE_NAME = "v-app";
@@ -296,10 +294,10 @@ public class PickupDragController extends AbstractDragController {
 
   @Override
   public void resetCache() {
-    long time = System.currentTimeMillis();
+    //long time = System.currentTimeMillis();
     super.resetCache();
     dropControllerCollection.resetCache(boundaryPanel, context);
-    VConsole.log("Cache invalidated in " + (System.currentTimeMillis() - time));
+    //VConsole.log("Cache invalidated in " + (System.currentTimeMillis() - time));
   }
 
   /**

@@ -15,7 +15,6 @@ import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.event.LayoutEvents.LayoutClickNotifier;
-import com.vaadin.terminal.ExternalResource;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
 import com.vaadin.terminal.ThemeResource;
@@ -36,17 +35,26 @@ import com.vaadin.ui.Layout.SpacingHandler;
 public class PortalLayout extends AbstractLayout implements SpacingHandler,
         LayoutClickNotifier {
 
+    /**
+     * Action class that represents a toolbutton on the client side that
+     * performs an action.
+     * 
+     * @author p4elkin
+     */
     public static abstract class ToolbarAction {
         private ThemeResource icon;
+
         public abstract void execute();
+
         public ToolbarAction(final ThemeResource icon) {
             this.icon = icon;
         }
+
         public ThemeResource getIcon() {
             return icon;
         }
     }
-    
+
     /**
      * Helper class that holds Portlet information about the object.
      * 
@@ -65,7 +73,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         private String caption;
 
         private Map<String, ToolbarAction> actions;
-        
+
         public ComponentDetails() {
         }
 
@@ -116,11 +124,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
             actions.put(randomId, action);
             return randomId;
         }
-        
+
         public Map<String, ToolbarAction> getActions() {
             return actions;
         }
-        
+
         ToolbarAction getActionById(final String id) {
             return actions.get(id);
         }
@@ -187,23 +195,25 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
             target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE,
                     childComponentDetails.isCollapsible());
 
-            final Map<String, ToolbarAction> actions = childComponentDetails.getActions();
-            if (actions != null &&
-                actions.entrySet().size() > 0) {
+            final Map<String, ToolbarAction> actions = childComponentDetails
+                    .getActions();
+            if (actions != null && actions.entrySet().size() > 0) {
                 final Iterator<?> actionIt = actions.entrySet().iterator();
                 final String[] ids = new String[actions.entrySet().size()];
                 final String[] iconUrls = new String[actions.entrySet().size()];
                 int pos = 0;
                 while (actionIt.hasNext()) {
                     final Map.Entry<?, ?> entry = (Entry<?, ?>) actionIt.next();
-                    final String id = (String)entry.getKey();
-                    final ThemeResource r = ((ToolbarAction)entry.getValue()).getIcon(); 
+                    final String id = (String) entry.getKey();
+                    final ThemeResource r = ((ToolbarAction) entry.getValue())
+                            .getIcon();
                     final String icon = "theme://" + r.getResourceId();
-                    ids[pos]= id;
+                    ids[pos] = id;
                     iconUrls[pos++] = icon;
                 }
                 target.addAttribute(VPortalLayout.PORTLET_ACTION_IDS, ids);
-                target.addAttribute(VPortalLayout.PORTLET_ACTION_ICONS, iconUrls);
+                target.addAttribute(VPortalLayout.PORTLET_ACTION_ICONS,
+                        iconUrls);
             }
             childComponent.paint(target);
             target.endTag("portlet");
@@ -435,14 +445,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
 
         if (variables.containsKey(VPortalLayout.PORTLET_ACTION_TRIGGERED)) {
             final Map<String, Object> portletParameters = (Map<String, Object>) variables
-                .get(VPortalLayout.PORTLET_ACTION_TRIGGERED);
+                    .get(VPortalLayout.PORTLET_ACTION_TRIGGERED);
             final Component component = (Component) portletParameters
-                .get(VPortalLayout.PAINTABLE_MAP_PARAM);
+                    .get(VPortalLayout.PAINTABLE_MAP_PARAM);
             final String actionId = (String) portletParameters
-                .get(VPortalLayout.PORTLET_ACTION_ID);
+                    .get(VPortalLayout.PORTLET_ACTION_ID);
             onActionTriggered(component, actionId);
         }
-        
+
         if (variables.containsKey(VPortalLayout.PORTLET_POSITION_UPDATED)) {
             final Map<String, Object> portletParameters = (Map<String, Object>) variables
                     .get(VPortalLayout.PORTLET_POSITION_UPDATED);
@@ -472,10 +482,12 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         }
     }
 
-    private void onActionTriggered(final Component component, final String actionId) {
+    private void onActionTriggered(final Component component,
+            final String actionId) {
         final ComponentDetails details = componentToDetails.get(component);
         if (details == null)
-            throw new IllegalArgumentException("Wrong Component! Action Trigger Failed!");
+            throw new IllegalArgumentException(
+                    "Wrong Component! Action Trigger Failed!");
         final ToolbarAction action = details.getActionById(actionId);
         action.execute();
     }
@@ -509,7 +521,8 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
      * @param newPosition
      *            New position of the component.
      */
-    private void onComponentPositionUpdated(final Component component, int newPosition) {
+    private void onComponentPositionUpdated(final Component component,
+            int newPosition) {
 
         // The client side reported that portlet is no longer there - remove
         // component if so.
@@ -536,9 +549,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
     private ComponentDetails getDetails(final Component c) {
         return componentToDetails.get(c);
     }
-    
+
     @Override
-    public void replaceComponent(final Component oldComponent, final Component newComponent) {
+    public void replaceComponent(final Component oldComponent,
+            final Component newComponent) {
     }
 
     @Override
@@ -550,13 +564,13 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         componentToDetails.remove(c);
         components.remove(c);
     }
-    
+
     @Override
     public void removeComponent(Component c) {
         doComponentRemoveLogic(c);
         super.removeComponent(c);
     }
-    
+
     public void addComponent(Component c) {
         addComponent(c, components.size());
     }
@@ -574,9 +588,8 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                     "Component has already been added to the portal!");
 
         c.setWidth("100%");
-        final ComponentDetails details = 
-            c.getParent() instanceof PortalLayout ?
-                ((PortalLayout)c.getParent()).getDetails(c) : new ComponentDetails();
+        final ComponentDetails details = c.getParent() instanceof PortalLayout ? ((PortalLayout) c
+                .getParent()).getDetails(c) : new ComponentDetails();
         componentToDetails.put(c, details);
         if (position == components.size())
             components.add(c);
@@ -601,20 +614,39 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         return isSpacingEnabled;
     }
 
+    /**
+     * Add an action to the components' portlet.
+     * 
+     * @param c
+     *            Component.
+     * @param action
+     *            Action to be performed.
+     * @return New action id. Action can be removed using this id.
+     */
     public String addAction(final Component c, final ToolbarAction action) {
         final ComponentDetails details = componentToDetails.get(c);
         if (details == null)
-            throw new IllegalArgumentException("Component does not belong to this portal!");
+            throw new IllegalArgumentException(
+                    "Component does not belong to this portal!");
         return details.addAction(action);
     }
-    
+
+    /**
+     * Remove action by its ID.
+     * 
+     * @param c
+     *            Component.
+     * @param actionId
+     *            ID of action to be removed.
+     */
     public void removeAction(final Component c, String actionId) {
         final ComponentDetails details = componentToDetails.get(c);
         if (details == null)
-            throw new IllegalArgumentException("Component does not belong to this portal!");
+            throw new IllegalArgumentException(
+                    "Component does not belong to this portal!");
         details.removeAction(actionId);
     }
-    
+
     public void addListener(LayoutClickListener listener) {
         addListener(CLICK_EVENT, LayoutClickEvent.class, listener,
                 LayoutClickListener.clickMethod);

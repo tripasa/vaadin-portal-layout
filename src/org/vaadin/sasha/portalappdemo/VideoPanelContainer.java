@@ -4,17 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.vaadin.sasha.portallayout.PortalLayout;
-import org.vaadin.sasha.portallayout.PortalLayout.ToolbarAction;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
-import com.vaadin.terminal.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
 public class VideoPanelContainer extends HorizontalSplitPanel {
