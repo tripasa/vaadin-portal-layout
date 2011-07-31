@@ -13,6 +13,7 @@ public class PortalTabSheet extends TabSheet {
 
     private final DashBoardPanel dashTab = new DashBoardPanel();
 
+    private final ActionDemoTab actionTab = new ActionDemoTab();
     /**
      * Constructor
      */
@@ -21,13 +22,17 @@ public class PortalTabSheet extends TabSheet {
         addTab(videoTabPanel, "Video Portal", null);
         addTab(chartTabPanel, "Chart Portal", null);
         addTab(dashTab, "Fixed Dash Board", null);
+        addTab(actionTab, "Portlets With Actions", null);
         addListener(new SelectedTabChangeListener() {
 
             @Override
             public void selectedTabChange(SelectedTabChangeEvent event) {
-                if (getSelectedTab() != null
-                        && getSelectedTab().equals(dashTab)) {
-                    dashTab.populateTree();
+                if (getSelectedTab() != null) {
+                    if (getSelectedTab().equals(dashTab)) {
+                        dashTab.populateTree();
+                    } else if (getSelectedTab().equals(actionTab)) {
+                        actionTab.construct();
+                    }
                 }
             }
         });

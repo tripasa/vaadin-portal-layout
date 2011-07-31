@@ -53,34 +53,14 @@ public class ChartPanelContainer extends VerticalLayout {
             portal.setHeight("500px");
             portal.setMargin(true);
             Component chart = ChartUtil.getChartByIndex(i);
-            // portal.addComponent(chart);
             portal.addComponent(chart);
-            // portal.setComponentCaption(chart,
-            // ChartUtil.getChartCaptionByIndex(i));
+            portal.setComponentCaption(chart,
+            ChartUtil.getChartCaptionByIndex(i));
 
             chart = ChartUtil.getChartByIndex(i + 1);
-            // portal.addComponent(chart);
             portal.addComponent(chart);
-            // portal.setComponentCaption(chart,
-            // ChartUtil.getChartCaptionByIndex(i+1));
-
-            chart = ChartUtil.getChartByIndex(i + 2);
-            // portal.addComponent(chart);
-            portal.addComponent(chart);
-            // portal.setComponentCaption(chart,
-            // ChartUtil.getChartCaptionByIndex(i+2));
-
-            chart = ChartUtil.getChartByIndex(i + 3);
-            // portal.addComponent(chart);
-            portal.addComponent(textText());
-            // portal.setComponentCaption(chart,
-            // ChartUtil.getChartCaptionByIndex(i+3));
-
-            chart = ChartUtil.getChartByIndex(i + 4);
-            // portal.addComponent(chart);
-            portal.addComponent(textText());
-            // portal.setComponentCaption(chart,
-            // ChartUtil.getChartCaptionByIndex(i+4));
+            portal.setComponentCaption(chart,
+            ChartUtil.getChartCaptionByIndex(i+1));
 
             panelLayout.addComponent(portal);
             if (i == 1)

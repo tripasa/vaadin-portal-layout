@@ -124,6 +124,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         ToolbarAction getActionById(final String id) {
             return actions.get(id);
         }
+
+        public void removeAction(final String actionId) {
+            actions.remove(actionId);
+        }
     }
 
     /**
@@ -157,8 +161,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
      */
     public PortalLayout() {
         super();
-        setWidth("100%");
-        setHeight("100%");
+        setSizeFull();
     }
 
     @Override
@@ -547,7 +550,13 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         componentToDetails.remove(c);
         components.remove(c);
     }
-
+    
+    @Override
+    public void removeComponent(Component c) {
+        doComponentRemoveLogic(c);
+        super.removeComponent(c);
+    }
+    
     public void addComponent(Component c) {
         addComponent(c, components.size());
     }
@@ -592,11 +601,18 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         return isSpacingEnabled;
     }
 
-    public void addAction(final Component c, final ToolbarAction action) {
+    public String addAction(final Component c, final ToolbarAction action) {
         final ComponentDetails details = componentToDetails.get(c);
         if (details == null)
             throw new IllegalArgumentException("Component does not belong to this portal!");
-        details.addAction(action);
+        return details.addAction(action);
+    }
+    
+    public void removeAction(final Component c, String actionId) {
+        final ComponentDetails details = componentToDetails.get(c);
+        if (details == null)
+            throw new IllegalArgumentException("Component does not belong to this portal!");
+        details.removeAction(actionId);
     }
     
     public void addListener(LayoutClickListener listener) {
