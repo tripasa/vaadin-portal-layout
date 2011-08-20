@@ -72,11 +72,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     public static final String PORTLET_COLLAPSE_STATE_CHANGED = "PORTLET_COLLAPSE_STATE_CHANGE";
 
     /**
-     * Parameter received from server, contains caption.
-     */
-    public static final String PORTLET_CAPTION = "PORTLET_CAPTION";
-
-    /**
      * Parameter received from server, true if portlet is closable.
      */
     public static final String PORTLET_CLOSABLE = "PORTLET_CLOSABLE";
@@ -303,8 +298,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
             final UIDL itUidl = (UIDL) it.next();
             if (itUidl.getTag().equals("portlet")) {
-                final String portletCaption = itUidl
-                        .getStringAttribute(PORTLET_CAPTION);
 
                 final Boolean isClosable = itUidl
                         .getBooleanAttribute(PORTLET_CLOSABLE);
@@ -326,7 +319,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                 updatePortletInPosition(portlet, pos);
 
                 setLock(portlet, isLocked);
-                portlet.setCaption(portletCaption);
                 portlet.setClosable(isClosable);
                 portlet.setCollapsible(isCollapsible);
                 
@@ -757,7 +749,11 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
 
     @Override
     public void updateCaption(Paintable component, UIDL uidl) {
-        // / Captions not supported.
+        final Widget widget = (Widget)component;
+        final Portlet portlet = widgetToPortletContainer.get(component);
+        if (portlet != null) {
+            portlet.updateCaption(uidl);
+        }
     }
 
     @Override

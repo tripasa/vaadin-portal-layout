@@ -11,12 +11,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.terminal.gwt.client.UIDL;
+import com.vaadin.terminal.gwt.client.VCaption;
 
 /**
  * Portlet header. COntains the controls for the basic operations with portlet
@@ -24,37 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author p4elkin
  */
-public class PortletHeader extends ComplexPanel {
-
-    private static class CaptionContainer extends FocusWidget implements HasHTML {
-        private String caption;
-        
-        public CaptionContainer() {
-            super(DOM.createDiv());
-        }
-        
-        @Override
-        public String getText() {
-            return caption;
-        }
-
-        @Override
-        public void setText(String text) {
-            this.caption = text;
-            getElement().setInnerHTML(caption == null || caption.isEmpty() ? "&nbsp":caption);
-        }
-
-        @Override
-        public String getHTML() {
-            return getText();
-        }
-
-        @Override
-        public void setHTML(String html) {
-            setText(html);
-        }
-    }
-    
+public class PortletHeader extends ComplexPanel {    
     /**
      * Class name for styling the element.
      */
@@ -63,27 +33,27 @@ public class PortletHeader extends ComplexPanel {
     /**
      * Class name suffix for the close button
      */
-    private static final String CLOSEBUTTON_CLASSNAME_SUFFIX = "-close";
+    private static final String BUTTON_CLOSE_SUFFIX = "close";
 
     /**
      * Class name suffix for the collapse button
      */
-    private static final String COLLAPSEBUTTON_CLASSNAME_SUFFIX = "-collapse";
+    private static final String BUTTON_COLLAPSE_SUFFIX = "collapse";
 
     /**
      * Class name suffix for the collapse button
      */
-    private static final String BUTTON_CLASSNAME_SUFFIX = "-button";
+    private static final String BUTTON_EXPAND_SUFFIX = "expand";
+    
+    /**
+     * Class name suffix for the collapse button
+     */
+    private static final String BUTTON_SUFFIX = "-button";
 
     /**
      * Class name suffix for the button bar.
      */
-    private static final String BUTTONBAR_CLASSNAME_SUFFIX = "-buttonbar";
-
-    /**
-     * Class name suffix for the caption wrapper
-     */
-    private static final String CAPTIONWRAPPER_CLASSNAME_SUFFIX = "-captionwrap";
+    private static final String BUTTONBAR_SUFFIX = "-buttonbar";
 
     /**
      * Element that holds the caption
@@ -94,11 +64,6 @@ public class PortletHeader extends ComplexPanel {
      * Portlet to which this header belongs.
      */
     private final Portlet parentPortlet;
-
-    /**
-     * 
-     */
-    private final CaptionContainer captionHtml = new CaptionContainer();
 
     /**
      * 
@@ -115,6 +80,11 @@ public class PortletHeader extends ComplexPanel {
      */
     private Button collapseButton = new Button();
 
+    /**
+     * 
+     */
+    private VCaption vcaption;
+    
     /**
      * 
      */
@@ -162,7 +132,8 @@ public class PortletHeader extends ComplexPanel {
 
         @Override
         public void onMouseDown(MouseDownEvent event) {
-            captionHtml.setFocus(true);
+            vcaption.getElement().focus();
+            parentPortlet.blur();
         }
     };
 
@@ -172,36 +143,29 @@ public class PortletHeader extends ComplexPanel {
      * @param parent
      *            Portlet to which this header belongs.
      */
-    public PortletHeader(final Portlet parent) {
+    public PortletHeader(final Portlet parent, final ApplicationConnection client) {
         super();
         setElement(captionWrapper);
-        setCaption("");
+        vcaption = new VCaption(null, client);
+        vcaption.addStyleName("caption");
         captionWrapper.setClassName(getClassName());
         captionWrapper.appendChild(buttonBar);
         parentPortlet = parent;
 
         closeButton.addClickHandler(closeButtonClickHandler);
         collapseButton.addClickHandler(collapseButtonClickHandler);
-        captionHtml.addMouseDownHandler(mouseDownHandler);
+        vcaption.addMouseDownHandler(mouseDownHandler);
 
-        add(captionHtml, (com.google.gwt.user.client.Element) captionWrapper);
+        add(vcaption, (com.google.gwt.user.client.Element) captionWrapper);
         add(collapseButton, (com.google.gwt.user.client.Element) buttonBar);
         add(closeButton, (com.google.gwt.user.client.Element) buttonBar);
 
-        closeButton.setStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX);
-        closeButton.addStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX
-                + CLOSEBUTTON_CLASSNAME_SUFFIX);
-        collapseButton.setStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX);
-        collapseButton.addStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX
-                + COLLAPSEBUTTON_CLASSNAME_SUFFIX);
-
-        buttonBar.setClassName(getClassName() + BUTTONBAR_CLASSNAME_SUFFIX);
-        captionHtml.setStyleName(getClassName()
-                + CAPTIONWRAPPER_CLASSNAME_SUFFIX);
-    }
-
-    public void setCaption(final String caption) {
-        captionHtml.setText(caption);
+        closeButton.setStyleName(getClassName() + BUTTON_SUFFIX);
+        closeButton.addStyleDependentName(BUTTON_CLOSE_SUFFIX);
+        
+        collapseButton.setStyleName(getClassName() + BUTTON_SUFFIX);
+        collapseButton.addStyleDependentName(BUTTON_COLLAPSE_SUFFIX);
+        buttonBar.setClassName(getClassName() + BUTTONBAR_SUFFIX);
     }
 
     @Override
@@ -212,7 +176,7 @@ public class PortletHeader extends ComplexPanel {
     }
 
     public Widget getDraggableArea() {
-        return captionHtml;
+        return vcaption;
     }
 
     public static String getClassName() {
@@ -237,10 +201,6 @@ public class PortletHeader extends ComplexPanel {
         return collapsible;
     }
 
-    public String getCaption() {
-        return captionHtml.getText();
-    }
-
     public void updateActions(final Map<String, String> actions) {
         final Set<String> keys = actions.keySet();
         final Iterator<String> it = keys.iterator();
@@ -262,7 +222,7 @@ public class PortletHeader extends ComplexPanel {
                     insert(button, (com.google.gwt.user.client.Element) buttonBar, 0, true);
                 }
                 button.getElement().getStyle().setBackgroundImage("url("+ icon +")");
-                button.setStyleName(getClassName() + BUTTON_CLASSNAME_SUFFIX);
+                button.setStyleName(getClassName() + BUTTON_SUFFIX);
                 actionIdToButton.put(key, button);
                 actionIdToIcon.put(key, icon);
             }
@@ -278,6 +238,15 @@ public class PortletHeader extends ComplexPanel {
                 actionIdToIcon.remove(id);
             }
         }
+    }
+
+    public void updateCaption(UIDL uidl) {
+        vcaption.updateCaption(uidl);
+    }
+
+    public void toggleCollapseStyles(boolean isCollapsed) {
+        collapseButton.removeStyleDependentName(isCollapsed ? BUTTON_COLLAPSE_SUFFIX : BUTTON_EXPAND_SUFFIX);
+        collapseButton.addStyleDependentName(isCollapsed ?  BUTTON_EXPAND_SUFFIX : BUTTON_COLLAPSE_SUFFIX);
     }
 
 }

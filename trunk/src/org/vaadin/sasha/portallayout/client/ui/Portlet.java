@@ -112,11 +112,6 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     private ApplicationConnection client;
 
     /**
-   * 
-   */
-    private int headerHeight = -1;
-
-    /**
      * Constructor.
      * 
      * @param widget
@@ -135,7 +130,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
 
         containerElement = DOM.createDiv();
 
-        header = new PortletHeader(this);
+        header = new PortletHeader(this, client);
         header.getElement().getStyle().setFloat(Style.Float.LEFT);
         add(header, containerElement);
 
@@ -344,7 +339,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     public void toggleCollapseState() {
         setCollapsed(!isCollapsed);
         setContainerElementSizes(getOffsetWidth(), getRequiredHeight());
-        updateCollapseStyle();
+        toggleCollapseStyles();
         parentPortal.onPortletCollapseStateChanged(this);
     }
 
@@ -374,19 +369,14 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         return CLASSNAME;
     }
 
-    public void updateCollapseStyle() {
-        contentDiv.getStyle().setProperty("visibility",
-                isCollapsed ? "hidden" : "visible");
-        contentDiv.getStyle().setPropertyPx("height",
-                isCollapsed ? 0 : contentSizeInfo.getHeight());
+    public void toggleCollapseStyles() {
+        contentDiv.getStyle().setProperty("visibility", isCollapsed ? "hidden" : "visible");
+        contentDiv.getStyle().setPropertyPx("height", isCollapsed ? 0 : contentSizeInfo.getHeight());
+        header.toggleCollapseStyles(isCollapsed);
     }
 
     public int getSpacing() {
         return parentPortal.getVerticalSpacing();
-    }
-
-    public void setCaption(final String portletCaption) {
-        header.setCaption(portletCaption);
     }
 
     public void setClosable(boolean closable) {
@@ -405,17 +395,13 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         return header.isCollapsible();
     }
 
-    public String getCaption() {
-        return header.getCaption();
-    }
-
     /**
      * 
      * @return
      */
     @Override
     public int getRequiredHeight() {
-        int result = getHeaderHeight();
+        int result = header.getOffsetHeight();
         if (!isCollapsed && !isHeightRelative)
             result += contentSizeInfo.getHeight();
         return result;
@@ -481,17 +467,19 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         return this;
     }
 
-    private int getHeaderHeight() {
-        if (headerHeight == -1)
-            headerHeight = header.getOffsetHeight();
-        return headerHeight;
-    }
-
     public void updateActions(final Map<String, String> actions) {
         header.updateActions(actions);
     }
 
     public void onActionTriggered(final String actionId) {
         parentPortal.onActionTriggered(this, actionId);
+    }
+
+    public void updateCaption(final UIDL uidl) {
+        header.updateCaption(uidl);
+    }
+
+    public void blur() {
+        content.getElement().blur();
     }
 }

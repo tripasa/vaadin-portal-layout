@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.vaadin.sasha.portallayout.ToolbarAction.ActionContext;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
@@ -36,26 +37,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         LayoutClickNotifier {
 
     /**
-     * Action class that represents a toolbutton on the client side that
-     * performs an action.
-     * 
-     * @author p4elkin
-     */
-    public static abstract class ToolbarAction {
-        private ThemeResource icon;
-
-        public abstract void execute();
-
-        public ToolbarAction(final ThemeResource icon) {
-            this.icon = icon;
-        }
-
-        public ThemeResource getIcon() {
-            return icon;
-        }
-    }
-
-    /**
      * Helper class that holds Portlet information about the object.
      * 
      * @author p4elkin
@@ -69,8 +50,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         private boolean isClosable = true;
 
         private boolean isCollapsible = true;
-
-        private String caption;
 
         private Map<String, ToolbarAction> actions;
 
@@ -107,14 +86,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
 
         public void setCollapsible(boolean isCollapsible) {
             this.isCollapsible = isCollapsible;
-        }
-
-        public String getCaption() {
-            return caption == null ? "" : caption;
-        }
-
-        public void setCaption(final String caption) {
-            this.caption = caption;
         }
 
         public String addAction(final ToolbarAction action) {
@@ -184,7 +155,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                     .get(childComponent);
 
             target.startTag("portlet");
-            target.addAttribute(VPortalLayout.PORTLET_CAPTION, childComponentDetails.getCaption());
             target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, childComponentDetails.isClosable());
             target.addAttribute(VPortalLayout.PORTLET_LOCKED, childComponentDetails.isLocked());
             target.addAttribute(VPortalLayout.PORTLET_COLLAPSED, childComponentDetails.isCollapsed());
@@ -280,48 +250,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                     "Portal doesn not contain this component!");
 
         return details.isLocked();
-    }
-
-    /**
-     * Get caption of the portlet containing this component.
-     * 
-     * @param c
-     *            Component
-     * @return Caption.
-     */
-    public String getComponentCaption(Component c) {
-        final ComponentDetails details = componentToDetails.get(c);
-
-        if (details == null)
-            throw new IllegalArgumentException(
-                    "Portal doesn not contain this component!");
-
-        return details.getCaption();
-    }
-
-    /**
-     * Set caption of the portlet containing this component.
-     * 
-     * @param c
-     *            Component.
-     * @param caption
-     *            Caption.
-     */
-    public void setComponentCaption(final Component c, final String caption) {
-        final ComponentDetails details = componentToDetails.get(c);
-
-        if (details == null)
-            throw new IllegalArgumentException(
-                    "Portal doesn not contain this component!");
-
-        final String currentCaption = details.getCaption();
-
-        if (currentCaption != null && caption != null
-                && caption.equals(currentCaption))
-            return;
-
-        details.setCaption(caption);
-        requestRepaint();
     }
 
     /**
@@ -475,14 +403,13 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         }
     }
 
-    private void onActionTriggered(final Component component,
-            final String actionId) {
+    private void onActionTriggered(final Component component, final String actionId) {
         final ComponentDetails details = componentToDetails.get(component);
         if (details == null)
             throw new IllegalArgumentException(
                     "Wrong Component! Action Trigger Failed!");
         final ToolbarAction action = details.getActionById(actionId);
-        action.execute();
+        action.execute(new ActionContext(this, component));
     }
 
     /**
@@ -626,8 +553,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
     public String addAction(final Component c, final ToolbarAction action) {
         final ComponentDetails details = componentToDetails.get(c);
         if (details == null)
-            throw new IllegalArgumentException(
-                    "Component does not belong to this portal!");
+            throw new IllegalArgumentException("Component does not belong to this portal!");
         return details.addAction(action);
     }
 
@@ -654,5 +580,30 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
 
     public void removeListener(LayoutClickListener listener) {
         removeListener(CLICK_EVENT, LayoutClickEvent.class, listener);
+    }
+    
+    /**
+     * Get caption of the portlet containing this component.
+     * 
+     * @param c
+     *            Component
+     * @return Caption.
+     * @deprecated
+     */
+    public String getComponentCaption(Component c) {
+        return c.getCaption();
+    }
+    
+    /**
+     * Set caption of the portlet containing this component.
+     * 
+     * @param c
+     *            Component.
+     * @param caption
+     *            Caption.
+     *@deprecated use components setCation method instead
+     */
+    public void setComponentCaption(final Component c, final String caption) {
+        c.setCaption(caption);
     }
 }
