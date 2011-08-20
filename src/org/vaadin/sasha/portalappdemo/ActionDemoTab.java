@@ -4,14 +4,21 @@ import java.io.File;
 import java.io.FileFilter;
 
 import org.vaadin.sasha.portallayout.PortalLayout;
-import org.vaadin.sasha.portallayout.PortalLayout.ToolbarAction;
+import org.vaadin.sasha.portallayout.ToolbarAction;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
 import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.ThemeResource;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
@@ -25,10 +32,16 @@ public class ActionDemoTab extends Panel {
     
     private final HorizontalLayout layout = new HorizontalLayout();
     
+    private TextArea tx1 = new TextArea("test1");
+    
+    private TextArea tx2 = new TextArea("test2");
+    
     private boolean init = false;
     
     private int currentDisplayedImage = -1;
 
+    private boolean replacementFlag = true;
+    
     private File[] files; 
     
     public ActionDemoTab() {
@@ -37,7 +50,20 @@ public class ActionDemoTab extends Panel {
         layout.setWidth("100%");
         layout.setMargin(true);
         layout.setSpacing(true);
+        final Button b = new Button("replace");
+        b.addListener(new ClickListener() {
+            
+            @Override
+            public void buttonClick(ClickEvent event) {
+                if (replacementFlag)
+                    imagePortal.replaceComponent(tx1, tx2);
+                else
+                    imagePortal.replaceComponent(tx2, tx1);
+                replacementFlag = !replacementFlag;
+            }
+        });
         setContent(layout);
+        layout.addComponent(b);
         buildPortals();
     }
 
@@ -51,6 +77,20 @@ public class ActionDemoTab extends Panel {
         layout.setExpandRatio(videoPortal, 1f);
         layout.setExpandRatio(imagePortal, 1f);
         layout.setExpandRatio(miscPortal, 1f);
+        
+        tx1.setWidth("100%");
+        tx1.setHeight("300px");
+        tx2.setWidth("100%");
+        tx2.setHeight("300px");
+        tx1.setValue("test1");
+        tx2.setValue("test2");
+        imagePortal.addComponent(tx1);
+        imagePortal.addComponent(new Button("b"));
+        imagePortal.addComponent(new TextField("TF test"));
+        VerticalLayout l = new VerticalLayout();
+        l.setSizeFull();
+        l.setCaption("test");
+        imagePortal.addComponent(l);
     }
     
 
@@ -83,22 +123,20 @@ public class ActionDemoTab extends Panel {
         image.setHeight("400px");
         image.setSource(new FileResource(files[currentDisplayedImage], getApplication()));
         imagePortal.addComponent(image);
-        imagePortal.setComponentCaption(image, files[currentDisplayedImage].getName());
+        image.setCaption(files[currentDisplayedImage].getName());
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_right.png")) {
             @Override
-            public void execute() {
+            public void execute(final ActionContext context) {
                 final File next = getNextFile();
-                final PortalLayout parent = (PortalLayout) image.getParent();  
-                parent.setComponentCaption(image, next.getName());
+                image.setCaption(next.getName());
                 image.setSource(new FileResource(next, getApplication()));
             }
         });
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_left.png")) {
             @Override
-            public void execute() {
+            public void execute(final ActionContext context) {
                 final File prev = getPrevFile();
-                final PortalLayout parent = (PortalLayout) image.getParent();
-                parent.setComponentCaption(image, prev.getName());
+                image.setCaption(prev.getName());
                 image.setSource(new FileResource(prev, getApplication()));
             }
         });
@@ -128,10 +166,10 @@ public class ActionDemoTab extends Panel {
         pl.setVideoId("QrzGpVOPcTI");
         pl.setImmediate(true);
         videoPortal.addComponent(pl);
-        videoPortal.setComponentCaption(pl, "Joy Division - Disorder");
+        pl.setCaption("Joy Division - Disorder");
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("stop.png")) {
             @Override
-            public void execute() {
+            public void execute(final ActionContext context) {
                 pl.stop();
                 final Notification n = new Notification("Stop! If didn't stop - DO NOT use YouTube add-on and FF!");
                 n.setDelayMsec(1000);
@@ -141,7 +179,7 @@ public class ActionDemoTab extends Panel {
         
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("pause.png")) {
             @Override
-            public void execute() {
+            public void execute(final ActionContext context) {
                 pl.pause();
                 final Notification n = new Notification("Pause! If didn't pause - DO NOT use YouTube add-on and FF!");
                 n.setDelayMsec(1000);
@@ -151,7 +189,7 @@ public class ActionDemoTab extends Panel {
         
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("play.png")) {
             @Override
-            public void execute() {
+            public void execute(final ActionContext context) {
                 pl.requestRepaint();
                 pl.play();
                 final Notification n = new Notification("Play! If didn't start - DO NOT use YouTube add-on and FF!");
