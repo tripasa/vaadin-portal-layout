@@ -184,19 +184,13 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                     .get(childComponent);
 
             target.startTag("portlet");
-            target.addAttribute(VPortalLayout.PORTLET_CAPTION,
-                    childComponentDetails.getCaption());
-            target.addAttribute(VPortalLayout.PORTLET_CLOSABLE,
-                    childComponentDetails.isClosable());
-            target.addAttribute(VPortalLayout.PORTLET_LOCKED,
-                    childComponentDetails.isLocked());
-            target.addAttribute(VPortalLayout.PORTLET_COLLAPSED,
-                    childComponentDetails.isCollapsed());
-            target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE,
-                    childComponentDetails.isCollapsible());
+            target.addAttribute(VPortalLayout.PORTLET_CAPTION, childComponentDetails.getCaption());
+            target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, childComponentDetails.isClosable());
+            target.addAttribute(VPortalLayout.PORTLET_LOCKED, childComponentDetails.isLocked());
+            target.addAttribute(VPortalLayout.PORTLET_COLLAPSED, childComponentDetails.isCollapsed());
+            target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE, childComponentDetails.isCollapsible());
 
-            final Map<String, ToolbarAction> actions = childComponentDetails
-                    .getActions();
+            final Map<String, ToolbarAction> actions = childComponentDetails.getActions();
             if (actions != null && actions.entrySet().size() > 0) {
                 final Iterator<?> actionIt = actions.entrySet().iterator();
                 final String[] ids = new String[actions.entrySet().size()];
@@ -205,8 +199,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
                 while (actionIt.hasNext()) {
                     final Map.Entry<?, ?> entry = (Entry<?, ?>) actionIt.next();
                     final String id = (String) entry.getKey();
-                    final ThemeResource r = ((ToolbarAction) entry.getValue())
-                            .getIcon();
+                    final ThemeResource r = ((ToolbarAction) entry.getValue()).getIcon();
                     final String icon = "theme://" + r.getResourceId();
                     ids[pos] = id;
                     iconUrls[pos++] = icon;
@@ -553,6 +546,13 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
     @Override
     public void replaceComponent(final Component oldComponent,
             final Component newComponent) {
+        int position = components.indexOf(oldComponent);
+        if (position < 0)
+            throw new IllegalArgumentException(
+                    "Portal does not contain the portlet. Replacement failed.");
+        componentToDetails.put(newComponent, componentToDetails.get(oldComponent));
+        removeComponent(oldComponent);
+        doComponentAddLogic(newComponent, position);
     }
 
     @Override
