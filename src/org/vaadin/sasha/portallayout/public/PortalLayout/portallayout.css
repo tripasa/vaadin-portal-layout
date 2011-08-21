@@ -22,15 +22,18 @@
 	border: 2px dashed black;	
 }
 
+
 .v-portlet {
+}
+
+.v-portlet .v-portlet-content {
+	overflow: hidden;
 }
 
 .v-portlet .v-portlet-header {
 	background-image: url(header-bg.png);
 	width: 100%;
-	height: 19px;
-	padding-top: 7px;
-	padding-bottom: 2px;
+	height: 28px;
 }
 
 .v-portlet .v-portlet-header-button {
@@ -49,14 +52,24 @@
 	background-image: url(collapse.png);
 }
 
+.v-portlet .v-portlet-header-button-expand {
+	background-image: url(close.png);
+}
+
+
 .v-portlet .v-portlet-header-buttonbar {
 	float: right;
 	margin-right: 9px;
+	padding-top: 7px;
+	padding-bottom: 2px;
 }
 
-.v-portlet .v-portlet-header-captionwrap {
+.v-portlet .v-portlet-header .v-caption {
 	padding-right: 3px;
-	padding-left: 11px;
+	height: 100%;
+}
+
+.v-portlet .v-portlet-header .v-caption .v-captiontext {
 	font-weight: bold;
 	font-size: 12px;
 	line-height: normal;
@@ -66,20 +79,16 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-ms-text-overflow: ellipsis;
+	padding-left: 11px;
+	padding-top: 7px;
+	padding-bottom: 2px;
 }
 
 .v-portlet .v-portlet-header-button:hover {
 	cursor: pointer;
 }
 
-.v-portlet. .v-portlet-header-caption {
-	
-}
-.v-portlet .v-portlet-header:hover {
-	cursor: move;
-}
-
-.v-portlet .v-portlet-header:active {
+.v-portlet .v-caption:hover {
 	cursor: move;
 }
 
