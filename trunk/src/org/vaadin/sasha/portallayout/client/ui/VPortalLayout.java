@@ -10,6 +10,7 @@ import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 import org.vaadin.sasha.portallayout.client.ui.Portlet.PortletLockState;
 
+import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Node;
@@ -299,14 +300,10 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             final UIDL itUidl = (UIDL) it.next();
             if (itUidl.getTag().equals("portlet")) {
 
-                final Boolean isClosable = itUidl
-                        .getBooleanAttribute(PORTLET_CLOSABLE);
-                final Boolean isCollapsible = itUidl
-                        .getBooleanAttribute(PORTLET_COLLAPSIBLE);
-                final Boolean isLocked = itUidl
-                        .getBooleanAttribute(PORTLET_LOCKED);
-                final Boolean isCollapsed = itUidl
-                        .getBooleanAttribute(PORTLET_COLLAPSED);
+                final Boolean isClosable = itUidl.getBooleanAttribute(PORTLET_CLOSABLE);
+                final Boolean isCollapsible = itUidl.getBooleanAttribute(PORTLET_COLLAPSIBLE);
+                final Boolean isLocked = itUidl.getBooleanAttribute(PORTLET_LOCKED);
+                final Boolean isCollapsed = itUidl.getBooleanAttribute(PORTLET_COLLAPSED);
 
                 final UIDL childUidl = (UIDL) itUidl.getChildUIDL(0);
                 final Paintable child = client.getPaintable(childUidl);
@@ -694,20 +691,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return widgetToPortletContainer.size();
     }
 
-    /**
-     * Check if heightCahe is valid.
-     */
-    public boolean isHeightCacheValid() {
-        return consumedHeight > 0;
-    }
-
-    /**
-     * Set the value of consumed height cache so everybody knows it's not valid.
-     */
-    public void invalidateConsumedHeigthCache() {
-        consumedHeight = -1;
-    }
-
     @Override
     public void setWidth(String width) {
         super.setWidth(width);
@@ -834,11 +817,9 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         if (!isAttached()) {
             return false;
         }
-
         // Measure spacing (actually CSS padding)
         measurement.setClassName(STYLENAME_SPACING);
         getElement().appendChild(helper);
-
         computedSpacing.vSpacing = measurement.getOffsetWidth();
         computedSpacing.hSpacing = measurement.getOffsetWidth();
         getElement().removeChild(helper);
@@ -849,4 +830,12 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return Util.getPaintableForElement(client, this, element);
     }
 
+    private static class CollapseAnimation extends Animation {
+
+        @Override
+        protected void onUpdate(double progress) {
+            
+        }
+        
+    }
 }
