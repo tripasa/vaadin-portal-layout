@@ -1,13 +1,14 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
@@ -15,7 +16,6 @@ import com.vaadin.terminal.gwt.client.RenderInformation.FloatSize;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
-import com.vaadin.terminal.gwt.client.VConsole;
 
 /**
  * The class representing the portlet in the portal. Basically has the header
@@ -57,7 +57,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
 
     /**
      * Size information of the portlet contents (how much space should be used
-     * for the non-collapsed widget in the protlet).
+     * for the non-collapsed widget in the portlet).
      */
     private Size contentSizeInfo = new Size(0, 0);
 
@@ -117,7 +117,22 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     /**
      * 
      */
-    private final ContentAnimation animation;
+    private int collapseAnimationSpeed = 1000;
+    
+    /**
+     * 
+     */
+    private int fadeAnimationSpeed = 1000;
+    
+    /**
+     * 
+     */
+    private boolean animateCollapse = true;
+    
+    /**
+     * 
+     */
+    private final ContentCollapseAnimation animation;
     /**
      * Constructor.
      * 
@@ -131,7 +146,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         super();
 
         this.client = client;
-        this.animation = new ContentAnimation();
+        this.animation = new ContentCollapseAnimation();
         parentPortal = parent;
         content = widget;
 
@@ -144,6 +159,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         contentDiv = DOM.createDiv();
         contentDiv.addClassName(CLASSNAME + CONTENT_CLASSNAME);
         contentDiv.getStyle().setFloat(Style.Float.LEFT);
+        contentDiv.getStyle().setOverflow(Overflow.HIDDEN);
 
         containerElement.appendChild(contentDiv);
         setElement(containerElement);
@@ -165,6 +181,20 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         ((Paintable) content).updateFromUIDL(uidl, client);
     }
 
+    @Override
+    public void setWidgetSizes(int width, int height) {
+        setContainerElementSizes(width, height);
+        if (isHeightRelative)
+            setContentElementSizes(width, height - header.getOffsetHeight());
+        
+    }
+    
+    private void setContentElementSizes(int width, int height) {
+        contentSizeInfo.setWidth(width);
+        contentSizeInfo.setHeight(height);
+        updateContentDOMSize();
+    }
+
     /**
      * Set the new sizes of the contents and wrappers.
      * 
@@ -176,12 +206,12 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     protected void setContainerElementSizes(int width, int height) {
         containerSizeInfo.setWidth(width);
         containerSizeInfo.setHeight(height);
-        updatePortletDOMSize();
+        updateContainerDOMSize();
     }
 
     /**
-   * 
-   */
+     * 
+     */
     public void updateContentSizeInfoFromDOM() {
         contentSizeInfo.setWidth(Util.getRequiredWidth(content));
         contentSizeInfo.setHeight(Util.getRequiredHeight(content));
@@ -195,11 +225,14 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
      * @param height
      *            New height.
      */
-    protected void updatePortletDOMSize() {
-        containerElement.getStyle().setPropertyPx("width",
-                containerSizeInfo.getWidth());
-        containerElement.getStyle().setPropertyPx("height",
-                containerSizeInfo.getHeight());
+    protected void updateContainerDOMSize() {
+        containerElement.getStyle().setPropertyPx("width", containerSizeInfo.getWidth());
+        containerElement.getStyle().setPropertyPx("height", containerSizeInfo.getHeight());
+    }
+    
+    protected void updateContentDOMSize() {
+        contentDiv.getStyle().setPropertyPx("width", contentSizeInfo.getWidth());
+        contentDiv.getStyle().setPropertyPx("height", contentSizeInfo.getHeight());
     }
 
     /**
@@ -210,8 +243,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
      *         Paintable (most likely they do, but everything may happen).
      */
     public Paintable getContentAsPaintable() {
-        return (content == null || !(content instanceof Paintable)) ? null
-                : (Paintable) content;
+        return (content == null || !(content instanceof Paintable)) ? null : (Paintable) content;
     }
 
     /**
@@ -344,11 +376,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
      * Update size info as well. TODO - implement observer!
      */
     public void toggleCollapseState() {
-        setCollapsed(!isCollapsed);
-        //setContainerElementSizes(getOffsetWidth(), getRequiredHeight());
-        animation.start();
-        toggleCollapseStyles();
-        //parentPortal.onPortletCollapseStateChanged(this);
+        animation.start(animateCollapse ? collapseAnimationSpeed : 0);
     }
 
     /**
@@ -375,11 +403,6 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
      */
     public static String getClassName() {
         return CLASSNAME;
-    }
-
-    public void toggleCollapseStyles() {
-        //contentDiv.getStyle().setPropertyPx("height", isCollapsed ? 0 : contentSizeInfo.getHeight());
-        header.toggleCollapseStyles(isCollapsed);
     }
 
     public int getSpacing() {
@@ -434,26 +457,6 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
         return isHeightRelative;
     }
 
-    @Override
-    public void setWidgetSizes(int width, int height) {
-        contentSizeInfo.setWidth(width);
-        /**
-         * Only relative height portlet contents follow the size of their
-         * wrapper. The fixed sized portlet knows it's height from DOM.
-         */
-        if (isHeightRelative)
-            contentSizeInfo.setHeight(height - header.getOffsetHeight());
-        setContainerElementSizes(width, height);
-    }
-
-    @Override
-    public void setWidgetHeight(int height) {
-        if (isHeightRelative)
-            contentSizeInfo.setHeight(height - header.getOffsetHeight());
-        containerSizeInfo.setHeight(height);
-        updatePortletDOMSize();
-    }
-
     /**
      * 
      */
@@ -461,7 +464,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     public void setWidgetWidth(int width) {
         contentSizeInfo.setWidth(width);
         containerSizeInfo.setWidth(width);
-        updatePortletDOMSize();
+        updateContainerDOMSize();
     }
 
     @Override
@@ -491,13 +494,38 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     }
     
 
-    private class ContentAnimation extends Animation {
+    private class ContentCollapseAnimation extends Animation {
 
         private int height;
-
-        public void start() {
-            height = content.getOffsetHeight();
-            run(2000);
+        
+        @Override
+        protected void onStart() {
+            super.onStart();
+        }
+        
+        public void start(int speed) {
+            cancel();
+            double duration = 0;
+            if (!isCollapsed && isHeightRelative) {
+                height = parentPortal.getRealtiveHeightPortletPxValue(Portlet.this);
+                setCollapsed(!isCollapsed);
+            } else {
+                setCollapsed(!isCollapsed);
+                parentPortal.recalculateLayout();
+                final Set<PortalObjectSizeHandler> portletSet = parentPortal.getPortletSet();
+                if (isHeightRelative) {
+                    parentPortal.calculatePortletSizes(portletSet);
+                    height = parentPortal.getRealtiveHeightPortletPxValue(Portlet.this);
+                } else {
+                    portletSet.remove(Portlet.this);
+                    parentPortal.calculatePortletSizes(portletSet);
+                    height = content.getOffsetHeight();
+                }
+            }
+            if (speed > 0) {
+                duration = (double)height / (double)speed * 1000d;
+            }
+            run((int)duration);
         }
         
         @Override
@@ -505,17 +533,25 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
             double heightValue = isCollapsed ?  (1 - progress) * height : progress * height;
             contentDiv.getStyle().setProperty("height",  heightValue + "px");
             setContainerElementSizes(getOffsetWidth(), header.getOffsetHeight() + (int)heightValue);
+            Util.notifyParentOfSizeChange(parentPortal, true);
         }
 
         @Override
         protected void onComplete() {
             super.onComplete();
-            //if (!isCollapsed) {
-            //    DOM.setStyleAttribute(contentDiv, "height", "");
-           // }
-//            client.updateVariable(paintableId, VAR_ROLLED_UP, dir < 0,
-//                    immediate);
+            header.toggleCollapseStyles(isCollapsed);
+            parentPortal.onPortletCollapseStateChanged(Portlet.this);
         }
 
+    }
+    
+    private class ContentFadeAnimation extends Animation {
+
+        @Override
+        protected void onUpdate(double progress) {
+            // TODO Auto-generated method stub
+            
+        }
+        
     }
 }

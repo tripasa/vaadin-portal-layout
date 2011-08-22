@@ -24,6 +24,14 @@ public class PortalDropController extends AbstractPositioningDropController {
     private PortalDropPositioner dummy;
 
     /**
+     * 
+     * @return
+     */
+    public PortalDropPositioner getDummy() {
+        return dummy;
+    }
+
+    /**
      * Portal.
      */
     private VPortalLayout portal;

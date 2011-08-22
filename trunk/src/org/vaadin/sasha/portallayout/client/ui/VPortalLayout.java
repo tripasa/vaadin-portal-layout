@@ -1,6 +1,8 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -452,6 +454,33 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
      * its piece of space.
      */
     public void recalculateLayoutAndPortletSizes() {
+        int newHeight = recalculateLayout();
+        
+        final Set<PortalObjectSizeHandler> objSet = getPortletSet();
+        final PortalDropPositioner p = dropController.getDummy();
+        if (p != null)
+            objSet.add(p);
+        calculatePortletSizes(objSet);
+    }
+
+    public Set<PortalObjectSizeHandler> getPortletSet() {
+        final Collection<Portlet> portlets = widgetToPortletContainer.values();
+        final Set<PortalObjectSizeHandler> objSet = new HashSet<PortalObjectSizeHandler>();
+        for (final Portlet p : portlets) {
+            objSet.add(p);
+        }
+        return objSet;
+    }
+
+    public void setContainerHeight(int newHeight) {
+        int oldHeight = getClientHeight();
+        setDOMHeight(newHeight + getVerticalMargins());
+        if (newHeight != oldHeight) {
+            Util.notifyParentOfSizeChange(this, false);
+        }
+    }
+    
+    public int recalculateLayout() {
         consumedHeight = 0;
         sumRelativeHeight = 0;
 
@@ -472,17 +501,51 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                 sumRelativeHeight += p.getRealtiveHeightValue();
         }
         consumedHeight += (contentsSize - 1) * activeSpacing.vSpacing;
-        final int newHeight = (sizeInfoFromUidl != null && 
-                consumedHeight < sizeInfoFromUidl.getHeight()) ? sizeInfoFromUidl.getHeight() : Math.max(
-                actualSizeInfo.getHeight(), consumedHeight);
-        int oldHeight = getClientHeight();
-        setDOMHeight(newHeight + getVerticalMargins());
-        calculatePortletSizes();
-        if (newHeight != oldHeight) {
-            Util.notifyParentOfSizeChange(this, false);
-        }        
+        int newHeight = 0;
+        if (sizeInfoFromUidl != null && consumedHeight < sizeInfoFromUidl.getHeight()) 
+            newHeight = sizeInfoFromUidl.getHeight();
+        else
+            newHeight = Math.max(actualSizeInfo.getHeight(), consumedHeight);
+        setContainerHeight(newHeight);
+        return newHeight;
+    }
+    
+    /**
+     * Calculate and accordingly update the size info of the portlets. In case
+     * of relative height portlets the contents need to be re-laid out.
+     */
+    public void calculatePortletSizes(final Set<PortalObjectSizeHandler> objSet) {
+        int totalWidth = getClientWidth();
+        final Iterator<PortalObjectSizeHandler> it = objSet.iterator();
+        while (it.hasNext()) {
+            final PortalObjectSizeHandler portalObject = (PortalObjectSizeHandler)it.next();
+
+            int newWidth = totalWidth;
+            int newHeight = portalObject.getRequiredHeight();
+
+            if (portalObject.isHeightRelative()) {
+                newHeight += getRealtiveHeightPortletPxValue(portalObject);
+            }
+
+            int position = getChildPosition(portalObject);
+            portalObject.setSpacingValue(position == 0 ? 0 : activeSpacing.vSpacing);
+            portalObject.setWidgetSizes(newWidth, newHeight);
+        }
+        if (client != null)
+            client.runDescendentsLayout(this);
     }
 
+    public int getResidualHeight() {
+        return getClientHeight() - consumedHeight - getVerticalMargins();
+    }
+    
+    public int getRealtiveHeightPortletPxValue(final PortalObjectSizeHandler portalObject) {
+        int residualHeight = getResidualHeight();
+        float relativeHeightRatio = normalizedRealtiveRatio();
+        float newRealtiveHeight = relativeHeightRatio * portalObject.getRealtiveHeightValue();
+        return (int) (residualHeight * newRealtiveHeight / 100);
+    }
+    
     private void setDOMHeight(int height) {
         getElement().getStyle().setPropertyPx("height", height);
         marginWrapper.getStyle().setPropertyPx("height", height);
@@ -505,42 +568,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return portalContent;
     }
     
-    /**
-     * Calculate and accordingly update the size info of the portlets. In case
-     * of relative height portlets the contents need to be re-laid out.
-     */
-    private void calculatePortletSizes() {
-        int totalHeight = getClientHeight();
-        int totalWidth = getClientWidth();
-        int residualHeight = totalHeight - consumedHeight - getVerticalMargins();
-        float relativeHeightRatio = normalizedRealtiveRatio();
-        final Iterator<Widget> it = getPortalContentIterator();
-        
-        while (it.hasNext()) {
-            final Widget p = it.next();
-            if (!(p instanceof PortalObjectSizeHandler))
-                continue;
-
-            final PortalObjectSizeHandler sizeHandler = (PortalObjectSizeHandler) p;
-
-            int newWidth = totalWidth;
-            int newHeight = sizeHandler.getRequiredHeight();
-
-            if (sizeHandler.isHeightRelative()) {
-                float newRealtiveHeight = relativeHeightRatio
-                        * sizeHandler.getRealtiveHeightValue();
-                newHeight += (int) (residualHeight * newRealtiveHeight / 100);
-            }
-
-            int position = getChildPosition(sizeHandler);
-            sizeHandler.setSpacingValue(position == 0 ? 0
-                    : activeSpacing.vSpacing);
-            sizeHandler.setWidgetSizes(newWidth, newHeight);
-        }
-        if (client != null)
-            client.runDescendentsLayout(this);
-    }
-
+    
     /**
      * Calculated a ratio that would be used in the calculation of how much
      * height the relative sized portlet can consume.
@@ -760,8 +788,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
          * how much space can be consumed.
          */
         if (portlet.isHeightRelative())
-            height = (int) (((float) height) * 100 / portlet
-                    .getRealtiveHeightValue());
+            height = (int) (((float) height) * 100 / portlet.getRealtiveHeightValue());
         return new RenderSpace(actualSizeInfo.getWidth(), height);
     }
 
@@ -817,7 +844,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         if (!isAttached()) {
             return false;
         }
-        // Measure spacing (actually CSS padding)
         measurement.setClassName(STYLENAME_SPACING);
         getElement().appendChild(helper);
         computedSpacing.vSpacing = measurement.getOffsetWidth();

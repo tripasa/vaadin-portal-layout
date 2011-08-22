@@ -86,9 +86,10 @@ public class ActionDemoTab extends Panel {
         imagePortal.addComponent(tx1);
         imagePortal.addComponent(new Button("b"));
         imagePortal.addComponent(new TextField("TF test"));
-        VerticalLayout l = new VerticalLayout();
+        TextArea l = new TextArea();
         l.setSizeFull();
         l.setCaption("test");
+        l.setValue("sadjdklsajkljfklahdkflhlkfhlkdhlfhdlkf");
         imagePortal.addComponent(l);
     }
     
