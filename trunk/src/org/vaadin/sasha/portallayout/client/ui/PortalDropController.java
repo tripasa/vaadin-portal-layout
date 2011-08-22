@@ -95,10 +95,8 @@ public class PortalDropController extends AbstractPositioningDropController {
      * @return true if the target drop panel was changed.
      */
     private int updateDropPosition(final DragContext context) {
-        final CoordinateLocation curLocation = new CoordinateLocation(
-                context.mouseX, context.mouseY);
-        int targetDropIndex = DOMUtil.findIntersect(portal.getContentPanel(),
-                curLocation, getLocationWidgetComparator());
+        final CoordinateLocation curLocation = new CoordinateLocation(context.mouseX, context.mouseY);
+        int targetDropIndex = DOMUtil.findIntersect(portal.getContentPanel(), curLocation, getLocationWidgetComparator());
         return targetDropIndex;
     }
 
@@ -120,47 +118,37 @@ public class PortalDropController extends AbstractPositioningDropController {
      */
     protected PortalDropPositioner newPositioner(DragContext context) {
         final Portlet portlet = (Portlet) context.selectedWidgets.get(0);
-        if (portlet == null)
-            return null;
-        final PortalDropPositioner result = new PortalDropPositioner(portlet);
-        return result;
+        if (portlet != null)
+            return new PortalDropPositioner(portlet);
+        return null;
     }
 
     @Override
     public void onDrop(DragContext context) {
-        //long time = System.currentTimeMillis();
         super.onDrop(context);
         assert targetDropIndex != -1 : "Should not happen after onPreviewDrop did not veto";
         final Widget widget = context.selectedWidgets.get(0);
         updatePortletLocationOnDrop((Portlet) widget);
         portal.addToRootElement((Portlet) widget, targetDropIndex);
-        //VConsole.log("Drop " + (System.currentTimeMillis() - time));
     }
 
     @Override
     public void onLeave(DragContext context) {
-        //long time = System.currentTimeMillis();
         dummy.removeFromParent();
         dummy = null;
         portal.recalculateLayoutAndPortletSizes();
-        //VConsole.log("Leave " + (System.currentTimeMillis() - time));
     }
 
     @Override
     public void onMove(final DragContext context) {
         super.onMove(context);
-
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
             @Override
             public void execute() {
                 if (dummy == null)
                     return;
-
                 int targetIndex = updateDropPosition(context);
-
                 int dummyIndex = getDummyIndex();
-
                 if (dummyIndex != targetIndex
                         && (dummyIndex != targetIndex - 1 || targetIndex == 0)) {
                     if (dummyIndex == 0 && portal.getChildCount() == 1) {

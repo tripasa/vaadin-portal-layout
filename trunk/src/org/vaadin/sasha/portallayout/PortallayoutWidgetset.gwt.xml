@@ -61,4 +61,6 @@
     <inherits name="org.vaadin.swfobject.SwfobjectWidgetset" />
 
     <inherits name="org.vaadin.codelabel.CodelabelWidgetset" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
 </module>
