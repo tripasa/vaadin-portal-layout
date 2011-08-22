@@ -2,6 +2,7 @@ package org.vaadin.sasha.portallayout;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.vaadin.sasha.portallayout.ToolbarAction.ActionContext;
+import org.vaadin.sasha.portallayout.client.ui.AnimationType;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
@@ -33,8 +35,7 @@ import com.vaadin.ui.Layout.SpacingHandler;
  */
 @SuppressWarnings("serial")
 @ClientWidget(value = VPortalLayout.class, loadStyle = LoadStyle.EAGER)
-public class PortalLayout extends AbstractLayout implements SpacingHandler,
-        LayoutClickNotifier {
+public class PortalLayout extends AbstractLayout implements SpacingHandler, LayoutClickNotifier {
 
     /**
      * Helper class that holds Portlet information about the object.
@@ -129,12 +130,22 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
      * Mapping between the components and their details.
      */
     private Map<Component, ComponentDetails> componentToDetails = new HashMap<Component, ComponentDetails>();
-
+    
     /**
      * List of components in the order of their appearance in the Portal.
      */
     private List<Component> components = new ArrayList<Component>();
 
+    /**
+     * 
+     */
+    private final Map<AnimationType, Boolean> animationModeMap = new HashMap<AnimationType, Boolean>();
+    
+    /**
+     * 
+     */
+    private final Map<AnimationType, Integer> animationSpeedMap = new HashMap<AnimationType, Integer>();
+    
     /**
      * Constructor
      */
@@ -148,6 +159,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         super.paintContent(target);
         target.addAttribute("spacing", isSpacingEnabled);
         target.addAttribute(VPortalLayout.PORTAL_COMMUNICATIVE, isCommunicative);
+        for (final AnimationType at : Arrays.asList(AnimationType.values())) {
+            target.addAttribute(at.toString(), shouldAnimate(at));
+            target.addAttribute(at.toString() + "-SPEED", getAnimationSpeed(at));
+        }
         final Iterator<Component> it = components.iterator();
         while (it.hasNext()) {
             final Component childComponent = it.next();
@@ -573,6 +588,36 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler,
         details.removeAction(actionId);
     }
 
+    public boolean shouldAnimate(final AnimationType animationType) {
+        Boolean result = animationModeMap.get(animationType);
+        return result == null || result;
+    }
+    
+    public void setAnimationMode(final AnimationType animationType, boolean animate) {
+        animationModeMap.put(animationType, animate);
+        requestRepaint();
+    }
+    
+    public void setAnimationSpeed(final AnimationType animationType, int speed) {
+        animationSpeedMap.put(animationType, speed);
+        requestRepaint();
+    }
+    
+    public int getAnimationSpeed(final AnimationType animationType) {
+        Integer speed = animationSpeedMap.get(animationType);
+        if (speed == null) {
+            switch (animationType) {
+            case AT_ATTACH:
+                return VPortalLayout.DEFAULT_ATTACH_SPEED;
+            case AT_CLOSE:
+                return VPortalLayout.DEFAULT_CLOSE_SPEED;
+            case AT_COLLAPSE:
+                return VPortalLayout.DEFAULT_CLOSE_SPEED;
+            }
+        }
+        return speed;
+    }
+    
     public void addListener(LayoutClickListener listener) {
         addListener(CLICK_EVENT, LayoutClickEvent.class, listener,
                 LayoutClickListener.clickMethod);

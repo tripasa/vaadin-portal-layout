@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.terminal.gwt.client.BrowserInfo;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.RenderInformation.FloatSize;
 import com.vaadin.terminal.gwt.client.RenderInformation.Size;
@@ -88,21 +89,20 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     private VPortalLayout parentPortal = null;
 
     /**
-     * The flag that indicates that height of the portlet should be calculated
-     * in the relative style.
+     * 
      */
-    private boolean isHeightRelative = false;
+    private final ContentCollapseAnimation animation;
+ 
+    /**
+     * 
+     */
+    private final FadeAnimation fadeAnimation;
 
     /**
      * Relative size. Null, if portlet has fixed size. Anyway - only height
      * matters. Width is always 100% as portlet should fit width of the portal.
      */
     private FloatSize relativeSize;
-
-    /**
-     * Flag indicating that this portlet is collapsed (only header is visible).
-     */
-    private boolean isCollapsed = false;
 
     /**
      * Flag indicatibg if the protlet can be dragged somewhere.
@@ -113,26 +113,18 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
      * Server-side communication channel.
      */
     private ApplicationConnection client;
-
+ 
     /**
-     * 
+     * Flag indicating that this portlet is collapsed (only header is visible).
      */
-    private int collapseAnimationSpeed = 1000;
+    private boolean isCollapsed = false;
     
     /**
-     * 
+     * The flag that indicates that height of the portlet should be calculated
+     * in the relative style.
      */
-    private int fadeAnimationSpeed = 1000;
+    private boolean isHeightRelative = false;
     
-    /**
-     * 
-     */
-    private boolean animateCollapse = true;
-    
-    /**
-     * 
-     */
-    private final ContentCollapseAnimation animation;
     /**
      * Constructor.
      * 
@@ -147,6 +139,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
 
         this.client = client;
         this.animation = new ContentCollapseAnimation();
+        this.fadeAnimation = new FadeAnimation();
         parentPortal = parent;
         content = widget;
 
@@ -364,19 +357,20 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
     }
 
     /**
-     * Close this portlet and notify parent about it. TODO - implement observer!
+     * Close this portlet and notify parent about it. 
      */
     public void close() {
-        removeFromParent();
-        parentPortal.onPortletClose(this);
+        fadeAnimation.start(false,  parentPortal.shouldAnimate(AnimationType.AT_CLOSE) ? 
+                parentPortal.getAnimationSpeed(AnimationType.AT_CLOSE) : 0);
     }
 
     /**
      * Change collapse state - if collapsed then expand otherwise - collapse.
-     * Update size info as well. TODO - implement observer!
+     * Update size info as well. 
      */
     public void toggleCollapseState() {
-        animation.start(animateCollapse ? collapseAnimationSpeed : 0);
+        animation.start(parentPortal.shouldAnimate(AnimationType.AT_COLLAPSE) ? 
+                parentPortal.getAnimationSpeed(AnimationType.AT_COLLAPSE) : 0);
     }
 
     /**
@@ -545,13 +539,57 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
 
     }
     
-    private class ContentFadeAnimation extends Animation {
+    
+    @Override
+    protected void onAttach() {
+        super.onAttach();
+        if (parentPortal.shouldAnimate(AnimationType.AT_ATTACH))
+            fadeAnimation.start(true, parentPortal.getAnimationSpeed(AnimationType.AT_ATTACH));
+    }
+    
+    protected class FadeAnimation extends Animation {
+
+        private boolean fadeIn;
+
+        
+        public void start(boolean isOpening, int speed) {
+            this.fadeIn = isOpening;
+            if (fadeIn) {
+                getElement().getStyle().setOpacity(0);
+            }
+            run(speed);
+        }
 
         @Override
         protected void onUpdate(double progress) {
-            // TODO Auto-generated method stub
-            
+            final String msOpacityPrpertyValue = "progid:DXImageTransform.Microsoft.Alpha(Opacity=";
+            if (fadeIn) {
+                if (BrowserInfo.get().isIE8()) {
+                    getElement().getStyle().setProperty(
+                            "filter",
+                            msOpacityPrpertyValue + (int) (progress * 100) + ")");
+                } else {
+                    getElement().getStyle().setOpacity(progress);
+                }
+            } else {
+                if (BrowserInfo.get().isIE8()) {
+                    getElement().getStyle().setProperty(
+                            "filter",
+                            msOpacityPrpertyValue + (int) ((1 - progress) * 100) + ")");
+                } else {
+                    getElement().getStyle().setOpacity(1 - progress);
+                }
+            }
         }
-        
+
+        @Override
+        public void onComplete() {
+            super.onComplete();
+            getElement().getStyle().clearOpacity();
+            if (!fadeIn) {
+                removeFromParent();
+                parentPortal.onPortletClose(Portlet.this);
+            }
+        }
     }
 }
