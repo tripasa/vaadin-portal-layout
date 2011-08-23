@@ -3,3 +3,113 @@
 .v-app .dark-background {
 	background-color: #878484;
 }
+
+.v-portallayout {
+}
+
+.v-portallayout-margin-top {
+	padding-top: 12px;	
+}
+.v-portallayout-margin-bottom {
+	padding-bottom: 12px;	
+}
+.v-portallayout-margin-left {
+	padding-left: 12px;	
+}
+.v-portallayout-margin-right {
+	padding-right: 12px;	
+}
+
+.v-app .v-portallayout-spacing {
+	width: 8px;
+}
+
+.v-portallayout-positioner {
+	border: 2px dashed black;	
+}
+
+.v-portlet {
+}
+
+.v-portlet .v-portlet-content {
+}
+
+.v-portlet .v-portlet-header {
+	background-image: url(header-bg.png);
+	width: 100%;
+	height: 28px;
+}
+
+.v-portlet .v-portlet-header-button {
+	margin-bottom: 1px;
+	width: 16px;
+	height: 16px;
+	background: transparent;
+	border: 0px;
+}
+
+.v-portlet .v-portlet-header-button-close {
+	background-image: url(close.png);
+}
+
+.v-portlet .v-portlet-header-button-collapse {
+	background-image: url(collapse.png);
+}
+
+.v-portlet .v-portlet-header-button-expand {
+	background-image: url(expand.png);
+}
+
+
+.v-portlet .v-portlet-header-buttonbar {
+	float: right;
+	margin-right: 9px;
+	padding-top: 7px;
+	padding-bottom: 2px;
+}
+
+.v-portlet .v-portlet-header .v-caption {
+	padding-right: 3px;
+	height: 100%;
+}
+
+.v-portlet .v-portlet-header .v-caption .v-captiontext {
+	font-weight: bold;
+	font-size: 12px;
+	line-height: normal;
+	color: #fff;
+	text-shadow: #000 0 -1px 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-ms-text-overflow: ellipsis;
+	padding-left: 11px;
+	padding-top: 7px;
+	padding-bottom: 2px;
+}
+
+.v-portlet .v-portlet-header-button:hover {
+	cursor: pointer;
+}
+
+.v-portlet .v-caption:hover {
+	cursor: move;
+}
+
+.v-portlet .v-portlet-header-button-close:hover {
+	background-image: url(close-hover.png);
+	cursor: pointer;
+}
+
+.v-portlet .v-portlet-header-button-collapse:active {
+	background-image: url(collapse-pressed.png);
+}
+
+.v-portlet .v-portlet-header-button-close:active {
+	background-image: url(close-pressed.png);
+}
+
+.dragdrop-movable-panel {
+	opacity : 0.4;
+	z-index: 1000;
+}

@@ -113,6 +113,16 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     /**
      * 
      */
+    public static final String PORTLET_ENTERED = "PORTLET_ENTERED";
+    
+    /**
+     * 
+     */
+    public static final String PORTLET_LEFT = "PORTLET_LEFT";
+    
+    /**
+     * 
+     */
     public static final String PORTLET_ACTION_ID = "PORTLET_ACTION_ID";
     
     /**
@@ -923,5 +933,17 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             }
         }
         return speed;
+    }
+
+    public void onPortletLeft(final PortalDropPositioner dummy, int dummyIndex) {
+        addToRootElement(dummy, dummyIndex);
+        recalculateLayoutAndPortletSizes();
+        client.updateVariable(paintableId, PORTLET_ENTERED, dummy.getPortalObjectReference().getContentAsPaintable(), true);
+    }
+    
+    public void onPortletEntered(final PortalDropPositioner dummy, int dummyIndex) {
+        addToRootElement(dummy, dummyIndex);
+        recalculateLayoutAndPortletSizes();
+        client.updateVariable(paintableId, PORTLET_ENTERED, dummy.getPortalObjectReference().getContentAsPaintable(), true);
     }
 }
