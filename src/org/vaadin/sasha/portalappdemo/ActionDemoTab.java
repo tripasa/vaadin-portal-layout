@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 
 import org.vaadin.sasha.portallayout.PortalLayout;
+import org.vaadin.sasha.portallayout.PortalLayout.Context;
 import org.vaadin.sasha.portallayout.ToolbarAction;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
@@ -17,7 +18,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
@@ -126,7 +126,7 @@ public class ActionDemoTab extends Panel {
         image.setCaption(files[currentDisplayedImage].getName());
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_right.png")) {
             @Override
-            public void execute(final ActionContext context) {
+            public void execute(final Context context) {
                 final File next = getNextFile();
                 image.setCaption(next.getName());
                 image.setSource(new FileResource(next, getApplication()));
@@ -134,7 +134,7 @@ public class ActionDemoTab extends Panel {
         });
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_left.png")) {
             @Override
-            public void execute(final ActionContext context) {
+            public void execute(final Context context) {
                 final File prev = getPrevFile();
                 image.setCaption(prev.getName());
                 image.setSource(new FileResource(prev, getApplication()));
@@ -169,7 +169,7 @@ public class ActionDemoTab extends Panel {
         pl.setCaption("Joy Division - Disorder");
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("stop.png")) {
             @Override
-            public void execute(final ActionContext context) {
+            public void execute(final Context context) {
                 pl.stop();
                 final Notification n = new Notification("Stop! If didn't stop - DO NOT use YouTube add-on and FF!");
                 n.setDelayMsec(1000);
@@ -179,7 +179,7 @@ public class ActionDemoTab extends Panel {
         
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("pause.png")) {
             @Override
-            public void execute(final ActionContext context) {
+            public void execute(final Context context) {
                 pl.pause();
                 final Notification n = new Notification("Pause! If didn't pause - DO NOT use YouTube add-on and FF!");
                 n.setDelayMsec(1000);
@@ -189,7 +189,7 @@ public class ActionDemoTab extends Panel {
         
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("play.png")) {
             @Override
-            public void execute(final ActionContext context) {
+            public void execute(final Context context) {
                 pl.requestRepaint();
                 pl.play();
                 final Notification n = new Notification("Play! If didn't start - DO NOT use YouTube add-on and FF!");

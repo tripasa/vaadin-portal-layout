@@ -3,6 +3,7 @@ package org.vaadin.sasha.portallayout;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.vaadin.sasha.portallayout.ToolbarAction.ActionContext;
 import org.vaadin.sasha.portallayout.client.ui.AnimationType;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
@@ -146,6 +146,20 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     private final Map<AnimationType, Integer> animationSpeedMap = new HashMap<AnimationType, Integer>();
     
+    /**
+     * 
+     */
+    private final List<PortletCollapseListener> collapseListeners = new ArrayList<PortalLayout.PortletCollapseListener>();
+    
+    /**
+     * 
+     */
+    private final List<PortletCloseListener> closeListeners = new ArrayList<PortletCloseListener>();
+    
+    /**
+     * 
+     */
+    private final List<PortalNavigationListener> navigationListeners = new ArrayList<PortalNavigationListener>();
     /**
      * Constructor
      */
@@ -424,7 +438,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
             throw new IllegalArgumentException(
                     "Wrong Component! Action Trigger Failed!");
         final ToolbarAction action = details.getActionById(actionId);
-        action.execute(new ActionContext(this, component));
+        action.execute(new Context(this, component));
     }
 
     /**
@@ -445,6 +459,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
                     "Portal doesn not contain this component!");
 
         details.setCollapsed(isCollapsed);
+        fireCollapseEvent(component);
     }
 
     /**
@@ -651,4 +666,89 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     public void setComponentCaption(final Component c, final String caption) {
         c.setCaption(caption);
     }
+    
+    public static class Context {
+        
+        private final Component component;
+
+        private final PortalLayout portal;
+        
+        public Context(final PortalLayout portal, final Component c) {
+            this.portal = portal;
+            this.component = c;
+        }
+        
+        public Component getComponent() {
+            return component;
+        }
+        
+        public PortalLayout getPortal() {
+            return portal;
+        }
+    }
+    
+    public interface PortletCollapseListener {
+        void portletCollapseStateChanged(final Context context);
+    }
+    
+    public interface PortletCloseListener {
+        void portletClosed(final Context context);
+    }
+    
+    public interface PortalNavigationListener {
+        void portletEnetered(final Context context);
+        void portletLeft(final Context context);
+    }
+    
+    public void addCloseListener(final PortletCloseListener listener) {
+        closeListeners.add(listener);
+    }
+    
+    public void removeCloseListener(final PortletCloseListener listener) {
+        closeListeners.remove(listener);
+    }
+    
+    public void addCollapseListener(final PortletCollapseListener listener) {
+        collapseListeners.add(listener);
+    }
+    
+    public void removeCollapseListener(final PortletCollapseListener listener) {
+        collapseListeners.remove(listener);
+    }
+    
+    public void addNavigationListener(final PortalNavigationListener listener) {
+        navigationListeners.add(listener);
+    }
+    
+    public void removeNavigationListener(final PortalNavigationListener listener) {
+        navigationListeners.remove(listener);
+    }
+    
+    void fireCloseEvent(final Component c) {
+        final Collection<PortletCloseListener> listeners = Collections.unmodifiableCollection(closeListeners);
+        final Context context = new Context(this, c); 
+        for (final PortletCloseListener l : listeners) {
+            l.portletClosed(context);
+        }
+    }
+    
+    void fireCollapseEvent(final Component c) {
+        final Collection<PortletCollapseListener> listeners = Collections.unmodifiableCollection(collapseListeners);
+        final Context context = new Context(this, c); 
+        for (final PortletCollapseListener l : listeners) {
+            l.portletCollapseStateChanged(context);
+        }
+    }
+    
+    void fireNavigationEvent(final Component c, boolean entered) {
+        final Collection<PortalNavigationListener> listeners = Collections.unmodifiableCollection(navigationListeners);
+        final Context context = new Context(this, c); 
+        for (final PortalNavigationListener l : listeners) {
+            if (entered)
+                l.portletEnetered(context);
+            else
+                l.portletLeft(context);
+        }
+    }
 }
+

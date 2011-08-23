@@ -1,7 +1,8 @@
 package org.vaadin.sasha.portallayout;
 
+import org.vaadin.sasha.portallayout.PortalLayout.Context;
+
 import com.vaadin.terminal.ThemeResource;
-import com.vaadin.ui.Component;
 
 /**
  * Action class that represents a toolbutton on the client side that
@@ -21,27 +22,6 @@ public abstract class ToolbarAction {
         return icon;
     }
     
-    public abstract void execute(final ActionContext context);
-
-    public static class ActionContext {
-        
-        private final Component component;
-
-        private final PortalLayout portal;
-        
-        public ActionContext(final PortalLayout portal, final Component c) {
-            this.portal = portal;
-            this.component = c;
-        }
-        
-        public Component getComponent() {
-            return component;
-        }
-        
-        public PortalLayout getPortal() {
-            return portal;
-        }
-        
-    }
+    public abstract void execute(final Context context);
 }
 

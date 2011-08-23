@@ -172,8 +172,7 @@ public class PortalDropController extends AbstractPositioningDropController {
     public void onEnter(final DragContext context) {
         dummy = newPositioner(context);
         int dummyIndex = updateDropPosition(context);
-        portal.addToRootElement(dummy, dummyIndex);
-        portal.recalculateLayoutAndPortletSizes();
+        portal.onPortletEntered(dummy, dummyIndex);
     }
 
     @Override
