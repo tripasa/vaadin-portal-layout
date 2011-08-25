@@ -19,8 +19,8 @@ public class PortalTabSheet extends TabSheet {
      */
     public PortalTabSheet() {
         super();
-        ///addTab(videoTabPanel, "Video Portal", null);
-        //addTab(chartTabPanel, "Chart Portal", null);
+        addTab(videoTabPanel, "Video Portal", null);
+        addTab(chartTabPanel, "Chart Portal", null);
         addTab(dashTab, "Fixed Dash Board", null);
         addTab(actionTab, "Portlets With Actions", null);
         addListener(new SelectedTabChangeListener() {

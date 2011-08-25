@@ -136,7 +136,6 @@ public class PortalDropController extends AbstractPositioningDropController {
     public void onLeave(DragContext context) {
         dummy.removeFromParent();
         dummy = null;
-        portal.recalculateLayoutAndPortletSizes();
     }
 
     @Override
@@ -160,8 +159,7 @@ public class PortalDropController extends AbstractPositioningDropController {
                         if (dummyIndex == 0)
                             portal.getChildAt(0).setSpacingValue(0);
                         if (dummyIndex == 1 && portal.getPortletCount() > 1)
-                            portal.getChildAt(1).setSpacingValue(
-                                    portal.getVerticalSpacing());
+                            portal.getChildAt(1).setSpacingValue(portal.getVerticalSpacing());
                     }
                 }
             }

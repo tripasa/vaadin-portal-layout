@@ -392,7 +392,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     public void changeVariables(Object source, Map<String, Object> variables) {
 
         super.changeVariables(source, variables);
-
+        
         if (variables.containsKey(VPortalLayout.PORTLET_ACTION_TRIGGERED)) {
             final Map<String, Object> portletParameters = (Map<String, Object>) variables
                     .get(VPortalLayout.PORTLET_ACTION_TRIGGERED);
@@ -404,21 +404,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         }
 
         if (variables.containsKey(VPortalLayout.PORTLET_POSITION_UPDATED)) {
-            final Map<String, Object> portletParameters = (Map<String, Object>) variables
-                    .get(VPortalLayout.PORTLET_POSITION_UPDATED);
-
-            final Component component = (Component) portletParameters
-                    .get(VPortalLayout.PAINTABLE_MAP_PARAM);
-
-            final Integer portletPosition = (Integer) portletParameters
-                    .get(VPortalLayout.PORTLET_POSITION);
-
+            final Map<String, Object> portletParameters = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_POSITION_UPDATED);
+            final Component component = (Component) portletParameters.get(VPortalLayout.PAINTABLE_MAP_PARAM);
+            final Integer portletPosition = (Integer) portletParameters.get(VPortalLayout.PORTLET_POSITION);
             onComponentPositionUpdated(component, portletPosition);
         }
 
         if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED)) {
-            final Map<String, Object> params = (Map<String, Object>) variables
-                    .get(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED);
+            final Map<String, Object> params = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED);
 
             onPortletCollapsed(
                     (Component) params.get(VPortalLayout.PAINTABLE_MAP_PARAM),
@@ -524,6 +517,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
     @Override
     public void removeComponent(Component c) {
+        fireCloseEvent(c);
         doComponentRemoveLogic(c);
         super.removeComponent(c);
     }
