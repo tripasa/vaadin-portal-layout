@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @author p4elkin
  * 
  */
-public interface PortalObjectSizeHandler extends IsWidget {
+public interface PortalObject extends IsWidget {
 
     /**
      * Check if object has relative height.

@@ -25,7 +25,7 @@ import com.vaadin.terminal.gwt.client.Util;
  * 
  * @author p4elkin
  */
-public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
+public class Portlet extends ComplexPanel implements PortalObject {
 
     /**
      * Enumeration for the lock states of the Portlet.
@@ -506,7 +506,7 @@ public class Portlet extends ComplexPanel implements PortalObjectSizeHandler {
             } else {
                 setCollapsed(!isCollapsed);
                 parentPortal.recalculateLayout();
-                final Set<PortalObjectSizeHandler> portletSet = parentPortal.getPortletSet();
+                final Set<PortalObject> portletSet = parentPortal.getPortletSet();
                 if (isHeightRelative) {
                     parentPortal.calculatePortletSizes(portletSet);
                     height = parentPortal.getRealtiveHeightPortletPxValue(Portlet.this);

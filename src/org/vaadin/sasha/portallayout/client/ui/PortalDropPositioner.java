@@ -10,8 +10,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * 
  * @author p4elkin
  */
-public class PortalDropPositioner extends SimplePanel implements
-        PortalObjectSizeHandler {
+public class PortalDropPositioner extends SimplePanel implements PortalObject {
 
     /**
      * Basic style name for the widget.

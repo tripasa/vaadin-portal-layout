@@ -14,6 +14,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Embedded;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
@@ -29,11 +30,13 @@ public class ActionDemoTab extends Panel {
     
     private final PortalLayout miscPortal = new PortalLayout();
     
-    private final HorizontalLayout layout = new HorizontalLayout();
+    private final GridLayout layout = new GridLayout(4, 1);
     
     private TextArea tx1 = new TextArea("test1");
     
     private TextArea tx2 = new TextArea("test2");
+    
+    private TextArea tx3 = new TextArea("test2");
     
     private boolean init = false;
     
@@ -67,25 +70,36 @@ public class ActionDemoTab extends Panel {
     }
 
     private void buildPortals() {
+        layout.setSizeFull();
         videoPortal.setHeight("500px");
         imagePortal.setHeight("500px");
         miscPortal.setHeight("500px");
         layout.addComponent(videoPortal);
         layout.addComponent(imagePortal);
         layout.addComponent(miscPortal);
-        layout.setExpandRatio(videoPortal, 1f);
-        layout.setExpandRatio(imagePortal, 1f);
-        layout.setExpandRatio(miscPortal, 1f);
+//        layout.setExpandRatio(videoPortal, 1f);
+//        layout.setExpandRatio(imagePortal, 1f);
+//        layout.setExpandRatio(miscPortal, 1f);
         
         tx1.setWidth("100%");
         tx1.setHeight("300px");
         tx2.setWidth("100%");
         tx2.setHeight("300px");
+        
+        tx3.setWidth("100%");
+        tx3.setHeight("300px");
+        
         tx1.setValue("test1");
         tx2.setValue("test2");
+        
         imagePortal.addComponent(tx1);
+        imagePortal.addComponent(tx3);
+        imagePortal.addComponent(tx2);
         imagePortal.addComponent(new Button("b"));
         imagePortal.addComponent(new TextField("TF test"));
+        imagePortal.setSizeFull();
+        videoPortal.setSizeFull();
+        miscPortal.setSizeFull();
         TextArea l = new TextArea();
         l.setSizeFull();
         l.setCaption("test");
