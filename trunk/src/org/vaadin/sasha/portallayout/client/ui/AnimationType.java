@@ -1,9 +1,9 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
 public enum AnimationType {
-    AT_CLOSE("AT_CLOSE"),
-    AT_COLLAPSE("AT_COLLAPSE"),
-    AT_ATTACH("AT_ATTACh");
+    AT_CLOSE("CLOSE"),
+    AT_COLLAPSE("COLLAPSE"),
+    AT_ATTACH("ATTACH");
     
     private String name;
     
