@@ -5,6 +5,8 @@ import java.io.FileFilter;
 
 import org.vaadin.sasha.portallayout.PortalLayout;
 import org.vaadin.sasha.portallayout.PortalLayout.Context;
+import org.vaadin.sasha.portallayout.PortalLayout.PortletCloseListener;
+import org.vaadin.sasha.portallayout.PortalLayout.PortletCollapseListener;
 import org.vaadin.sasha.portallayout.ToolbarAction;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
@@ -22,7 +24,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
-public class ActionDemoTab extends Panel {
+public class ActionDemoTab extends Panel implements PortletCloseListener, PortletCollapseListener {
     
     private final PortalLayout videoPortal = new PortalLayout();
     
@@ -70,13 +72,13 @@ public class ActionDemoTab extends Panel {
     }
 
     private void buildPortals() {
-        layout.setSizeFull();
-        videoPortal.setHeight("500px");
-        imagePortal.setHeight("500px");
-        miscPortal.setHeight("500px");
-        layout.addComponent(videoPortal);
+        //layout.setSizeFull();
+        videoPortal.setHeight("1000px");
+        imagePortal.setHeight("1200px");
+        miscPortal.setHeight("1000px");
+        //layout.addComponent(videoPortal);
         layout.addComponent(imagePortal);
-        layout.addComponent(miscPortal);
+        //layout.addComponent(miscPortal);
 //        layout.setExpandRatio(videoPortal, 1f);
 //        layout.setExpandRatio(imagePortal, 1f);
 //        layout.setExpandRatio(miscPortal, 1f);
@@ -97,14 +99,16 @@ public class ActionDemoTab extends Panel {
         imagePortal.addComponent(tx2);
         imagePortal.addComponent(new Button("b"));
         imagePortal.addComponent(new TextField("TF test"));
-        imagePortal.setSizeFull();
-        videoPortal.setSizeFull();
-        miscPortal.setSizeFull();
+//        imagePortal.setSizeFull();
+//        videoPortal.setSizeFull();
+//        miscPortal.setSizeFull();
         TextArea l = new TextArea();
         l.setSizeFull();
         l.setCaption("test");
         l.setValue("sadjdklsajkljfklahdkflhlkfhlkdhlfhdlkf");
         imagePortal.addComponent(l);
+        imagePortal.addCloseListener(this);
+        imagePortal.addCollapseListener(this);
     }
     
 
@@ -211,6 +215,16 @@ public class ActionDemoTab extends Panel {
                 getWindow().showNotification(n);
             }
         });
+    }
+
+    @Override
+    public void portletClosed(Context context) {
+        getWindow().showNotification(context.getComponent().getCaption() + "closed", Notification.TYPE_ERROR_MESSAGE);
+    }
+
+    @Override
+    public void portletCollapseStateChanged(Context context) {
+        getWindow().showNotification(context.getComponent().getCaption() + "collapsed", Notification.TYPE_ERROR_MESSAGE);
     }
 
 }

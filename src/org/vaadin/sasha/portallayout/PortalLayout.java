@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.vaadin.sasha.portallayout.client.ui.AnimationType;
+import org.vaadin.sasha.portallayout.client.ui.PortalConst;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
@@ -172,7 +173,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     public void paintContent(PaintTarget target) throws PaintException {
         super.paintContent(target);
         target.addAttribute("spacing", isSpacingEnabled);
-        target.addAttribute(VPortalLayout.PORTAL_COMMUNICATIVE, isCommunicative);
+        target.addAttribute(PortalConst.PORTAL_COMMUNICATIVE, isCommunicative);
         for (final AnimationType at : Arrays.asList(AnimationType.values())) {
             target.addAttribute(at.toString(), shouldAnimate(at));
             target.addAttribute(at.toString() + "-SPEED", getAnimationSpeed(at));
@@ -184,10 +185,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
                     .get(childComponent);
 
             target.startTag("portlet");
-            target.addAttribute(VPortalLayout.PORTLET_CLOSABLE, childComponentDetails.isClosable());
-            target.addAttribute(VPortalLayout.PORTLET_LOCKED, childComponentDetails.isLocked());
-            target.addAttribute(VPortalLayout.PORTLET_COLLAPSED, childComponentDetails.isCollapsed());
-            target.addAttribute(VPortalLayout.PORTLET_COLLAPSIBLE, childComponentDetails.isCollapsible());
+            target.addAttribute(PortalConst.PORTLET_CLOSABLE, childComponentDetails.isClosable());
+            target.addAttribute(PortalConst.PORTLET_LOCKED, childComponentDetails.isLocked());
+            target.addAttribute(PortalConst.PORTLET_COLLAPSED, childComponentDetails.isCollapsed());
+            target.addAttribute(PortalConst.PORTLET_COLLAPSIBLE, childComponentDetails.isCollapsible());
 
             final Map<String, ToolbarAction> actions = childComponentDetails.getActions();
             if (actions != null && actions.entrySet().size() > 0) {
@@ -203,8 +204,8 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
                     ids[pos] = id;
                     iconUrls[pos++] = icon;
                 }
-                target.addAttribute(VPortalLayout.PORTLET_ACTION_IDS, ids);
-                target.addAttribute(VPortalLayout.PORTLET_ACTION_ICONS,
+                target.addAttribute(PortalConst.PORTLET_ACTION_IDS, ids);
+                target.addAttribute(PortalConst.PORTLET_ACTION_ICONS,
                         iconUrls);
             }
             childComponent.paint(target);
@@ -393,34 +394,33 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
         super.changeVariables(source, variables);
         
-        if (variables.containsKey(VPortalLayout.PORTLET_ACTION_TRIGGERED)) {
+        if (variables.containsKey(PortalConst.PORTLET_ACTION_TRIGGERED)) {
             final Map<String, Object> portletParameters = (Map<String, Object>) variables
-                    .get(VPortalLayout.PORTLET_ACTION_TRIGGERED);
+                    .get(PortalConst.PORTLET_ACTION_TRIGGERED);
             final Component component = (Component) portletParameters
-                    .get(VPortalLayout.PAINTABLE_MAP_PARAM);
+                    .get(PortalConst.PAINTABLE_MAP_PARAM);
             final String actionId = (String) portletParameters
-                    .get(VPortalLayout.PORTLET_ACTION_ID);
+                    .get(PortalConst.PORTLET_ACTION_ID);
             onActionTriggered(component, actionId);
         }
 
-        if (variables.containsKey(VPortalLayout.PORTLET_POSITION_UPDATED)) {
-            final Map<String, Object> portletParameters = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_POSITION_UPDATED);
-            final Component component = (Component) portletParameters.get(VPortalLayout.PAINTABLE_MAP_PARAM);
-            final Integer portletPosition = (Integer) portletParameters.get(VPortalLayout.PORTLET_POSITION);
+        if (variables.containsKey(PortalConst.PORTLET_POSITION_UPDATED)) {
+            final Map<String, Object> portletParameters = (Map<String, Object>) variables.get(PortalConst.PORTLET_POSITION_UPDATED);
+            final Component component = (Component) portletParameters.get(PortalConst.PAINTABLE_MAP_PARAM);
+            final Integer portletPosition = (Integer) portletParameters.get(PortalConst.PORTLET_POSITION);
             onComponentPositionUpdated(component, portletPosition);
         }
 
-        if (variables.containsKey(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED)) {
-            final Map<String, Object> params = (Map<String, Object>) variables.get(VPortalLayout.PORTLET_COLLAPSE_STATE_CHANGED);
+        if (variables.containsKey(PortalConst.PORTLET_COLLAPSE_STATE_CHANGED)) {
+            final Map<String, Object> params = (Map<String, Object>) variables.get(PortalConst.PORTLET_COLLAPSE_STATE_CHANGED);
 
             onPortletCollapsed(
-                    (Component) params.get(VPortalLayout.PAINTABLE_MAP_PARAM),
-                    (Boolean) params.get(VPortalLayout.PORTLET_COLLAPSED));
+                    (Component) params.get(PortalConst.PAINTABLE_MAP_PARAM),
+                    (Boolean) params.get(PortalConst.PORTLET_COLLAPSED));
         }
 
-        if (variables.containsKey(VPortalLayout.COMPONENT_REMOVED)) {
-            final Component child = (Component) variables
-                    .get(VPortalLayout.COMPONENT_REMOVED);
+        if (variables.containsKey(PortalConst.PORTLET_REMOVED)) {
+            final Component child = (Component) variables.get(PortalConst.PORTLET_REMOVED);
             doComponentRemoveLogic(child);
         }
     }
@@ -517,7 +517,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
     @Override
     public void removeComponent(Component c) {
-        fireCloseEvent(c);
         doComponentRemoveLogic(c);
         super.removeComponent(c);
     }
@@ -617,11 +616,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         if (speed == null) {
             switch (animationType) {
             case AT_ATTACH:
-                return VPortalLayout.DEFAULT_ATTACH_SPEED;
+                return PortalConst.DEFAULT_ATTACH_SPEED;
             case AT_CLOSE:
-                return VPortalLayout.DEFAULT_CLOSE_SPEED;
+                return PortalConst.DEFAULT_CLOSE_SPEED;
             case AT_COLLAPSE:
-                return VPortalLayout.DEFAULT_CLOSE_SPEED;
+                return PortalConst.DEFAULT_CLOSE_SPEED;
             }
         }
         return speed;
