@@ -22,7 +22,6 @@
 	border: 2px dashed black;	
 }
 
-
 .v-portlet {
 }
 
@@ -53,7 +52,7 @@
 }
 
 .v-portlet .v-portlet-header-button-expand {
-	background-image: url(close.png);
+	background-image: url(expand.png);
 }
 
 
@@ -107,5 +106,6 @@
 
 .dragdrop-movable-panel {
 	opacity : 0.4;
+	filter: alpha(opacity = 50);
 	z-index: 1000;
 }

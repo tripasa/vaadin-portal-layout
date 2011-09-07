@@ -37,6 +37,7 @@ import com.vaadin.terminal.gwt.client.RenderSpace;
 import com.vaadin.terminal.gwt.client.StyleConstants;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.Util;
+import com.vaadin.terminal.gwt.client.VConsole;
 import com.vaadin.terminal.gwt.client.ui.LayoutClickEventHandler;
 import com.vaadin.terminal.gwt.client.ui.VMarginInfo;
 import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
@@ -196,8 +197,9 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                     parsePixel(uidl.getStringAttribute("width")) - getHorizontalMargins(),
                     parsePixel(uidl.getStringAttribute("height")) - getVerticalMargins());
 
-        actualSizeInfo.setHeight(getElement().getClientHeight() - getVerticalMargins());
-        actualSizeInfo.setWidth(getElement().getClientWidth() - getHorizontalMargins());
+        actualSizeInfo.setHeight(DOMUtil.getClientHeight(getElement()));
+        actualSizeInfo.setWidth(DOMUtil.getClientWidth(getElement()));
+        
         
         int pos = 0;
         final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet, UIDL>();
@@ -281,11 +283,13 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     }
 
     private int getClientWidth() {
-        return marginWrapper.getOffsetWidth() - getHorizontalMargins();
+        VConsole.log("Client width: " + DOMUtil.getClientWidth(marginWrapper));
+        return DOMUtil.getClientWidth(getElement());//marginWrapper.getOffsetWidth() - getHorizontalMargins();
     }
 
     private int getClientHeight() {
-        return marginWrapper.getOffsetHeight() - getVerticalMargins();
+        VConsole.log("Client height: " + DOMUtil.getClientHeight(marginWrapper));
+        return DOMUtil.getClientHeight(getElement()); //marginWrapper.getOffsetHeight() - getVerticalMargins();
     }
     
     private int getVerticalMargins() {
@@ -388,7 +392,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     public void setContainerHeight(int newHeight) {
         int oldHeight = getClientHeight();
         setDOMHeight(newHeight + getVerticalMargins());
-        if (newHeight != oldHeight && getPortletCount() > 0) {
+        if (newHeight != oldHeight && getPortletCount() > 0 && !isRendering) {
             Util.notifyParentOfSizeChange(this, false);
         }
     }
@@ -712,7 +716,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return activeSpacing.vSpacing;
     }
 
-    /**
+    /**. 
      * Takes a String value e.g. "12px" and parses that to int 12
      * 
      * @param String

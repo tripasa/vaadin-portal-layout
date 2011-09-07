@@ -110,6 +110,7 @@
 }
 
 .dragdrop-movable-panel {
-	opacity : 0.4;
+	opacity : 0.5;
+	filter: alpha(opacity = 50);
 	z-index: 1000;
 }
