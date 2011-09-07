@@ -13,8 +13,13 @@
  */
 package org.vaadin.sasha.portallayout.client.dnd.util.impl;
 
+import java.text.ParseException;
+
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.terminal.PaintException;
+import com.vaadin.terminal.gwt.client.VConsole;
 
 /*
  * {@link com.allen_sauer.gwt.dnd.client.util.DOMUtil} default cross-browser implementation.
@@ -23,17 +28,17 @@ public abstract class DOMUtilImpl {
 
   // CHECKSTYLE_JAVADOC_OFF
 
-  public abstract String adjustTitleForBrowser(String title);
+    public abstract String adjustTitleForBrowser(String title);
 
-  public abstract void cancelAllDocumentSelections();
+    public abstract void cancelAllDocumentSelections();
 
-  public abstract int getBorderLeft(Element elem);
+    public abstract int getBorderLeft(Element elem);
 
-  public abstract int getBorderTop(Element elem);
+    public abstract int getBorderTop(Element elem);
 
-  public abstract int getClientHeight(Element elem);
+    public abstract int getClientHeight(Element elem);
 
-  public abstract int getClientWidth(Element elem);
+    public abstract int getClientWidth(Element elem);
 
   /**
    * From http://code.google.com/p/doctype/wiki/ArticleComputedStyle
@@ -44,59 +49,81 @@ public abstract class DOMUtilImpl {
         || elem.style[style];
   }-*/;
 
-  public final int getHorizontalBorders(Widget widget) {
-    return widget.getOffsetWidth() - getClientWidth(widget.getElement());
-  }
-
-  public final int getVerticalBorders(Widget widget) {
-    return widget.getOffsetHeight() - getClientHeight(widget.getElement());
-  }
-
-  private native String getComputedStyle(Element elem, String style) /*-{
-    if ($doc.defaultView && $doc.defaultView.getComputedStyle) {
-      var styles = $doc.defaultView.getComputedStyle(elem, "");
-      if (styles) {
-        return styles[style];
-      }
+    public final int getHorizontalBorders(Widget widget) {
+        return widget.getOffsetWidth() - getClientWidth(widget.getElement());
     }
 
-    return null;
-  }-*/;
+    public final int getVerticalBorders(Widget widget) {
+        return widget.getOffsetHeight() - getClientHeight(widget.getElement());
+    }
 
-  public native int getPaddingLeft(Element elem)
-  /*-{
-    try {
-      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
-      var paddingLeftWidth = computedStyle.getPropertyValue("padding-left");
-      return paddingLeftWidth.indexOf("px") == -1 ? 0 : parseInt(paddingLeftWidth.substr(0, paddingLeftWidth.length - 2));
-    } catch(e) { throw new Error("getPaddingLeft exception:\n" + e); }
-  }-*/;
+    private native String getComputedStyle(Element elem, String style) /*-{
+        if ($doc.defaultView && $doc.defaultView.getComputedStyle) {
+            var styles = $doc.defaultView.getComputedStyle(elem, "");
+            if (styles) {
+                return styles[style];
+            }
+        }
+        return null;
+    }-*/;
 
-  public native int getPaddingRight(Element elem)
-  /*-{
-    try {
-      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
-      var padding = computedStyle.getPropertyValue("padding-right");
-      return padding.indexOf("px") == -1 ? 0 : parseInt(padding.substr(0, padding.length - 2));
-    } catch(e) { throw new Error("getPaddingRight exception:\n" + e); }
-  }-*/;
+    public int getPaddingLeft(Element elem) {
+        final Style style = elem.getStyle();
+        final String paddingLeft = style.getProperty("paddingLeft");
+        int result = 0;
+        if (paddingLeft.indexOf("px") != -1) {
+            try {
+                result = Integer.parseInt(paddingLeft.substring(0,
+                        paddingLeft.length() - 2));
+            } catch (NumberFormatException e) {
+                VConsole.log("Get padding left " + e.getMessage());
+            }
+        }
+        return result;
+    }
 
-  public native int getPaddingBottom(Element elem)
-  /*-{
-    try {
-      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
-      var padding = computedStyle.getPropertyValue("padding-bottom");
-      return padding.indexOf("px") == -1 ? 0 : parseInt(padding.substr(0, padding.length - 2));
-    } catch(e) { throw new Error("getPaddingBottom exception:\n" + e); }
-  }-*/;
+    public int getPaddingRight(Element elem) {
+        final Style style = elem.getStyle();
+        final String padding = style.getProperty("paddingRight");
+        int result = 0;
+        if (padding.indexOf("px") != -1) {
+            try {
+                result = Integer.parseInt(padding.substring(0,
+                        padding.length() - 2));
+            } catch (NumberFormatException e) {
+                VConsole.log("Get padding left " + e.getMessage());
+            }
+        }
+        return result;
+    }
 
-  public native int getPaddingTop(Element elem)
-  /*-{
-    try {
-      var computedStyle = $doc.defaultView.getComputedStyle(elem, null);
-      var padding = computedStyle.getPropertyValue("padding-top");
-      return padding.indexOf("px") == -1 ? 0 : parseInt(padding.substr(0, padding.length - 2));
-    } catch(e) { throw new Error("getPaddingTop exception:\n" + e); }
-  }-*/;
+    public int getPaddingBottom(Element elem) {
+        final Style style = elem.getStyle();
+        final String padding = style.getProperty("paddingRight");
+        int result = 0;
+        if (padding.indexOf("px") != -1) {
+            try {
+                result = Integer.parseInt(padding.substring(0,
+                        padding.length() - 2));
+            } catch (NumberFormatException e) {
+                VConsole.log("Get padding left " + e.getMessage());
+            }
+        }
+        return result;
+    }
 
+    public int getPaddingTop(Element elem) {
+        final Style style = elem.getStyle();
+        final String padding = style.getProperty("paddingRight");
+        int result = 0;
+        if (padding.indexOf("px") != -1) {
+            try {
+                result = Integer.parseInt(padding.substring(0,
+                        padding.length() - 2));
+            } catch (NumberFormatException e) {
+                VConsole.log("Get padding left " + e.getMessage());
+            }
+        }
+        return result;
+    }
 }

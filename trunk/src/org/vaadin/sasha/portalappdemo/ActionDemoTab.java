@@ -85,11 +85,16 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         
         tx1.setWidth("100%");
         tx1.setHeight("300px");
+        
         tx2.setWidth("100%");
         tx2.setHeight("300px");
         
         tx3.setWidth("100%");
         tx3.setHeight("300px");
+        
+        TextArea tx4 = new TextArea();
+        tx4.setWidth("100%");
+        tx4.setHeight("300px");
         
         tx1.setValue("test1");
         tx2.setValue("test2");
@@ -97,8 +102,9 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         imagePortal.addComponent(tx1);
         imagePortal.addComponent(tx3);
         imagePortal.addComponent(tx2);
-        imagePortal.addComponent(new Button("b"));
-        imagePortal.addComponent(new TextField("TF test"));
+        imagePortal.addComponent(tx4);
+        /*imagePortal.addComponent(new Button("b"));
+        imagePortal.addComponent(new TextField("TF test"));*/
 //        imagePortal.setSizeFull();
 //        videoPortal.setSizeFull();
 //        miscPortal.setSizeFull();
@@ -106,7 +112,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         l.setSizeFull();
         l.setCaption("test");
         l.setValue("sadjdklsajkljfklahdkflhlkfhlkdhlfhdlkf");
-        imagePortal.addComponent(l);
+        //imagePortal.addComponent(l);
         imagePortal.addCloseListener(this);
         imagePortal.addCollapseListener(this);
     }
