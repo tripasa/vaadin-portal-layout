@@ -13,20 +13,14 @@
  */
 package org.vaadin.sasha.portallayout.client.dnd.util.impl;
 
-import java.text.ParseException;
-
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.gwt.client.VConsole;
 
 /*
  * {@link com.allen_sauer.gwt.dnd.client.util.DOMUtil} default cross-browser implementation.
  */
 public abstract class DOMUtilImpl {
-
-  // CHECKSTYLE_JAVADOC_OFF
 
     public abstract String adjustTitleForBrowser(String title);
 
@@ -40,14 +34,18 @@ public abstract class DOMUtilImpl {
 
     public abstract int getClientWidth(Element elem);
 
-  /**
-   * From http://code.google.com/p/doctype/wiki/ArticleComputedStyle
-   */
-  public native String getEffectiveStyle(Element elem, String style) /*-{
-    return this.@org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl::getComputedStyle(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(elem,style)
-        || (elem.currentStyle ? elem.currentStyle[style] : null)
-        || elem.style[style];
-  }-*/;
+    public native String getEffectiveStyle(Element elem, String style) /*-{
+    var computedStyle = 
+        this.@org.vaadin.sasha.portallayout.client.dnd.util.impl.DOMUtilImpl::getComputedStyle(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(elem,style);
+    if (computedStyle) {
+        return computedStyle;
+    } else if (elem.currentStyle) {
+        return elem.currentStyle[style];
+    } else {
+        $wnd.alert('returning inline ' + elem.style[style]);
+        return elem.style[style];
+    }
+    }-*/;
 
     public final int getHorizontalBorders(Widget widget) {
         return widget.getOffsetWidth() - getClientWidth(widget.getElement());
@@ -66,62 +64,24 @@ public abstract class DOMUtilImpl {
         }
         return null;
     }-*/;
-
-    public int getPaddingLeft(Element elem) {
-        final Style style = elem.getStyle();
-        final String paddingLeft = style.getProperty("paddingLeft");
+    
+    public static native Integer parseInt(final String value)
+    /*-{
+        var number = parseInt(value, 10);
+        if (isNaN(number))
+            return null;
+        else
+            return @java.lang.Integer::valueOf(I)(number);
+    }-*/;
+    
+    public final int getIntProperty(Element elem, String name) {
+        final String style = getEffectiveStyle(elem, name);
         int result = 0;
-        if (paddingLeft.indexOf("px") != -1) {
+        if (style != null) {
             try {
-                result = Integer.parseInt(paddingLeft.substring(0,
-                        paddingLeft.length() - 2));
-            } catch (NumberFormatException e) {
-                VConsole.log("Get padding left " + e.getMessage());
-            }
-        }
-        return result;
-    }
-
-    public int getPaddingRight(Element elem) {
-        final Style style = elem.getStyle();
-        final String padding = style.getProperty("paddingRight");
-        int result = 0;
-        if (padding.indexOf("px") != -1) {
-            try {
-                result = Integer.parseInt(padding.substring(0,
-                        padding.length() - 2));
-            } catch (NumberFormatException e) {
-                VConsole.log("Get padding left " + e.getMessage());
-            }
-        }
-        return result;
-    }
-
-    public int getPaddingBottom(Element elem) {
-        final Style style = elem.getStyle();
-        final String padding = style.getProperty("paddingRight");
-        int result = 0;
-        if (padding.indexOf("px") != -1) {
-            try {
-                result = Integer.parseInt(padding.substring(0,
-                        padding.length() - 2));
-            } catch (NumberFormatException e) {
-                VConsole.log("Get padding left " + e.getMessage());
-            }
-        }
-        return result;
-    }
-
-    public int getPaddingTop(Element elem) {
-        final Style style = elem.getStyle();
-        final String padding = style.getProperty("paddingRight");
-        int result = 0;
-        if (padding.indexOf("px") != -1) {
-            try {
-                result = Integer.parseInt(padding.substring(0,
-                        padding.length() - 2));
-            } catch (NumberFormatException e) {
-                VConsole.log("Get padding left " + e.getMessage());
+                result = parseInt(style).intValue();
+            } catch (Exception e) {
+                return 0;
             }
         }
         return result;

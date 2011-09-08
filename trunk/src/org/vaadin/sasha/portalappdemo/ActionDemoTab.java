@@ -3,6 +3,7 @@ package org.vaadin.sasha.portalappdemo;
 import java.io.File;
 import java.io.FileFilter;
 
+import org.vaadin.sasha.portalappdemo.chart.ChartUtil;
 import org.vaadin.sasha.portallayout.PortalLayout;
 import org.vaadin.sasha.portallayout.PortalLayout.Context;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletCloseListener;
@@ -10,8 +11,10 @@ import org.vaadin.sasha.portallayout.PortalLayout.PortletCollapseListener;
 import org.vaadin.sasha.portallayout.ToolbarAction;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
+import com.vaadin.Application;
 import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.ThemeResource;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Panel;
@@ -19,6 +22,8 @@ import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
 public class ActionDemoTab extends Panel implements PortletCloseListener, PortletCollapseListener {
+    
+    private final Application app;
     
     private final PortalLayout videoPortal = new PortalLayout();
     
@@ -34,14 +39,16 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
     
     private File[] files; 
     
-    public ActionDemoTab() {
+    public ActionDemoTab(Application app) {
         super();
+        this.app = app;
         setSizeFull();
         setContent(layout);
-        layout.setSizeFull();
+        layout.setWidth("100%");
         layout.setMargin(true);
         layout.setSpacing(true);
         buildPortals();
+        construct();
     }
 
     private void buildPortals() {
@@ -49,11 +56,26 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         layout.addComponent(imagePortal, 1, 0);
         layout.addComponent(miscPortal, 2, 0);
         
-        imagePortal.setSizeFull();
-        videoPortal.setSizeFull();
-        miscPortal.setSizeFull();
+        imagePortal.setWidth("100%");
+        videoPortal.setWidth("100%");
+        miscPortal.setWidth("100%");
+
+        imagePortal.setHeight("800px");
+        videoPortal.setHeight("800px");
+        miscPortal.setHeight("800px");
+        
         imagePortal.addCloseListener(this);
         imagePortal.addCollapseListener(this);
+        
+        miscPortal.addCloseListener(this);
+        miscPortal.addCollapseListener(this);
+        
+        videoPortal.addCloseListener(this);
+        videoPortal.addCollapseListener(this);
+        
+        miscPortal.setMargin(true);
+        imagePortal.setMargin(true);
+        videoPortal.setMargin(true);
     }
     
 
@@ -63,10 +85,18 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         init = true;
         createVideoContents();
         createImageContents();
+        createMisc();
     }
     
+    private void createMisc() {
+        final Component chart = ChartUtil.getChartByIndex(1);
+        miscPortal.addComponent(chart);
+        chart.setCaption(ChartUtil.getChartCaptionByIndex(1));
+        chart.setIcon(new ThemeResource("chart.png"));
+    }
+
     private void createImageContents() {
-        String fullPath = getApplication().getContext().getBaseDirectory() + "/sample_pictures";
+        String fullPath = app.getContext().getBaseDirectory() + "/sample_pictures";
         File dir = new File(fullPath);
         files = dir.listFiles(new FileFilter() {
             @Override
@@ -84,15 +114,17 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         currentDisplayedImage = 0;
         image.setWidth("100%");
         image.setHeight("400px");
-        image.setSource(new FileResource(files[currentDisplayedImage], getApplication()));
+        image.setIcon(new ThemeResource("arrow_left.png"));
+        image.setSource(new FileResource(files[currentDisplayedImage], app));
         imagePortal.addComponent(image);
         image.setCaption(files[currentDisplayedImage].getName());
+        image.setIcon(new ThemeResource("picture.png"));
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_right.png")) {
             @Override
             public void execute(final Context context) {
                 final File next = getNextFile();
                 image.setCaption(next.getName());
-                image.setSource(new FileResource(next, getApplication()));
+                image.setSource(new FileResource(next, app));
             }
         });
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_left.png")) {
@@ -100,7 +132,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
             public void execute(final Context context) {
                 final File prev = getPrevFile();
                 image.setCaption(prev.getName());
-                image.setSource(new FileResource(prev, getApplication()));
+                image.setSource(new FileResource(prev, app));
             }
         });
     }
@@ -130,6 +162,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         pl.setImmediate(true);
         videoPortal.addComponent(pl);
         pl.setCaption("Joy Division - Disorder");
+        pl.setIcon(new ThemeResource("video.png"));
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("stop.png")) {
             @Override
             public void execute(final Context context) {
@@ -164,12 +197,13 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
 
     @Override
     public void portletClosed(Context context) {
-        getWindow().showNotification(context.getComponent().getCaption() + "closed", Notification.TYPE_ERROR_MESSAGE);
+        getWindow().showNotification(context.getComponent().getCaption() + "closed");
     }
 
     @Override
     public void portletCollapseStateChanged(Context context) {
-        getWindow().showNotification(context.getComponent().getCaption() + "collapsed", Notification.TYPE_ERROR_MESSAGE);
+        getWindow().showNotification(context.getComponent().getCaption() + "collapsed " + 
+                context.getPortal().isCollapsed(context.getComponent()));
     }
 
 }

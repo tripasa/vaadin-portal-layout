@@ -291,16 +291,11 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     }
 
     private void updateMarginsFromUidl(UIDL uidl) {
-        VMarginInfo marginInfo = new VMarginInfo(
-                uidl.getIntAttribute("margins"));
-        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_TOP, 
-                marginInfo.hasTop());
-        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_RIGHT,
-                marginInfo.hasRight());
-        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_BOTTOM,
-                marginInfo.hasBottom());
-        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_LEFT,
-                marginInfo.hasLeft());
+        VMarginInfo marginInfo = new VMarginInfo(uidl.getIntAttribute("margins"));
+        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_TOP, marginInfo.hasTop());
+        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_RIGHT, marginInfo.hasRight());
+        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_BOTTOM, marginInfo.hasBottom());
+        setStyleName(marginWrapper, PortalConst.CLASSNAME + "-" + StyleConstants.MARGIN_LEFT, marginInfo.hasLeft());
     }
 
     @Override
@@ -381,7 +376,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     public void setContainerHeight(int newHeight) {
         int oldHeight = DOMUtil.getClientHeight(getElement());
         setDOMHeight(newHeight + getVerticalMargins());
-        if (newHeight != oldHeight && getPortletCount() > 0 && !isRendering) {
+        if (newHeight + getVerticalMargins() != oldHeight && getPortletCount() > 0 && !isRendering) {
             Util.notifyParentOfSizeChange(this, false);
         }
     }

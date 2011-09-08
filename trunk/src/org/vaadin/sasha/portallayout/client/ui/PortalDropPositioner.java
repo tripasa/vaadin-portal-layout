@@ -69,8 +69,7 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
     @Override
     public void setWidgetWidth(int width) {
         int innerWidth = width - DOMUtil.getHorizontalBorders(this);
-        internalContent.getElement().getStyle()
-                .setPropertyPx("width", innerWidth);
+        internalContent.getElement().getStyle().setPropertyPx("width", innerWidth);
 
     }
 
