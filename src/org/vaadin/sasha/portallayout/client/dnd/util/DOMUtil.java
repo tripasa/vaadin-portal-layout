@@ -232,13 +232,13 @@ public class DOMUtil {
     }
 
     public static int getVerticalPadding(Element element) {
-        return impl.getPaddingTop(element)
-                + impl.getPaddingBottom(element);
+        return impl.getIntProperty(element, "marginTop")
+                + impl.getIntProperty(element, "marginBottom");
     }
 
     public static int getHorizontalPadding(Element element) {
-        return impl.getPaddingRight(element)
-                + impl.getPaddingLeft(element);
+        return impl.getIntProperty(element, "marginRight")
+                + impl.getIntProperty(element, "marginLeft");
     }
 
     /**

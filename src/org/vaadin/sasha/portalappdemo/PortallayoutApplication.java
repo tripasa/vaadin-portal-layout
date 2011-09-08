@@ -13,26 +13,20 @@ public class PortallayoutApplication extends Application {
 
     @Override
     public void init() {
-
         setTheme("portallayouttheme");
         mainWindow = new Window("Portallayout Application");
-        testInit();
         setMainWindow(mainWindow);
+        testInit();
     }
 
     public void testInit() {
         HorizontalLayout windowLayout = new HorizontalLayout();
         windowLayout.setSizeFull();
-
         mainWindow.setContent(windowLayout);
-
-        PortalTabSheet tabs = new PortalTabSheet();
-        tabs.setSizeFull();
+        PortalTabSheet tabs = new PortalTabSheet(this);
         windowLayout.addComponent(tabs);
         windowLayout.setExpandRatio(tabs, 1.0f);
-
-        // windowLayout.addComponent(sidePanel);
-
+        tabs.setSizeFull();
     }
 
 }

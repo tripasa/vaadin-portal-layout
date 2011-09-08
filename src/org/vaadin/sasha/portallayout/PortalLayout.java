@@ -451,7 +451,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         }
 
         int oldPosition = components.indexOf(component);
-
         if (oldPosition == -1) {
             doComponentAddLogic(component, newPosition);
             return;
@@ -664,11 +663,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         void portletClosed(final Context context);
     }
     
-    public interface PortalNavigationListener {
-        void portletEnetered(final Context context);
-        void portletLeft(final Context context);
-    }
-    
     public void addCloseListener(final PortletCloseListener listener) {
         closeListeners.add(listener);
     }
@@ -685,7 +679,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         collapseListeners.remove(listener);
     }
     
-    void fireCloseEvent(final Component c) {
+    private void fireCloseEvent(final Component c) {
         final Context context = new Context(this, c); 
         final Collection<PortletCloseListener> listeners = Collections.unmodifiableCollection(closeListeners);
         for (final PortletCloseListener l : listeners) {
@@ -693,7 +687,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         }
     }
     
-    void fireCollapseEvent(final Component c) {
+    private void fireCollapseEvent(final Component c) {
         final Context context = new Context(this, c); 
         final Collection<PortletCollapseListener> listeners = Collections.unmodifiableCollection(collapseListeners);
         for (final PortletCollapseListener l : listeners) {
