@@ -85,6 +85,11 @@ public class PortalConst {
     public static final String PORTAL_COMMUNICATIVE = "PORTAL_COMMUNCATIVE";
 
     /**
+     * 
+     */
+    public static final String PORTLET_CLOSED = "PORTLET_CLOSED";
+    
+    /**
      * Basic style name.
      */
     public static final String CLASSNAME = "v-portallayout";
@@ -94,7 +99,7 @@ public class PortalConst {
      */
     public static final String STYLENAME_SPACING = CLASSNAME + "-spacing";
     
-    public static final int DEFAULT_COLLAPSE_SPEED = 1000;
+    public static final int DEFAULT_COLLAPSE_SPEED = 1500;
     
     public static final int DEFAULT_CLOSE_SPEED = 400;
     

@@ -36,94 +36,39 @@ public class Portlet extends ComplexPanel implements PortalObject {
         PLS_NOT_SET, PLS_LOCKED, PLS_NOT_LOCKED;
     }
 
-    /**
-     * Style name used for the portlets.
-     */
     private final static String CLASSNAME = "v-portlet";
 
-    /**
-     * Wrapper style name.
-     */
     private static final String WRAPPER_CLASSNAME = "-wrapper";
 
-    /**
-     * Content DIV style name.
-     */
     private static final String CONTENT_CLASSNAME = "-content";
 
-    /**
-     * Size information of the portlet wrapper element.
-     */
     private Size containerSizeInfo = new Size(0, 0);
 
-    /**
-     * Size information of the portlet contents (how much space should be used
-     * for the non-collapsed widget in the portlet).
-     */
     private Size contentSizeInfo = new Size(0, 0);
 
-    /**
-     * Header object that both serves as an area for the draggable part of the
-     * portlet and holds the controls of the portal and its caption.
-     */
     private PortletHeader header;
 
-    /**
-     * Vaadin widget contained in the portlet.
-     */
     private Widget content;
 
-    /**
-     * Wrapper around the contents.
-     */
     private Element containerElement;
 
-    /**
-     * Element that holds contents.
-     */
     private Element contentDiv;
 
-    /**
-     * The portal which currently holds this portlet.
-     */
     private VPortalLayout parentPortal = null;
 
-    /**
-     * 
-     */
     private final ContentCollapseAnimation animation;
  
-    /**
-     * 
-     */
     private final FadeAnimation fadeAnimation;
 
-    /**
-     * Relative size. Null, if portlet has fixed size. Anyway - only height
-     * matters. Width is always 100% as portlet should fit width of the portal.
-     */
     private FloatSize relativeSize;
 
-    /**
-     * Flag indicatibg if the protlet can be dragged somewhere.
-     */
-    private PortletLockState isLocked = PortletLockState.PLS_NOT_SET;
-
-    /**
-     * Server-side communication channel.
-     */
     private ApplicationConnection client;
- 
-    /**
-     * Flag indicating that this portlet is collapsed (only header is visible).
-     */
+    
     private boolean isCollapsed = false;
     
-    /**
-     * The flag that indicates that height of the portlet should be calculated
-     * in the relative style.
-     */
     private boolean isHeightRelative = false;
+    
+    private PortletLockState isLocked = PortletLockState.PLS_NOT_SET;
     
     /**
      * Constructor.
@@ -133,8 +78,7 @@ public class Portlet extends ComplexPanel implements PortalObject {
      * @param parent
      *            Parent layout.
      */
-    public Portlet(Widget widget, final ApplicationConnection client,
-            VPortalLayout parent) {
+    public Portlet(Widget widget, final ApplicationConnection client, VPortalLayout parent) {
         super();
 
         this.client = client;
@@ -208,6 +152,8 @@ public class Portlet extends ComplexPanel implements PortalObject {
     public void updateContentSizeInfoFromDOM() {
         contentSizeInfo.setWidth(Util.getRequiredWidth(content));
         contentSizeInfo.setHeight(Util.getRequiredHeight(content));
+        //System.out.println(DOMUtil.getClientWidth(content.getElement()));
+        //contentSizeInfo.setHeight(DOMUtil.getClientHeight(content));
     }
 
     /**
@@ -467,7 +413,7 @@ public class Portlet extends ComplexPanel implements PortalObject {
     }
 
     @Override
-    public Portlet getPortalObjectReference() {
+    public Portlet getPortletRef() {
         return this;
     }
 

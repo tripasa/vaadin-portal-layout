@@ -8,16 +8,16 @@
 }
 
 .v-portallayout-margin-top {
-	padding-top: 12px;	
+	margin-top: 12px;	
 }
 .v-portallayout-margin-bottom {
-	padding-bottom: 12px;	
+	margin-bottom: 12px;	
 }
 .v-portallayout-margin-left {
-	padding-left: 12px;	
+	margin-left: 12px;	
 }
 .v-portallayout-margin-right {
-	padding-right: 12px;	
+	margin-right: 12px;	
 }
 
 .v-app .v-portallayout-spacing {

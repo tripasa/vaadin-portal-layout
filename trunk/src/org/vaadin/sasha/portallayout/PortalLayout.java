@@ -137,30 +137,12 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     private List<Component> components = new ArrayList<Component>();
 
-    /**
-     * 
-     */
     private final Map<AnimationType, Boolean> animationModeMap = new HashMap<AnimationType, Boolean>();
-    
-    /**
-     * 
-     */
     private final Map<AnimationType, Integer> animationSpeedMap = new HashMap<AnimationType, Integer>();
     
-    /**
-     * 
-     */
-    private final List<PortletCollapseListener> collapseListeners = new ArrayList<PortalLayout.PortletCollapseListener>();
-    
-    /**
-     * 
-     */
+    private final List<PortletCollapseListener> collapseListeners = new ArrayList<PortletCollapseListener>();
     private final List<PortletCloseListener> closeListeners = new ArrayList<PortletCloseListener>();
     
-    /**
-     * 
-     */
-    private final List<PortalNavigationListener> navigationListeners = new ArrayList<PortalNavigationListener>();
     /**
      * Constructor
      */
@@ -256,11 +238,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     public boolean isClosable(Component c) {
         final ComponentDetails details = componentToDetails.get(c);
-
         if (details == null)
             throw new IllegalArgumentException(
                     "Portal doesn not contain this component!");
-
         return details.isClosable();
     }
 
@@ -274,11 +254,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     public boolean isLocked(Component c) {
         final ComponentDetails details = componentToDetails.get(c);
-
         if (details == null)
             throw new IllegalArgumentException(
                     "Portal doesn not contain this component!");
-
         return details.isLocked();
     }
 
@@ -292,11 +270,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     public void setClosable(final Component c, boolean closable) {
         final ComponentDetails details = componentToDetails.get(c);
-
         if (details == null)
             throw new IllegalArgumentException(
                     "Portal doesn not contain this component!");
-
         if (details.isClosable() != closable) {
             details.setClosable(closable);
             requestRepaint();
@@ -313,11 +289,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     public void setLocked(final Component c, boolean isLocked) {
         final ComponentDetails details = componentToDetails.get(c);
-
         if (details == null)
             throw new IllegalArgumentException(
                     "Portal doesn not contain this component!");
-
         if (isLocked != details.isLocked()) {
             details.setLocked(isLocked);
             requestRepaint();
@@ -331,11 +305,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     public void setCollapsible(final Component c, boolean isCollapsible) {
         final ComponentDetails details = componentToDetails.get(c);
-
         if (details == null)
             throw new IllegalArgumentException(
                     "Portal doesn not contain this component!");
-
         if (isCollapsible != details.isCollapsible()) {
             details.setCollapsible(isCollapsible);
             requestRepaint();
@@ -352,11 +324,9 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
      */
     public void setCollapsed(final Component c, boolean isCollapsed) {
         final ComponentDetails details = componentToDetails.get(c);
-
         if (details == null)
             throw new IllegalArgumentException(
                     "Portal doesn not contain this component!");
-
         if (isCollapsed != details.isCollapsed()) {
             details.setCollapsed(isCollapsed);
             requestRepaint();
@@ -422,6 +392,12 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         if (variables.containsKey(PortalConst.PORTLET_REMOVED)) {
             final Component child = (Component) variables.get(PortalConst.PORTLET_REMOVED);
             doComponentRemoveLogic(child);
+        }
+        
+        if (variables.containsKey(PortalConst.PORTLET_CLOSED)) {
+            final Component child = (Component) variables.get(PortalConst.PORTLET_CLOSED);
+            fireCloseEvent(child);
+            removeComponent(child);
         }
     }
 
@@ -620,7 +596,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
             case AT_CLOSE:
                 return PortalConst.DEFAULT_CLOSE_SPEED;
             case AT_COLLAPSE:
-                return PortalConst.DEFAULT_CLOSE_SPEED;
+                return PortalConst.DEFAULT_COLLAPSE_SPEED;
             }
         }
         return speed;
@@ -709,38 +685,19 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         collapseListeners.remove(listener);
     }
     
-    public void addNavigationListener(final PortalNavigationListener listener) {
-        navigationListeners.add(listener);
-    }
-    
-    public void removeNavigationListener(final PortalNavigationListener listener) {
-        navigationListeners.remove(listener);
-    }
-    
     void fireCloseEvent(final Component c) {
-        final Collection<PortletCloseListener> listeners = Collections.unmodifiableCollection(closeListeners);
         final Context context = new Context(this, c); 
+        final Collection<PortletCloseListener> listeners = Collections.unmodifiableCollection(closeListeners);
         for (final PortletCloseListener l : listeners) {
             l.portletClosed(context);
         }
     }
     
     void fireCollapseEvent(final Component c) {
-        final Collection<PortletCollapseListener> listeners = Collections.unmodifiableCollection(collapseListeners);
         final Context context = new Context(this, c); 
+        final Collection<PortletCollapseListener> listeners = Collections.unmodifiableCollection(collapseListeners);
         for (final PortletCollapseListener l : listeners) {
             l.portletCollapseStateChanged(context);
-        }
-    }
-    
-    void fireNavigationEvent(final Component c, boolean entered) {
-        final Collection<PortalNavigationListener> listeners = Collections.unmodifiableCollection(navigationListeners);
-        final Context context = new Context(this, c); 
-        for (final PortalNavigationListener l : listeners) {
-            if (entered)
-                l.portletEnetered(context);
-            else
-                l.portletLeft(context);
         }
     }
 }

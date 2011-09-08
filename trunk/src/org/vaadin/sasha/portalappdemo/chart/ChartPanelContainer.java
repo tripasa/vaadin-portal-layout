@@ -34,13 +34,11 @@ public class ChartPanelContainer extends VerticalLayout {
             portal.setMargin(true);
             Component chart = ChartUtil.getChartByIndex(i);
             portal.addComponent(chart);
-            portal.setComponentCaption(chart,
-            ChartUtil.getChartCaptionByIndex(i));
+            chart.setCaption(ChartUtil.getChartCaptionByIndex(i));
 
             chart = ChartUtil.getChartByIndex(i + 1);
             portal.addComponent(chart);
-            portal.setComponentCaption(chart,
-            ChartUtil.getChartCaptionByIndex(i+1));
+            chart.setCaption(ChartUtil.getChartCaptionByIndex(i+1));
 
             panelLayout.addComponent(portal);
             if (i == 1)
