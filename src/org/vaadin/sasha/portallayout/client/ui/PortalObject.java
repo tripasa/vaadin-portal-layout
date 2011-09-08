@@ -67,5 +67,5 @@ public interface PortalObject extends IsWidget {
      * 
      * @return Reference to the Portlet.
      */
-    public Portlet getPortalObjectReference();
+    public Portlet getPortletRef();
 }

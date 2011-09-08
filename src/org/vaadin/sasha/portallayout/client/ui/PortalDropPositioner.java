@@ -80,7 +80,7 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
     }
 
     @Override
-    public Portlet getPortalObjectReference() {
+    public Portlet getPortletRef() {
         assert portlet != null;
         return portlet;
     }

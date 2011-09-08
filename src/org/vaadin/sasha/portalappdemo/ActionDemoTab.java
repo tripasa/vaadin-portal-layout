@@ -12,15 +12,9 @@ import org.vaadin.youtubeplayer.YouTubePlayer;
 
 import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.ThemeResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
@@ -32,87 +26,32 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
     
     private final PortalLayout miscPortal = new PortalLayout();
     
-    private final GridLayout layout = new GridLayout(4, 1);
-    
-    private TextArea tx1 = new TextArea("test1");
-    
-    private TextArea tx2 = new TextArea("test2");
-    
-    private TextArea tx3 = new TextArea("test2");
+    private final GridLayout layout = new GridLayout(3, 1);
     
     private boolean init = false;
     
     private int currentDisplayedImage = -1;
-
-    private boolean replacementFlag = true;
     
     private File[] files; 
     
     public ActionDemoTab() {
         super();
         setSizeFull();
-        layout.setWidth("100%");
+        setContent(layout);
+        layout.setSizeFull();
         layout.setMargin(true);
         layout.setSpacing(true);
-        final Button b = new Button("replace");
-        b.addListener(new ClickListener() {
-            
-            @Override
-            public void buttonClick(ClickEvent event) {
-                if (replacementFlag)
-                    imagePortal.replaceComponent(tx1, tx2);
-                else
-                    imagePortal.replaceComponent(tx2, tx1);
-                replacementFlag = !replacementFlag;
-            }
-        });
-        setContent(layout);
-        layout.addComponent(b);
         buildPortals();
     }
 
     private void buildPortals() {
-        //layout.setSizeFull();
-        videoPortal.setHeight("1000px");
-        imagePortal.setHeight("1200px");
-        miscPortal.setHeight("1000px");
-        //layout.addComponent(videoPortal);
-        layout.addComponent(imagePortal);
-        //layout.addComponent(miscPortal);
-//        layout.setExpandRatio(videoPortal, 1f);
-//        layout.setExpandRatio(imagePortal, 1f);
-//        layout.setExpandRatio(miscPortal, 1f);
+        layout.addComponent(videoPortal, 0, 0);
+        layout.addComponent(imagePortal, 1, 0);
+        layout.addComponent(miscPortal, 2, 0);
         
-        tx1.setWidth("100%");
-        tx1.setHeight("300px");
-        
-        tx2.setWidth("100%");
-        tx2.setHeight("300px");
-        
-        tx3.setWidth("100%");
-        tx3.setHeight("300px");
-        
-        TextArea tx4 = new TextArea();
-        tx4.setWidth("100%");
-        tx4.setHeight("300px");
-        
-        tx1.setValue("test1");
-        tx2.setValue("test2");
-        
-        imagePortal.addComponent(tx1);
-        imagePortal.addComponent(tx3);
-        imagePortal.addComponent(tx2);
-        imagePortal.addComponent(tx4);
-        /*imagePortal.addComponent(new Button("b"));
-        imagePortal.addComponent(new TextField("TF test"));*/
-//        imagePortal.setSizeFull();
-//        videoPortal.setSizeFull();
-//        miscPortal.setSizeFull();
-        TextArea l = new TextArea();
-        l.setSizeFull();
-        l.setCaption("test");
-        l.setValue("sadjdklsajkljfklahdkflhlkfhlkdhlfhdlkf");
-        //imagePortal.addComponent(l);
+        imagePortal.setSizeFull();
+        videoPortal.setSizeFull();
+        miscPortal.setSizeFull();
         imagePortal.addCloseListener(this);
         imagePortal.addCollapseListener(this);
     }
