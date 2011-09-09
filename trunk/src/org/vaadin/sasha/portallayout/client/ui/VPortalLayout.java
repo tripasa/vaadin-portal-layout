@@ -367,9 +367,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     public Set<PortalObject> getPortletSet() {
         final Collection<Portlet> portlets = widgetToPortletContainer.values();
         final Set<PortalObject> objSet = new HashSet<PortalObject>();
-        for (final Portlet p : portlets) {
-            objSet.add(p);
-        }
+        objSet.addAll(portlets);
         return objSet;
     }
 
