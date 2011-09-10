@@ -26,7 +26,6 @@ import org.vaadin.sasha.portallayout.client.dnd.util.WidgetArea;
 import org.vaadin.sasha.portallayout.client.dnd.util.WidgetLocation;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.InsertPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -49,11 +48,6 @@ public class PickupDragController extends AbstractDragController {
      * The initial draggable index for {@link InsertPanel} parents.
      */
     int initialDraggableIndex;
-
-    /**
-     * Initial draggable CSS margin.
-     */
-    String initialDraggableMargin;
 
     /**
      * Initial draggable parent widget.
@@ -132,9 +126,6 @@ public class PickupDragController extends AbstractDragController {
       context.dropController = null;
     }
 
-    if (!getBehaviorDragProxy()) {
-      restoreSelectedWidgetsStyle();
-    }
     movablePanel.removeFromParent();
     movablePanel = null;
     super.dragEnd();
@@ -175,7 +166,6 @@ public class PickupDragController extends AbstractDragController {
     if (context.dropController != null) {
       context.dropController.onMove(context);
     }
-    //VConsole.log("On move! " + (System.currentTimeMillis() - timeMillis));
   }
 
   private final static String APPLICATION_STYLE_NAME = "v-app";
@@ -407,19 +397,6 @@ public class PickupDragController extends AbstractDragController {
   }
 
   /**
-   * Restore the selected widgets with their original style.
-   * 
-   * @see #saveSelectedWidgetsLocationAndStyle()
-   * @see #restoreSelectedWidgetsLocation()
-   */
-  protected void restoreSelectedWidgetsStyle() {
-    for (Widget widget : context.selectedWidgets) {
-      SavedWidgetInfo info = savedWidgetInfoMap.get(widget);
-      widget.getElement().getStyle().setProperty("margin", info.initialDraggableMargin);
-    }
-  }
-
-  /**
    * Save the selected widgets' current location in case they much be restored due to a cancelled
    * drop.
    * 
@@ -447,7 +424,6 @@ public class PickupDragController extends AbstractDragController {
                 + " and override saveSelectedWidgetsLocationAndStyle(), restoreSelectedWidgetsLocation() and restoreSelectedWidgetsStyle()");
       }
 
-      info.initialDraggableMargin = DOM.getStyleAttribute(widget.getElement(), "margin");
       widget.getElement().getStyle().setProperty("margin", "0px");
       savedWidgetInfoMap.put(widget, info);
     }

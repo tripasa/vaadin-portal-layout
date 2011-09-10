@@ -12,34 +12,22 @@ import com.google.gwt.user.client.ui.SimplePanel;
  */
 public class PortalDropPositioner extends SimplePanel implements PortalObject {
 
-    /**
-     * Basic style name for the widget.
-     */
     private static final String CLASS_NAME = "v-portallayout-positioner";
 
-    /**
-     * Internal contents.
-     */
     private final SimplePanel internalContent = new SimplePanel();
 
-    /**
-   * 
-   */
     private final Portlet portlet;
-
-    /**
-     * Constructor
-     */
+    
     public PortalDropPositioner(final Portlet portlet) {
         super();
         setStyleName(CLASS_NAME);
         this.portlet = portlet;
-        int width = portlet.getContainerSizeInfo().getWidth();
+        int width = portlet.getContentSizeInfo().getWidth();
         int height = portlet.getRequiredHeight();
         setWidgetSizes(width, height);
         setWidget(internalContent);
     }
-
+    
     @Override
     public boolean isHeightRelative() {
         assert portlet != null;
@@ -47,9 +35,9 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
     }
 
     @Override
-    public float getRealtiveHeightValue() {
+    public float getRelativeHeightValue() {
         assert portlet != null;
-        return portlet.getRealtiveHeightValue();
+        return portlet.getRelativeHeightValue();
     }
 
     @Override
@@ -67,13 +55,6 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
     }
 
     @Override
-    public void setWidgetWidth(int width) {
-        int innerWidth = width - DOMUtil.getHorizontalBorders(this);
-        internalContent.getElement().getStyle().setPropertyPx("width", innerWidth);
-
-    }
-
-    @Override
     public void setSpacingValue(int spacing) {
         getElement().getStyle().setPropertyPx("marginTop", spacing);
     }
@@ -83,5 +64,4 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
         assert portlet != null;
         return portlet;
     }
-
 }

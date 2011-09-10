@@ -181,34 +181,22 @@ public class DOMUtil {
         return impl.getClientHeight(elem);
     }
 
-    /**
-     * Gets an element's client widget in pixels or <code>0</code> (zero) when
-     * the element is hidden. This is equal to offset width minus the left and
-     * right CSS borders.
-     * 
-     * @param elem
-     *            the element to be measured
-     * @return the element's client width in pixels
-     */
     public static int getClientWidth(Element elem) {
-        return impl.getClientWidth(elem);
+        return impl.getClientWidth(elem) - getHorizontalMargin(elem) - impl.getHorizontalBorders(elem);
     }
 
     public static String getEffectiveStyle(Element elem, String styleName) {
         return impl.getEffectiveStyle(elem, styleName);
     }
 
-    /**
-     * Gets the sum of an element's left and right CSS borders in pixels.
-     * 
-     * @param widget
-     *            the widget to be measured
-     * @return the total border width in pixels
-     */
     public static int getHorizontalBorders(Widget widget) {
         return impl.getHorizontalBorders(widget);
     }
 
+    public static int getHorizontalBorders(Element element) {
+        return impl.getHorizontalBorders(element);
+    }
+    
     /**
      * Determine an element's node name via the <code>nodeName</code> property.
      * 
@@ -220,25 +208,26 @@ public class DOMUtil {
         return elem.getNodeName();
     }
 
-    /**
-     * Gets the sum of an element's top and bottom CSS borders in pixels.
-     * 
-     * @param widget
-     *            the widget to be measured
-     * @return the total border height in pixels
-     */
+    public static int getIntPropertyValue(Element element, String name) {
+        return impl.getIntProperty(element, name);
+    }
+    
     public static int getVerticalBorders(Widget widget) {
         return impl.getVerticalBorders(widget);
     }
-
-    public static int getVerticalPadding(Element element) {
-        return impl.getIntProperty(element, "marginTop")
-                + impl.getIntProperty(element, "marginBottom");
+    
+    public static int getVerticalBorders(Element element) {
+        return impl.getVerticalBorders(element);
     }
 
-    public static int getHorizontalPadding(Element element) {
-        return impl.getIntProperty(element, "marginRight")
-                + impl.getIntProperty(element, "marginLeft");
+    public static int getVerticalMargin(Element element) {
+        return getIntPropertyValue(element, "paddingTop")
+                + getIntPropertyValue(element, "paddingBottom");
+    }
+
+    public static int getHorizontalMargin(Element element) {
+        return getIntPropertyValue(element, "paddingRight")
+                + getIntPropertyValue(element, "paddingLeft");
     }
 
     /**
