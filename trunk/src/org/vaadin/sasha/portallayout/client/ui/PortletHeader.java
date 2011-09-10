@@ -25,89 +25,39 @@ import com.vaadin.terminal.gwt.client.VCaption;
  * @author p4elkin
  */
 public class PortletHeader extends ComplexPanel {    
-    /**
-     * Class name for styling the element.
-     */
+    
     public static final String CLASSNAME_SUFFIX = "-header";
 
-    /**
-     * Class name suffix for the close button
-     */
     private static final String BUTTON_CLOSE_SUFFIX = "close";
 
-    /**
-     * Class name suffix for the collapse button
-     */
     private static final String BUTTON_COLLAPSE_SUFFIX = "collapse";
 
-    /**
-     * Class name suffix for the collapse button
-     */
     private static final String BUTTON_EXPAND_SUFFIX = "expand";
     
-    /**
-     * Class name suffix for the collapse button
-     */
     private static final String BUTTON_SUFFIX = "-button";
 
-    /**
-     * Class name suffix for the button bar.
-     */
     private static final String BUTTONBAR_SUFFIX = "-buttonbar";
 
-    /**
-     * Element that holds the caption
-     */
     private final Element captionWrapper = Document.get().createDivElement();
 
-    /**
-     * Portlet to which this header belongs.
-     */
     private final Portlet parentPortlet;
 
-    /**
-     * 
-     */
     private final Element buttonBar = Document.get().createDivElement();
 
-    /**
-     * Close button.
-     */
     private Button closeButton = new Button();
 
-    /**
-     * Collapse button.
-     */
     private Button collapseButton = new Button();
 
-    /**
-     * 
-     */
     private VCaption vcaption;
     
-    /**
-     * 
-     */
     private boolean closable = true;
 
-    /**
-     * 
-     */
     private boolean collapsible = true;
 
-    /**
-     * 
-     */
     private Map<String, Button> actionIdToButton = new HashMap<String, Button>();
     
-    /**
-     * 
-     */
     private Map<String, String> actionIdToIcon = new HashMap<String, String>();
     
-    /**
-     * Handler for close button click.
-     */
     private ClickHandler closeButtonClickHandler = new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -115,9 +65,6 @@ public class PortletHeader extends ComplexPanel {
         }
     };
 
-    /**
-     * Handler for collapse button click.
-     */
     private ClickHandler collapseButtonClickHandler = new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -125,9 +72,6 @@ public class PortletHeader extends ComplexPanel {
         }
     };
 
-    /**
-     * Mouse down handler.
-     */
     private MouseDownHandler mouseDownHandler = new MouseDownHandler() {
 
         @Override
@@ -137,12 +81,6 @@ public class PortletHeader extends ComplexPanel {
         }
     };
 
-    /**
-     * Constructor.
-     * 
-     * @param parent
-     *            Portlet to which this header belongs.
-     */
     public PortletHeader(final Portlet parent, final ApplicationConnection client) {
         super();
         setElement(captionWrapper);

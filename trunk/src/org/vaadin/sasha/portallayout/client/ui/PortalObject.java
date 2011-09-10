@@ -24,7 +24,7 @@ public interface PortalObject extends IsWidget {
      * 
      * @return The relative height value.
      */
-    public float getRealtiveHeightValue();
+    public float getRelativeHeightValue();
 
     /**
      * Get pixel amount needed by the component to display its fixed part. If
@@ -44,15 +44,6 @@ public interface PortalObject extends IsWidget {
      *            New height value.
      */
     public void setWidgetSizes(int width, int height);
-
-    /**
-     * Set width pixel value of the portal object (Portlet or
-     * PortalDropPositioners).
-     * 
-     * @param width
-     *            New width value.
-     */
-    public void setWidgetWidth(int width);
 
     /**
      * Set the pixel value reserved for the spacing.
