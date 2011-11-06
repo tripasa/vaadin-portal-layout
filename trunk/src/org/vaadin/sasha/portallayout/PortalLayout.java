@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,7 +25,9 @@ import com.vaadin.terminal.PaintTarget;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.terminal.gwt.client.EventId;
 import com.vaadin.ui.AbstractLayout;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ClientWidget;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.ClientWidget.LoadStyle;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Layout.SpacingHandler;
@@ -55,6 +58,10 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
         private Map<String, ToolbarAction> actions;
 
+        private List<String> styles = new LinkedList<String>();
+
+        Component headerComponent = new TextField("Test");
+        
         public ComponentDetails() {
         }
 
@@ -108,6 +115,18 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
         public void removeAction(final String actionId) {
             actions.remove(actionId);
+        }
+        
+        public void addStyle(final String style) {
+            styles.add(style);
+        }
+        
+        public void removeStyle(final String style) {
+            styles.remove(style);
+        }
+        
+        public List<String> getStyles() {
+            return styles;
         }
     }
 
@@ -163,15 +182,15 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         final Iterator<Component> it = components.iterator();
         while (it.hasNext()) {
             final Component childComponent = it.next();
-            final ComponentDetails childComponentDetails = componentToDetails
-                    .get(childComponent);
+            final ComponentDetails childComponentDetails = componentToDetails.get(childComponent);
 
             target.startTag("portlet");
+            target.startTag("body");
             target.addAttribute(PortalConst.PORTLET_CLOSABLE, childComponentDetails.isClosable());
             target.addAttribute(PortalConst.PORTLET_LOCKED, childComponentDetails.isLocked());
             target.addAttribute(PortalConst.PORTLET_COLLAPSED, childComponentDetails.isCollapsed());
             target.addAttribute(PortalConst.PORTLET_COLLAPSIBLE, childComponentDetails.isCollapsible());
-
+            target.addAttribute("styles", childComponentDetails.getStyles().toArray());
             final Map<String, ToolbarAction> actions = childComponentDetails.getActions();
             if (actions != null && actions.entrySet().size() > 0) {
                 final Iterator<?> actionIt = actions.entrySet().iterator();
@@ -187,10 +206,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
                     iconUrls[pos++] = icon;
                 }
                 target.addAttribute(PortalConst.PORTLET_ACTION_IDS, ids);
-                target.addAttribute(PortalConst.PORTLET_ACTION_ICONS,
-                        iconUrls);
+                target.addAttribute(PortalConst.PORTLET_ACTION_ICONS, iconUrls);
             }
             childComponent.paint(target);
+            target.endTag("body");
+            target.startTag("header");
+            childComponentDetails.headerComponent.setWidth("50%");
+            childComponentDetails.headerComponent.paint(target);
+            target.endTag("header");
             target.endTag("portlet");
         }
     }
@@ -452,11 +475,11 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
         int oldPosition = components.indexOf(component);
         if (oldPosition == -1) {
-            doComponentAddLogic(component, newPosition);
+            doAddComponent(component, newPosition);
             return;
         }
 
-        // / Component is in the right position - nothing to do.
+        // Component is in the right position - nothing to do.
         if (newPosition == oldPosition)
             return;
 
@@ -477,7 +500,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
                     "Portal does not contain the portlet. Replacement failed.");
         componentToDetails.put(newComponent, componentToDetails.get(oldComponent));
         removeComponent(oldComponent);
-        doComponentAddLogic(newComponent, position);
+        doAddComponent(newComponent, position);
     }
 
     @Override
@@ -501,25 +524,26 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     }
 
     public void addComponent(Component c, int position) {
-        doComponentAddLogic(c, position);
+        doAddComponent(c, position);
         requestRepaint();
     }
 
-    private void doComponentAddLogic(final Component c, int position) {
+    private void doAddComponent(final Component c, int position) {
         int index = components.indexOf(c);
 
         if (index != -1)
-            throw new IllegalArgumentException(
-                    "Component has already been added to the portal!");
+            throw new IllegalArgumentException("Component has already been added to the portal!");
 
         c.setWidth("100%");
-        final ComponentDetails details = c.getParent() instanceof PortalLayout ? ((PortalLayout) c
-                .getParent()).getDetails(c) : new ComponentDetails();
+        final ComponentDetails details = c.getParent() instanceof PortalLayout ? 
+                    ((PortalLayout) c.getParent()).getDetails(c) : new ComponentDetails();
         componentToDetails.put(c, details);
         if (position == components.size())
             components.add(c);
         else
             components.add(position, c);
+        details.headerComponent.attach();
+        details.headerComponent.setParent(c);
         super.addComponent(c);
     }
 
@@ -608,6 +632,15 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
     public void removeListener(LayoutClickListener listener) {
         removeListener(CLICK_EVENT, LayoutClickEvent.class, listener);
+    }
+    
+    
+    public void addStyleName(final Component c, final String style) {
+        final ComponentDetails details = componentToDetails.get(c);
+        if (details != null && details.getStyles().indexOf(style) < 0) {
+            details.addStyle(style);
+            requestRepaint();
+        }
     }
     
     /**
