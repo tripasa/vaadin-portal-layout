@@ -7,8 +7,9 @@ import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Overflow;
-import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
@@ -40,6 +41,8 @@ public class Portlet extends ComplexPanel implements PortalObject {
 
     private static final String CONTENT_CLASSNAME = "-content";
 
+    private static final String DRAGGABLE_SUFFIX = "draggable";
+    
     private Size contentSizeInfo = new Size(0, 0);
 
     private PortletHeader header;
@@ -66,9 +69,9 @@ public class Portlet extends ComplexPanel implements PortalObject {
     
     private PortletLockState isLocked = PortletLockState.PLS_NOT_SET;
     
-    int vBorders = -1;
+    private int vBorders = -1;
     
-    int hBorders = -1;
+    private int hBorders = -1;
     
     public Portlet(Widget widget, final ApplicationConnection client, VPortalLayout parent) {
         super();
@@ -93,57 +96,56 @@ public class Portlet extends ComplexPanel implements PortalObject {
         containerElement.appendChild(contentDiv);
         setElement(containerElement);
         setStyleName(CLASSNAME);
+        addStyleDependentName(DRAGGABLE_SUFFIX);
         containerElement.addClassName(CLASSNAME + WRAPPER_CLASSNAME);
 
         add(content, contentDiv);
     }
 
     public void renderContent(UIDL uidl) {
-        if (content == null || !(content instanceof Paintable))
-            return;
-        ((Paintable) content).updateFromUIDL(uidl, client);
-    }
-
-    @Override
-    public void setWidgetSizes(int width, int height) {
-        setContainerElementSizes(width, height);
-        contentSizeInfo.setWidth(width - getHBorders());
-        if (isHeightRelative) {
-            contentSizeInfo.setHeight(height - header.getOffsetHeight() - getVBorders());
-            updateContentDOMSize();
+        if (content != null && (content instanceof Paintable)) {
+            ((Paintable) content).updateFromUIDL(uidl, client);
         }
     }
 
+    @Override
+    public void addStyleName(String style) {
+        super.addStyleName(style);
+        vBorders = DOMUtil.getVerticalBorders(contentDiv);
+        hBorders = DOMUtil.getHorizontalBorders(contentDiv);
+    }
+    
+    @Override
+    public void setWidgetSizes(int width, int height) {
+        setPortletWidth(width);
+        setPortletHeight(height);
+    }
+
+    public void setPortletHeight(int height) {
+        contentSizeInfo.setHeight((height >= getVBorders()) ? height - getVBorders() : 0);
+        contentDiv.getStyle().setHeight(contentSizeInfo.getHeight(), Unit.PX);
+        containerElement.getStyle().setHeight(height + header.getOffsetHeight(), Unit.PX);
+    }
+    
+    public void setPortletWidth(int width) {
+        contentSizeInfo.setWidth(width >= getHBorders() ? width - getHBorders() : 0);
+        contentDiv.getStyle().setWidth(contentSizeInfo.getWidth(), Unit.PX);
+        containerElement.getStyle().setWidth(width, Unit.PX);
+        header.setWidth(width + "px");
+    }
+    
     private int getVBorders() {
-        if (isCollapsed)
-            return 0;
-        if (vBorders == -1)
+        if (vBorders < 0) {
             vBorders = DOMUtil.getVerticalBorders(contentDiv);
-        return vBorders;
+        }
+        return isCollapsed ? 0 : vBorders;
     }
     
     private int getHBorders() {
-        if (isCollapsed)
-            return 0;
-        if (hBorders == -1)
+        if (hBorders < 0) {
             hBorders = DOMUtil.getHorizontalBorders(contentDiv);
+        }
         return hBorders;
-    }
-    
-    protected void setContainerElementSizes(int width, int height) {
-        containerElement.getStyle().setPropertyPx("width", width);
-        containerElement.getStyle().setPropertyPx("height", height);
-    }
-
-    public void updateContentSizeInfoFromDOM() {
-        contentSizeInfo.setWidth(Util.getRequiredWidth(content));
-        contentSizeInfo.setHeight(Util.getRequiredHeight(content));
-    }
-
-    
-    protected void updateContentDOMSize() {
-        contentDiv.getStyle().setPropertyPx("width", contentSizeInfo.getWidth());
-        contentDiv.getStyle().setPropertyPx("height", contentSizeInfo.getHeight());
     }
 
     public Paintable getContentAsPaintable() {
@@ -156,7 +158,6 @@ public class Portlet extends ComplexPanel implements PortalObject {
 
     public void setContent(Widget content) {
         this.content = content;
-        updateContentSizeInfoFromDOM();
     }
 
     public Widget getDraggableArea() {
@@ -190,8 +191,15 @@ public class Portlet extends ComplexPanel implements PortalObject {
     }
 
     public void setLocked(boolean isLocked) {
+        boolean oldState = this.isLocked();
         this.isLocked = isLocked ? PortletLockState.PLS_LOCKED
                 : PortletLockState.PLS_NOT_LOCKED;
+        if (isLocked != oldState) {
+            if (!isLocked) {
+                addStyleDependentName(DRAGGABLE_SUFFIX);
+            } else
+                removeStyleDependentName(DRAGGABLE_SUFFIX);
+        }
     }
 
     public boolean isLocked() {
@@ -242,12 +250,19 @@ public class Portlet extends ComplexPanel implements PortalObject {
 
     @Override
     public int getRequiredHeight() {
-        int result = header.getOffsetHeight() + getVBorders();
-        if (!isCollapsed && !isHeightRelative)
-            result += contentSizeInfo.getHeight();
+        int result = header.getOffsetHeight() + contentDiv.getOffsetHeight();
         return result;
     }
 
+    public int getTotalHeight() {
+        return header.getOffsetHeight() + getVBorders() + contentSizeInfo.getHeight();
+    }
+    
+    @Override
+    public int getContentHeight() {
+        return getTotalHeight() - header.getOffsetHeight();
+    }
+    
     @Override
     public float getRelativeHeightValue() {
         if (relativeSize != null && !isCollapsed)
@@ -294,23 +309,24 @@ public class Portlet extends ComplexPanel implements PortalObject {
         @Override
         protected void onStart() {
             super.onStart();
-            if (!isCollapsed)
-                contentDiv.getStyle().setVisibility(Visibility.VISIBLE);
         }
         
         public void start(int speed) {
             cancel();
             double duration = 0;
             if (!isCollapsed && isHeightRelative) {
-                height = parentPortal.getRealtiveHeightPortletPxValue(Portlet.this);
+                height = parentPortal.getRelativePortletHeight(Portlet.this) - getVBorders();
                 setCollapsed(!isCollapsed);
             } else {
                 setCollapsed(!isCollapsed);
+                if (!isCollapsed) {
+                    contentDiv.getStyle().setDisplay(Display.BLOCK);
+                }
                 parentPortal.recalculateLayout();
                 final Set<PortalObject> portletSet = parentPortal.getPortletSet();
                 if (isHeightRelative) {
                     parentPortal.calculatePortletSizes(portletSet);
-                    height = parentPortal.getRealtiveHeightPortletPxValue(Portlet.this);
+                    height = parentPortal.getRelativePortletHeight(Portlet.this) - getVBorders();
                 } else {
                     portletSet.remove(Portlet.this);
                     parentPortal.calculatePortletSizes(portletSet);
@@ -325,10 +341,9 @@ public class Portlet extends ComplexPanel implements PortalObject {
         
         @Override
         protected void onUpdate(double progress) {
-            double heightValue = isCollapsed ?  (1 - progress) * height : progress * height;
-            contentDiv.getStyle().setProperty("height",  heightValue + "px");
-            setContainerElementSizes(getOffsetWidth(), header.getOffsetHeight() + (int)heightValue);
-            Util.notifyParentOfSizeChange(parentPortal, true);
+            int heightValue =(int)(isCollapsed ?  (1 - progress) * height : progress * height);
+            contentSizeInfo.setHeight(heightValue);
+            setPortletHeight(getContentHeight());
         }
 
         @Override
@@ -336,8 +351,9 @@ public class Portlet extends ComplexPanel implements PortalObject {
             super.onComplete();
             header.toggleCollapseStyles(isCollapsed);
             parentPortal.onPortletCollapseStateChanged(Portlet.this);
+            Util.notifyParentOfSizeChange(parentPortal, false);
             if (isCollapsed)
-                contentDiv.getStyle().setVisibility(Visibility.HIDDEN);
+                contentDiv.getStyle().setDisplay(Display.NONE);
         }
 
     }
@@ -395,5 +411,9 @@ public class Portlet extends ComplexPanel implements PortalObject {
                 parentPortal.onPortletClose(Portlet.this);
             }
         }
+    }
+
+    public void setHeaderWidget(Widget widget) {
+        header.setHeaderWidget(widget);
     }
 }

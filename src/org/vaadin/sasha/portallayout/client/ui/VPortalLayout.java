@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.vaadin.sasha.portallayout.client.dnd.PickupDragController;
@@ -46,27 +47,13 @@ import com.vaadin.terminal.gwt.client.ui.layout.CellBasedLayout.Spacing;
  * @author p4elkin
  */
 public class VPortalLayout extends SimplePanel implements Paintable, Container {
-    /**
-     * The common drag controller for all the portals in the application. Having
-     * this drag controller static allows us to drag portlets between all the
-     * possible portals.
-     */
+    
     private final static PickupDragController commonDragController = new PickupDragController(RootPanel.get(), false);
 
-    /**
-     * Server side communication interface.
-     */
     protected ApplicationConnection client;
     
-    /**
-     * Object controlling the way of how the portlets are being dropped on the
-     * portal.
-     */
     protected PortalDropController dropController;
     
-    /**
-     * Controller used in case this portal should not share its portlets.
-     */
     private PickupDragController localDragController = null;
 
     protected final Map<Widget, Portlet> widgetToPortletContainer = new HashMap<Widget, Portlet>();
@@ -76,7 +63,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     private final Map<AnimationType, Integer> animationSpeedMap = new HashMap<AnimationType, Integer>();
 
     private final Element marginWrapper = DOM.createDiv();
-
+    
     private final FlowPanel portalContent = new FlowPanel() {
         
       public void insert(Widget w, int beforeIndex) {
@@ -131,8 +118,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return localDragController;
     }
 
-    private LayoutClickEventHandler clickEventHandler = new LayoutClickEventHandler(
-            this, EventId.LAYOUT_CLICK) {
+    private LayoutClickEventHandler clickEventHandler = new LayoutClickEventHandler(this, EventId.LAYOUT_CLICK) {
 
         @Override
         protected Paintable getChildComponent(Element element) {
@@ -145,9 +131,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         }
     };
 
-    /**
-     * Constructor.
-     */
     public VPortalLayout() {
         super();
         getElement().appendChild(marginWrapper);
@@ -161,8 +144,10 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         getDragController().registerDropController(dropController);
     }
 
+    @SuppressWarnings("unchecked")
     public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
         isRendering = true;
+        
         if (client.updateComponent(this, uidl, true)) {
             isRendering = false;
             return;
@@ -188,32 +173,43 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         int pos = 0;
         final Map<Portlet, UIDL> realtiveSizePortletUIDLS = new HashMap<Portlet, UIDL>();
         final Map<Widget, Portlet> oldMap = new HashMap<Widget, Portlet>(widgetToPortletContainer);
+        final Map<Paintable, UIDL> headerPaintablesMap = new HashMap<Paintable, UIDL>();
         for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext(); ++pos) {
             final UIDL itUidl = (UIDL) it.next();
             if (itUidl.getTag().equals("portlet")) {
 
-                final Boolean isClosable = itUidl.getBooleanAttribute(PortalConst.PORTLET_CLOSABLE);
-                final Boolean isCollapsible = itUidl.getBooleanAttribute(PortalConst.PORTLET_COLLAPSIBLE);
-                final Boolean isLocked = itUidl.getBooleanAttribute(PortalConst.PORTLET_LOCKED);
-                final Boolean isCollapsed = itUidl.getBooleanAttribute(PortalConst.PORTLET_COLLAPSED);
-
-                final UIDL childUidl = (UIDL) itUidl.getChildUIDL(0);
+                final UIDL bodyUidl = itUidl.getChildByTagName("body");
+                
+                final Boolean isClosable = bodyUidl.getBooleanAttribute(PortalConst.PORTLET_CLOSABLE);
+                final Boolean isCollapsible = bodyUidl.getBooleanAttribute(PortalConst.PORTLET_COLLAPSIBLE);
+                final Boolean isLocked = bodyUidl.getBooleanAttribute(PortalConst.PORTLET_LOCKED);
+                final Boolean isCollapsed = bodyUidl.getBooleanAttribute(PortalConst.PORTLET_COLLAPSED);
+                
+                final UIDL childUidl = (UIDL) bodyUidl.getChildUIDL(0);
                 final Paintable child = client.getPaintable(childUidl);
                 final Widget widget = (Widget) child;
                 
                 if (oldMap.containsKey(widget))
                     oldMap.remove(widget);
                 
+                
                 final Portlet portlet = findOrCreatePortlet(widget);
+                
+                final String[] styles = bodyUidl.getStringArrayAttribute("styles");
+                for (final String style : styles) {
+                    if (!portlet.getStyleName().contains(style)) {
+                        portlet.addStyleName(style);
+                    }
+                }
+                
                 updatePortletInPosition(portlet, pos);
-
                 setLock(portlet, isLocked);
                 portlet.setClosable(isClosable);
                 portlet.setCollapsible(isCollapsible);
                 
-                if (itUidl.hasAttribute(PortalConst.PORTLET_ACTION_IDS)) {
-                    final String[] actions = itUidl.getStringArrayAttribute(PortalConst.PORTLET_ACTION_IDS);
-                    final String[] icons = itUidl.getStringArrayAttribute(PortalConst.PORTLET_ACTION_ICONS);
+                if (bodyUidl.hasAttribute(PortalConst.PORTLET_ACTION_IDS)) {
+                    final String[] actions = bodyUidl.getStringArrayAttribute(PortalConst.PORTLET_ACTION_IDS);
+                    final String[] icons = bodyUidl.getStringArrayAttribute(PortalConst.PORTLET_ACTION_ICONS);
                     assert icons.length == actions.length;
                     final Map<String, String> idToIconUrl = new LinkedHashMap<String, String>();
                     for (int i = 0; i < actions.length; ++i)
@@ -224,16 +220,28 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                 if (!isCollapsed.equals(portlet.isCollapsed()))
                     portlet.toggleCollapseState();
 
-                if (!Util.isCached(childUidl))
+                final Size portletSize = portlet.getContentSizeInfo();
+                portletSize.setWidth(actualSizeInfo.getWidth());
+                
+                if (!Util.isCached(childUidl)) {
                     portlet.tryDetectRelativeHeight(childUidl);
+                }
 
                 if (portlet.isHeightRelative())
                     realtiveSizePortletUIDLS.put(portlet, childUidl);
                 else {
                     portlet.renderContent(childUidl);
-                    portlet.updateContentSizeInfoFromDOM();
+                    portletSize.setHeight(Util.getRequiredHeight(widget.getElement()));
                 }
-
+                
+                final UIDL headerUidl = itUidl.getChildByTagName("header");
+                if (headerUidl != null) {
+                    Paintable p = client.getPaintable(headerUidl.getChildUIDL(0));
+                    if (p instanceof Widget) {
+                        portlet.setHeaderWidget((Widget)p);
+                        headerPaintablesMap.put(p, headerUidl.getChildUIDL(0));
+                    }
+                }
             }
         }
 
@@ -245,6 +253,12 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         }
 
         updateCommunicationAbility(uidl);
+        
+        final Iterator<?> it = headerPaintablesMap.entrySet().iterator();
+        while (it.hasNext()) {
+            final Map.Entry<Paintable, UIDL> entry = (Entry<Paintable, UIDL>) it.next();
+            entry.getKey().updateFromUIDL(entry.getValue(), client);
+        }
         
         for (final Widget w : oldMap.keySet()) {
             final Portlet p = oldMap.get(w);
@@ -317,13 +331,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             getDragController().makeNotDraggable(portlet);
     }
 
-    /**
-     * Check if spacing was enabled/disabled on the server side and update
-     * spacing info accordingly.
-     * 
-     * @param uidl
-     *            Server payload.
-     */
     private void updateSpacingInfoFromUidl(final UIDL uidl) {
         boolean newSpacingEnabledState = uidl.getBooleanAttribute("spacing");
         if (isSpacingEnabled != newSpacingEnabledState) {
@@ -356,9 +363,9 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     }
 
     public void setContainerHeight(int newHeight) {
-        int oldHeight = DOMUtil.getClientHeight(getElement());
+        int contentHeight = portalContent.getOffsetHeight();
         setDOMHeight(newHeight + getVerticalMargins());
-        if (newHeight + getVerticalMargins() != oldHeight && getPortletCount() > 0 && !isRendering) {
+        if (newHeight + getVerticalMargins() != contentHeight && getPortletCount() > 0 && !isRendering) {
             Util.notifyParentOfSizeChange(this, false);
         }
     }
@@ -376,9 +383,12 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             if (currentPortletIndex != -1 &&
                 currentPortletIndex != portalContent.getWidgetIndex(p))
                 continue;
-            consumedHeight += p.getRequiredHeight();
-            if (p.isHeightRelative())
+            if (p.isHeightRelative()) {
                 sumRelativeHeight += p.getRelativeHeightValue();
+            } else { 
+                consumedHeight += p.getRequiredHeight();
+            }
+                
         }
         consumedHeight += (contentsSize - 1) * activeSpacing.vSpacing;
         if (sizeInfoFromUidl != null && consumedHeight < sizeInfoFromUidl.getHeight()) 
@@ -389,19 +399,15 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return newHeight;
     }
     
-    /**
-     * Calculate and accordingly update the size info of the portlets. In case
-     * of relative height portlets the contents need to be re-laid out.
-     */
     public void calculatePortletSizes(final Set<PortalObject> objSet) {
         int width = DOMUtil.getClientWidth(marginWrapper);
         final Iterator<PortalObject> it = objSet.iterator();
         while (it.hasNext()) {
             final PortalObject portalObject = (PortalObject)it.next();
-            int height = portalObject.getRequiredHeight();
-            if (portalObject.isHeightRelative()) {
-                height += getRealtiveHeightPortletPxValue(portalObject);
-            }
+            int height = 
+            portalObject.isHeightRelative() ?
+                getRelativePortletHeight(portalObject):
+                portalObject.getContentHeight();
             portalObject.setWidgetSizes(width, height);
         }
         if (client != null)
@@ -427,7 +433,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return DOMUtil.getClientHeight(getElement()) - consumedHeight - getVerticalMargins();
     }
     
-    public int getRealtiveHeightPortletPxValue(final PortalObject portalObject) {
+    public int getRelativePortletHeight(final PortalObject portalObject) {
         int residualHeight = getResidualHeight();
         float relativeHeightRatio = normalizedRealtiveRatio();
         float newRealtiveHeight = relativeHeightRatio * portalObject.getRelativeHeightValue();
@@ -456,14 +462,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return portalContent;
     }
     
-    
-    /**
-     * Calculated a ratio that would be used in the calculation of how much
-     * height the relative sized portlet can consume.
-     * 
-     * @return 1 if the sum of the relative heights is less or equal to 100, 100
-     *         / SUM if sum is more than 100.
-     */
     private float normalizedRealtiveRatio() {
         float result = 0;
         if (sumRelativeHeight != 0f)
@@ -471,14 +469,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return result;
     }
 
-    /**
-     * Search for the portlet corresponding to the widget. If it does not exist
-     * - create it.
-     * 
-     * @param widget
-     *            Search criteria.
-     * @return Found or created portlet.
-     */
     private Portlet findOrCreatePortlet(Widget widget) {
         Portlet result = widgetToPortletContainer.get(widget);
         if (result == null)
@@ -486,27 +476,12 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         return result;
     }
 
-    /**
-     * Create new portlet, make it draggable and save it in the map.
-     * 
-     * @param widget
-     *            Contents for the new portlet.
-     * @return Created portlet.
-     */
     private final Portlet createPortlet(Widget widget) {
         final Portlet result = new Portlet(widget, client, this);
         widgetToPortletContainer.put(widget, result);
         return result;
     }
 
-    /**
-     * If the portlet was closed from somewhere outside - this method should be
-     * called, so portal would do all the required logic on client and server
-     * sides.
-     * 
-     * @param portlet
-     *            The portlet that has been closed.
-     */
     public void onPortletClose(final Portlet portlet) {
         final Paintable child = portlet.getContentAsPaintable();
         if (child != null) {
@@ -522,12 +497,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         client.updateVariable(paintableId, PortalConst.PORTLET_ACTION_TRIGGERED, params, true);
     }
     
-    /**
-     * Handler for the portlet collapse state toggle.
-     * 
-     * @param portlet
-     *            Target portlet.
-     */
     public void onPortletCollapseStateChanged(final Portlet portlet) {
         final Map<String, Object> params = new HashMap<String, Object>();
         params.put(PortalConst.PAINTABLE_MAP_PARAM, portlet.getContentAsPaintable());
@@ -543,23 +512,13 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         }
     }
 
-    /**
-     * Add widget to the root panel
-     * 
-     * @param widget
-     *            The widget to be added.
-     */
     public void addToRootElement(final PortalObject widget, int position) {
         portalContent.insert(widget, position);
+        if (position == 1) {
+            widget.getPortletRef().addStyleName("v-test");
+        }
     }
 
-    /**
-     * The portlet might have been moved from one portal to another. Do
-     * everything about detaching here.
-     * 
-     * @param portlet
-     *            The portlet that has been removed.
-     */
     public void onPortletMovedOut(Portlet portlet) {
         final Paintable child = portlet.getContentAsPaintable();
         if (child != null) {
@@ -568,17 +527,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         }
     }
 
-    /**
-     * The portlet might have been moved from one portal to another or just drag
-     * to some other place inside the portal. Do everything about attaching
-     * here.
-     * 
-     * @param portlet
-     *            The portlet that either was added to the portal or changed its
-     *            position.
-     * @param newPosition
-     *            New position of the portlet.
-     */
     public void onPortletPositionUpdated(Portlet portlet, int newPosition) {
         final Paintable child = portlet.getContentAsPaintable();
         if (child != null) {
@@ -591,11 +539,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         }
     }
 
-    /**
-     * Get the number of the portlets currently contained in the protal.
-     * 
-     * @return The number of portlets.
-     */
     public int getPortletCount() {
         return widgetToPortletContainer.size();
     }
@@ -629,6 +572,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             portlet.setContent(newComponent);
             client.unregisterPaintable((Paintable) oldComponent);
             widgetToPortletContainer.put(newComponent, portlet);
+            recalculateLayoutAndPortletSizes();
         }
     }
 
@@ -652,7 +596,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
          * if needed - notification is already sent, 
          * no need to propagate.
          */
-        return true;
+        return !isRendering;
     }
 
     @Override
@@ -662,13 +606,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
         final Size sizeInfo = portlet.getContentSizeInfo();
 
         int height = sizeInfo.getHeight();
-        /**
-         * Due to the logic of the portal layout realtive height portlets
-         * consume the according amount of free space (if 50% portlet height is
-         * specified - a half of free space goes to that portlet). Here we
-         * ensure that the rendering routines get the correct information about
-         * how much space can be consumed.
-         */
         if (portlet.isHeightRelative())
             height = (int) (((float) height) * 100 / portlet.getRelativeHeightValue());
         return new RenderSpace(sizeInfo.getWidth(), height);

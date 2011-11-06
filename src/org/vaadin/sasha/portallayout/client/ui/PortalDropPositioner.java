@@ -30,27 +30,28 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
     
     @Override
     public boolean isHeightRelative() {
-        assert portlet != null;
         return portlet.isHeightRelative();
     }
 
     @Override
     public float getRelativeHeightValue() {
-        assert portlet != null;
         return portlet.getRelativeHeightValue();
     }
 
     @Override
     public int getRequiredHeight() {
-        assert portlet != null;
         return portlet.getRequiredHeight();
     }
 
     @Override
+    public int getContentHeight() {
+        return portlet.getContentHeight();
+    }
+    
+    @Override
     public void setWidgetSizes(int width, int height) {
         int innerWidth = width - DOMUtil.getHorizontalBorders(this);
-        int innerHeight = height - DOMUtil.getVerticalBorders(this);
-
+        int innerHeight = height - DOMUtil.getVerticalBorders(this) + portlet.getDraggableArea().getOffsetHeight();
         internalContent.setPixelSize(innerWidth, innerHeight);
     }
 
@@ -61,7 +62,6 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
 
     @Override
     public Portlet getPortletRef() {
-        assert portlet != null;
         return portlet;
     }
 }

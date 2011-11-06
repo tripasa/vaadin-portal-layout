@@ -30,7 +30,6 @@
 
 .v-portlet .v-portlet-header {
 	background-image: url(header-bg.png);
-	width: 100%;
 	height: 28px;
 }
 
@@ -56,16 +55,18 @@
 
 
 .v-portlet .v-portlet-header-buttonbar {
-	float: right;
+	/*float: right;
 	margin-right: 9px;
 	padding-top: 7px;
-	padding-bottom: 2px;
+	padding-bottom: 2px;*/
+	display: inline-block;
 }
 
 .v-portlet .v-portlet-header .v-caption {
-	padding-right: 3px;
-	padding-left: 7px;
+	/*padding-right: 3px;
+	padding-left: 7px;*/
 	height: 100%;
+	float: left;
 }
 
 .v-portlet .v-portlet-header .v-caption .v-captiontext {
@@ -86,13 +87,15 @@
 .v-portlet .v-portlet-header .v-caption .v-icon {
 	padding-top: 6px;
 	padding-bottom: 3px;		
+	width: 16px;
+	height: 16px;
 }
 
 .v-portlet .v-portlet-header-button:hover {
 	cursor: pointer;
 }
 
-.v-portlet .v-caption:hover {
+.v-portlet-draggable .v-caption:hover {
 	cursor: move;
 }
 
