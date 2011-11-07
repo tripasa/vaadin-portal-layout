@@ -364,8 +364,8 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
 
     public void setContainerHeight(int newHeight) {
         int contentHeight = portalContent.getOffsetHeight();
-        setDOMHeight(newHeight + getVerticalMargins());
-        if (newHeight + getVerticalMargins() != contentHeight && getPortletCount() > 0 && !isRendering) {
+        setDOMHeight(newHeight/* + getVerticalMargins()*/);
+        if (newHeight /*+ getVerticalMargins()*/ != contentHeight && getPortletCount() > 0 && !isRendering) {
             Util.notifyParentOfSizeChange(this, false);
         }
     }
@@ -430,7 +430,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     }
     
     public int getResidualHeight() {
-        return DOMUtil.getClientHeight(getElement()) - consumedHeight - getVerticalMargins();
+        return DOMUtil.getClientHeight(marginWrapper) - consumedHeight - getVerticalMargins();
     }
     
     public int getRelativePortletHeight(final PortalObject portalObject) {
@@ -441,7 +441,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     }
     
     private void setDOMHeight(int height) {
-        getElement().getStyle().setPropertyPx("height", height);
+        getElement().getStyle().setPropertyPx("height", height + getVerticalMargins());
         marginWrapper.getStyle().setPropertyPx("height", height);
         portalContent.setHeight(height + "px");
     }
@@ -596,7 +596,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
          * if needed - notification is already sent, 
          * no need to propagate.
          */
-        return !isRendering;
+        return true;
     }
 
     @Override

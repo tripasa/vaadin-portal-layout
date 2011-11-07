@@ -51,7 +51,8 @@ public class PortalDropPositioner extends SimplePanel implements PortalObject {
     @Override
     public void setWidgetSizes(int width, int height) {
         int innerWidth = width - DOMUtil.getHorizontalBorders(this);
-        int innerHeight = height - DOMUtil.getVerticalBorders(this) + portlet.getDraggableArea().getOffsetHeight();
+        int innerHeight = height - DOMUtil.getVerticalBorders(this) + 
+                (portlet.isHeightRelative() ? 0 : portlet.getDraggableArea().getOffsetHeight());
         internalContent.setPixelSize(innerWidth, innerHeight);
     }
 
