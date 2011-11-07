@@ -25,12 +25,11 @@ import com.vaadin.terminal.PaintTarget;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.terminal.gwt.client.EventId;
 import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.ClientWidget;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.ClientWidget.LoadStyle;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Layout.SpacingHandler;
+import com.vaadin.ui.TextField;
 
 /**
  * Layout that presents its contents in a portal style.
@@ -60,7 +59,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
         private List<String> styles = new LinkedList<String>();
 
-        Component headerComponent = new TextField("Test");
+        private Component headerComponent = new TextField("Test");
         
         public ComponentDetails() {
         }
@@ -109,7 +108,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
             return actions;
         }
 
-        ToolbarAction getActionById(final String id) {
+        public ToolbarAction getActionById(final String id) {
             return actions.get(id);
         }
 

@@ -63,8 +63,8 @@
 }
 
 .v-portlet .v-portlet-header .v-caption {
-	/*padding-right: 3px;
-	padding-left: 7px;*/
+	padding-right: 3px;
+	padding-left: 7px;
 	height: 100%;
 	float: left;
 }

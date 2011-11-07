@@ -122,9 +122,11 @@ public class Portlet extends ComplexPanel implements PortalObject {
     }
 
     public void setPortletHeight(int height) {
-        contentSizeInfo.setHeight((height >= getVBorders()) ? height - getVBorders() : 0);
+        int contentHeight = isHeightRelative ? height - header.getOffsetHeight(): height;
+        contentHeight = (contentHeight >= getVBorders()) ? contentHeight - getVBorders() : 0;
+        contentSizeInfo.setHeight(contentHeight);
         contentDiv.getStyle().setHeight(contentSizeInfo.getHeight(), Unit.PX);
-        containerElement.getStyle().setHeight(height + header.getOffsetHeight(), Unit.PX);
+        containerElement.getStyle().setHeight(contentHeight + header.getOffsetHeight(), Unit.PX);
     }
     
     public void setPortletWidth(int width) {
@@ -134,17 +136,15 @@ public class Portlet extends ComplexPanel implements PortalObject {
         header.setWidth(width + "px");
     }
     
-    private int getVBorders() {
+    public int getVBorders() {
         if (vBorders < 0) {
             vBorders = DOMUtil.getVerticalBorders(contentDiv);
         }
         return isCollapsed ? 0 : vBorders;
     }
     
-    private int getHBorders() {
-        if (hBorders < 0) {
-            hBorders = DOMUtil.getHorizontalBorders(contentDiv);
-        }
+    public int getHBorders() {
+        hBorders = DOMUtil.getHorizontalBorders(contentDiv);
         return hBorders;
     }
 
@@ -321,6 +321,7 @@ public class Portlet extends ComplexPanel implements PortalObject {
                 setCollapsed(!isCollapsed);
                 if (!isCollapsed) {
                     contentDiv.getStyle().setDisplay(Display.BLOCK);
+                    setPortletWidth(contentSizeInfo.getWidth());
                 }
                 parentPortal.recalculateLayout();
                 final Set<PortalObject> portletSet = parentPortal.getPortletSet();
