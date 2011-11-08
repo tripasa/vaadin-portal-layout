@@ -166,6 +166,7 @@ public class PickupDragController extends AbstractDragController {
     if (context.dropController != null) {
       context.dropController.onMove(context);
     }
+    System.out.println("Move: " + (System.currentTimeMillis() - timeMillis));
   }
 
   private final static String APPLICATION_STYLE_NAME = "v-app";

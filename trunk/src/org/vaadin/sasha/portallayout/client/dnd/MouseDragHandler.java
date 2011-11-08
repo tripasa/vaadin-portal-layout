@@ -426,13 +426,10 @@ class MouseDragHandler implements MouseMoveHandler, MouseDownHandler,
             DOMUtil.reportFatalAndThrowRuntimeException("PopupPanel (and its subclasses) cannot be made draggable; See http://code.google.com/p/gwt-dnd/issues/detail?id=43");
         }
         try {
-            RegisteredDraggable registeredDraggable = new RegisteredDraggable(
-                    draggable, dragHandle);
+            RegisteredDraggable registeredDraggable = new RegisteredDraggable(draggable, dragHandle);
             dragHandleMap.put(dragHandle, registeredDraggable);
         } catch (Exception ex) {
-            throw new RuntimeException(
-                    "dragHandle must implement HasMouseDownHandlers to be draggable",
-                    ex);
+            throw new RuntimeException("dragHandle must implement HasMouseDownHandlers to be draggable", ex);
         }
     }
 
@@ -544,8 +541,7 @@ class MouseDragHandler implements MouseMoveHandler, MouseDownHandler,
         context.dragController.dragStart();
 
         startCapturing();
-        capturingWidget.setPixelSize(RootPanel.get().getOffsetWidth(),
-                RootPanel.get().getOffsetHeight());
+        capturingWidget.setPixelSize(RootPanel.get().getOffsetWidth(), RootPanel.get().getOffsetHeight());
         dragging = DRAGGING_NO_MOVEMENT_YET;
     }
 

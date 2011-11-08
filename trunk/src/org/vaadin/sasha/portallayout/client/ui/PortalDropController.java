@@ -95,19 +95,18 @@ public class PortalDropController extends AbstractPositioningDropController {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                if (dummy == null)
-                    return;
-                int targetIndex = updateDropPosition(context);
-                int dummyIndex = getDummyIndex();
-                if (dummyIndex != targetIndex
-                        && (dummyIndex != targetIndex - 1 || targetIndex == 0)) {
-                    if (dummyIndex == 0 && portal.getChildCount() == 1) {
-                        // Do nothing...
-                    } else if (targetIndex == -1) {
-                        Panel parent = (Panel)dummy.getParent();
-                        parent.remove(dummy);
-                    } else {
-                        portal.addToRootElement(dummy, targetIndex);
+                if (dummy != null) {
+                    int targetIndex = updateDropPosition(context);
+                    int dummyIndex = getDummyIndex();
+                    if (dummyIndex != targetIndex && (dummyIndex != targetIndex - 1 || targetIndex == 0)) {
+                        if (dummyIndex == 0 && portal.getChildCount() == 1) {
+                            // Do nothing...
+                        } else if (targetIndex == -1) {
+                            Panel parent = (Panel)dummy.getParent();
+                            parent.remove(dummy);
+                        } else {
+                            portal.addToRootElement(dummy, targetIndex);
+                        }
                     }
                 }
             }
