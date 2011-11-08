@@ -201,11 +201,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                 final Portlet portlet = findOrCreatePortlet(widget);
                 
                 final String[] styles = bodyUidl.getStringArrayAttribute("styles");
-                for (final String style : styles) {
-                    if (!portlet.getStyleName().contains(style)) {
-                        portlet.addStyleName(style);
-                    }
-                }
+                portlet.updateStyles(Arrays.asList(styles));
                 
                 updatePortletInPosition(portlet, pos);
                 setLock(portlet, isLocked);
@@ -217,8 +213,9 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                     final String[] icons = bodyUidl.getStringArrayAttribute(PortalConst.PORTLET_ACTION_ICONS);
                     assert icons.length == actions.length;
                     final Map<String, String> idToIconUrl = new LinkedHashMap<String, String>();
-                    for (int i = 0; i < actions.length; ++i)
+                    for (int i = 0; i < actions.length; ++i) {
                         idToIconUrl.put(actions[i], client.translateVaadinUri(icons[i]));
+                    }
                     portlet.updateActions(idToIconUrl);
                 }
                 
@@ -528,9 +525,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
 
     public void addToRootElement(final PortalObject widget, int position) {
         portalContent.insert(widget, position);
-        if (position == 1) {
-            widget.getPortletRef().addStyleName("v-test");
-        }
     }
 
     public void onPortletMovedOut(Portlet portlet) {

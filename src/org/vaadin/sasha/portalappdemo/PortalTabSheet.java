@@ -18,8 +18,8 @@ public class PortalTabSheet extends TabSheet {
         super();
         actionTab = new ActionDemoTab(app);
         addTab(actionTab, "Portal In Action", null);
-        //addTab(dashTab, "Fixed Dash Board", null);
-        //addTab(videoTabPanel, "Video Portal", null);
+        addTab(dashTab, "Fixed Dash Board", null);
+        addTab(videoTabPanel, "Video Portal", null);
         addListener(new SelectedTabChangeListener() {
 
             @Override

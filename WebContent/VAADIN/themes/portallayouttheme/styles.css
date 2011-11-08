@@ -23,16 +23,19 @@
 	width: 20px !important;
 }
 
-.v-test .v-portlet-header{
-	color: black !important;
-	border-color: red;
+.red .v-portlet-content{
+	border: 5px solid red;
 }
 
-.v-test .v-portlet-content{
-	border: 5px solid red !important;
+.green .v-portlet-content{
+	border: 5px solid green;
 }
 
-.v-test .v-portlet-header{
+.yellow .v-portlet-content{
+	border: 5px solid yellow;
+}
+
+.v-test .v-portlet-header {
 	background-image: none;
 	background-color: green;
 }
