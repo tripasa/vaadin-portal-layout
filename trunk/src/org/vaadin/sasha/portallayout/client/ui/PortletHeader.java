@@ -5,9 +5,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
+
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,21 +37,29 @@ import com.vaadin.terminal.gwt.client.VCaption;
  */
 public class PortletHeader extends ComplexPanel implements Container {    
     
-    public static final String CLASSNAME_SUFFIX = "-header";
+    public static final String CLASSNAME = "-header";
 
-    private static final String BUTTON_CLOSE_SUFFIX = "close";
+    private static final String BUTTON_CLOSE = "close";
 
-    private static final String BUTTON_COLLAPSE_SUFFIX = "collapse";
+    private static final String BUTTON_COLLAPSE = "collapse";
 
-    private static final String BUTTON_EXPAND_SUFFIX = "expand";
+    private static final String BUTTON_EXPAND = "expand";
     
-    private static final String BUTTON_SUFFIX = "-button";
+    private static final String BUTTON = "-button";
 
-    private static final String BUTTONBAR_SUFFIX = "-buttonbar";
+    private static final String BUTTONBAR = "-buttonbar";
+
+    private static final String TOOLBAR = "-toolbar";
+    
+    private static final String WIDGET_SLOT = "-widget-slot";
 
     private final Element container = DOM.createDiv();
     
-    private final Element controlContainer = DOM.createDiv();
+    private final Element controlContainer = DOM.createSpan();
+    
+    private final Element buttonContainer = DOM.createDiv();
+    
+    private final Element uidlContainer = DOM.createDiv();
     
     private final Portlet parentPortlet;
 
@@ -114,22 +123,28 @@ public class PortletHeader extends ComplexPanel implements Container {
         vcaption.addMouseDownHandler(blockingDownHandler);
         closeButton.addMouseDownHandler(blockingDownHandler);
         collapseButton.addMouseDownHandler(blockingDownHandler);
+       
         
-        closeButton.getElement().getStyle().setFloat(Float.RIGHT);
-        collapseButton.getElement().getStyle().setFloat(Float.RIGHT);
         add(vcaption, container);
-        add(closeButton, controlContainer);
-        add(collapseButton, controlContainer);
+        add(collapseButton, buttonContainer);
+        add(closeButton, buttonContainer);
+
+        controlContainer.appendChild(buttonContainer);
+        controlContainer.appendChild(uidlContainer);
+
 
         
         vcaption.getElement().appendChild(controlContainer);
         controlContainer.getStyle().setVerticalAlign(VerticalAlign.TOP);
-        closeButton.setStyleName(getClassName() + BUTTON_SUFFIX);
-        closeButton.addStyleDependentName(BUTTON_CLOSE_SUFFIX);
+        closeButton.setStyleName(getClassName() + BUTTON);
+        closeButton.addStyleDependentName(BUTTON_CLOSE);
         
-        collapseButton.setStyleName(getClassName() + BUTTON_SUFFIX);
-        collapseButton.addStyleDependentName(BUTTON_COLLAPSE_SUFFIX);
-        controlContainer.setClassName(getClassName() + BUTTONBAR_SUFFIX);
+        collapseButton.setStyleName(getClassName() + BUTTON);
+        collapseButton.addStyleDependentName(BUTTON_COLLAPSE);
+        
+        controlContainer.setClassName(getClassName() + TOOLBAR);
+        buttonContainer.setClassName(getClassName() + BUTTONBAR);
+        uidlContainer.setClassName(getClassName() + WIDGET_SLOT);
     }
     
     @Override
@@ -143,7 +158,7 @@ public class PortletHeader extends ComplexPanel implements Container {
     }
 
     public static String getClassName() {
-        return Portlet.getClassName() + CLASSNAME_SUFFIX;
+        return Portlet.getClassName() + CLASSNAME;
     }
 
     public void setClosable(boolean closable) {
@@ -176,7 +191,6 @@ public class PortletHeader extends ComplexPanel implements Container {
                 Button button = actionIdToButton.get(key);
                 if (button == null) {
                     button = new Button();
-                    button.getElement().getStyle().setFloat(Float.RIGHT);
                     button.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
@@ -191,10 +205,10 @@ public class PortletHeader extends ComplexPanel implements Container {
                             
                         }
                     });
-                    add(button, controlContainer);
+                    insert(button, buttonContainer, 0, true);
                 }
                 button.getElement().getStyle().setBackgroundImage("url("+ icon +")");
-                button.setStyleName(getClassName() + BUTTON_SUFFIX);
+                button.setStyleName(getClassName() + BUTTON);
                 actionIdToButton.put(key, button);
                 actionIdToIcon.put(key, icon);
             }
@@ -227,8 +241,8 @@ public class PortletHeader extends ComplexPanel implements Container {
     }
 
     public void toggleCollapseStyles(boolean isCollapsed) {
-        collapseButton.removeStyleDependentName(isCollapsed ? BUTTON_COLLAPSE_SUFFIX : BUTTON_EXPAND_SUFFIX);
-        collapseButton.addStyleDependentName(isCollapsed ?  BUTTON_EXPAND_SUFFIX : BUTTON_COLLAPSE_SUFFIX);
+        collapseButton.removeStyleDependentName(isCollapsed ? BUTTON_COLLAPSE : BUTTON_EXPAND);
+        collapseButton.addStyleDependentName(isCollapsed ?  BUTTON_EXPAND : BUTTON_COLLAPSE);
     }
     
     private class VPortletCaption extends VCaption {
@@ -240,10 +254,16 @@ public class PortletHeader extends ComplexPanel implements Container {
         }
 
         public void updateComponentWidth() {
-            controlContainer.getStyle().setWidth(PortletHeader.this.getOffsetWidth() - vcaption.getRequiredWidth() - 4, Unit.PX);
+            int offsetWidth = PortletHeader.this.getOffsetWidth() - getRequiredWidth()  - getHPadding();
+            controlContainer.getStyle().setWidth(offsetWidth, Unit.PX);
+            uidlContainer.getStyle().setWidth(offsetWidth - buttonContainer.getOffsetWidth(), Unit.PX);
             if (child != null) {
                 client.handleComponentRelativeSize(child);
             }
+        }
+        
+        public int getHPadding() {
+            return DOMUtil.getHorizontalMargin(getElement());
         }
         
     }
@@ -258,9 +278,7 @@ public class PortletHeader extends ComplexPanel implements Container {
                 remove(child);
             }
             child = newComponent;
-            child.getElement().getStyle().setFloat(Float.RIGHT);
-            child.getElement().getStyle().setMarginRight(10, Unit.PX);
-            add(newComponent, controlContainer);
+            add(newComponent, uidlContainer);
             newComponent.addDomHandler(blockingDownHandler, MouseDownEvent.getType());
             vcaption.updateComponentWidth();
         }
@@ -283,13 +301,7 @@ public class PortletHeader extends ComplexPanel implements Container {
     @Override
     public RenderSpace getAllocatedSpace(Widget child) {
         if (child == this.child) {
-            int buttonSumWidth = 0;
-            for (final Button b : actionIdToButton.values()) {
-                buttonSumWidth += b.getOffsetWidth();
-            }
-            buttonSumWidth += closeButton.getOffsetWidth();
-            buttonSumWidth += collapseButton.getOffsetWidth();
-            return new RenderSpace(controlContainer.getOffsetWidth() - buttonSumWidth, getOffsetHeight());
+            return new RenderSpace(uidlContainer.getOffsetWidth(), uidlContainer.getOffsetHeight());
         }
         return null;
     }

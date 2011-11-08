@@ -65,7 +65,7 @@ public class VideoPanelContainer extends HorizontalSplitPanel {
         pl.setVideoId(str);
         pl.setImmediate(true);
         rightPortal.addComponent(pl);
-        rightPortal.setComponentCaption(pl, name);
+        pl.setCaption(name);
     }
 
     private void buildMainPanel() {
@@ -112,8 +112,7 @@ public class VideoPanelContainer extends HorizontalSplitPanel {
         private void bundleArtists() {
             artistVideos.put("Editors - Munich", "oVLdaa4Wplo");
             artistVideos.put("Joy Division - Disorder", "QrzGpVOPcTI");
-            artistVideos
-                    .put("The Killers - When You Were Young", "ff0oWESdmH0");
+            artistVideos.put("The Killers - When You Were Young", "ff0oWESdmH0");
             artistVideos.put("Interpol - Evil", "eqfiHfDmOnw");
             artistVideos.put("Sick Of It All - Death Or Jail", "oZDiOuJR5HM");
             artistVideos.put("Royksopp - Happy Up There", "51Bpx63wkbA");

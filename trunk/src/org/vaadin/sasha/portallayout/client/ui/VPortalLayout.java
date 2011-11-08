@@ -50,13 +50,17 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     
     private final static PickupDragController commonDragController = new PickupDragController(RootPanel.get(), false);
 
+    public static final String PORTLET_CLOSED_EVENT_ID = "PORTLET_CLOSED";
+
+    public static final String PORTLET_COLLAPSE_EVENT_ID = "COLLAPSE_STATE_CHANGED";
+
     protected ApplicationConnection client;
     
     protected PortalDropController dropController;
     
     private PickupDragController localDragController = null;
 
-    protected final Map<Widget, Portlet> widgetToPortletContainer = new HashMap<Widget, Portlet>();
+    private final Map<Widget, Portlet> widgetToPortletContainer = new HashMap<Widget, Portlet>();
 
     private final Map<AnimationType, Boolean> animationModeMap = new HashMap<AnimationType, Boolean>();
     

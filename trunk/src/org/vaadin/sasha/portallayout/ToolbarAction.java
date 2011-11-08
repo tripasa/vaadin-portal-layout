@@ -1,6 +1,6 @@
 package org.vaadin.sasha.portallayout;
 
-import org.vaadin.sasha.portallayout.PortalLayout.Context;
+import org.vaadin.sasha.portallayout.event.Context;
 
 import com.vaadin.terminal.ThemeResource;
 
