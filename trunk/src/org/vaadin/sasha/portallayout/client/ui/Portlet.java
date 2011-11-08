@@ -1,5 +1,8 @@
 package org.vaadin.sasha.portallayout.client.ui;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,6 +72,8 @@ public class Portlet extends ComplexPanel implements PortalObject {
     
     private PortletLockState isLocked = PortletLockState.PLS_NOT_SET;
     
+    private List<String> appliedStyles = new ArrayList<String>();
+    
     private int vBorders = -1;
     
     private int hBorders = -1;
@@ -108,6 +113,18 @@ public class Portlet extends ComplexPanel implements PortalObject {
         }
     }
 
+    public void updateStyles(final List<String> newStyles) {
+        final Iterator<String> styleIt = appliedStyles.iterator();
+        while (styleIt.hasNext()) {
+            removeStyleName(styleIt.next());
+            styleIt.remove();
+        }
+        for (final String style : newStyles ) {
+            appliedStyles.add(style);
+            addStyleName(style);
+        }
+    }
+    
     @Override
     public void addStyleName(String style) {
         super.addStyleName(style);

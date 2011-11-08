@@ -1,11 +1,11 @@
 package org.vaadin.sasha.portallayout;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import com.vaadin.ui.Component;
 
 /**
@@ -29,9 +29,6 @@ final class ComponentDetails implements Serializable {
     private List<String> styles = new LinkedList<String>();
 
     private Component headerComponent;
-
-    public ComponentDetails() {
-    }
 
     public boolean isLocked() {
         return isLocked;
@@ -89,12 +86,17 @@ final class ComponentDetails implements Serializable {
         styles.add(style);
     }
 
+    public void setStyles(final List<String> styles) {
+        this.styles.clear();
+        this.styles.addAll(styles);
+    }
+    
     public void removeStyle(final String style) {
         styles.remove(style);
     }
-
+    
     public List<String> getStyles() {
-        return styles;
+        return Collections.unmodifiableList(styles);
     }
 
     public Component getHeaderComponent() {

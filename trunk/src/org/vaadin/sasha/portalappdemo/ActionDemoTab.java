@@ -5,10 +5,12 @@ import java.io.FileFilter;
 
 import org.vaadin.sasha.portalappdemo.chart.ChartUtil;
 import org.vaadin.sasha.portallayout.PortalLayout;
-import org.vaadin.sasha.portallayout.PortalLayout.Context;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletCloseListener;
+import org.vaadin.sasha.portallayout.PortalLayout.PortletClosedEvent;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletCollapseListener;
+import org.vaadin.sasha.portallayout.PortalLayout.PortletCollapseEvent;
 import org.vaadin.sasha.portallayout.ToolbarAction;
+import org.vaadin.sasha.portallayout.event.Context;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
 import com.vaadin.Application;
@@ -25,11 +27,29 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
     
     private final Application app;
     
-    private final PortalLayout videoPortal = new PortalLayout();
+    private final PortalLayout videoPortal = new PortalLayout() {
+        public void addComponent(Component c, int position) {
+            super.addComponent(c, position);
+            clearStyleNames(c);
+            addStyleName(c, "red");
+        };
+    };
     
-    private final PortalLayout imagePortal = new PortalLayout();
+    private final PortalLayout imagePortal = new PortalLayout()  {
+        public void addComponent(Component c, int position) {
+            super.addComponent(c, position);
+            clearStyleNames(c);
+            addStyleName(c, "green");
+        };
+    };
     
-    private final PortalLayout miscPortal = new PortalLayout();
+    private final PortalLayout miscPortal = new PortalLayout()  {
+        public void addComponent(Component c, int position) {
+            super.addComponent(c, position);
+            clearStyleNames(c);
+            addStyleName(c, "yellow");
+        };
+    };
     
     private final GridLayout layout = new GridLayout(3, 1);
     
@@ -156,8 +176,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
     
     private void createVideoContents() {
         final YouTubePlayer pl = new YouTubePlayer();
-        pl.setWidth("100%");
-        pl.setHeight("350px");
+        pl.setHeight("100%");
         pl.setVideoId("QrzGpVOPcTI");
         pl.setImmediate(true);
         videoPortal.addComponent(pl);
@@ -195,15 +214,17 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         });
     }
 
+
     @Override
-    public void portletClosed(Context context) {
-        getWindow().showNotification(context.getComponent().getCaption() + "closed");
+    public void portletCollapseStateChanged(PortletCollapseEvent event) {
+        final Context context = event.getContext();
+        getWindow().showNotification(context.getComponent().getCaption() + "collapsed " + 
+                context.getPortal().isCollapsed(context.getComponent()));
     }
 
     @Override
-    public void portletCollapseStateChanged(Context context) {
-        getWindow().showNotification(context.getComponent().getCaption() + "collapsed " + 
-                context.getPortal().isCollapsed(context.getComponent()));
+    public void portletClosed(PortletClosedEvent event) {
+        getWindow().showNotification(event.getContext().getComponent().getCaption() + "closed");
     }
 
 }
