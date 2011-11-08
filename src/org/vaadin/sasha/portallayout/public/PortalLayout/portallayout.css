@@ -34,7 +34,8 @@
 }
 
 .v-portlet .v-portlet-header-button {
-	margin-bottom: 1px;
+	margin-top: 6px;
+	margin-bottom: 6px;
 	width: 16px;
 	height: 16px;
 	background: transparent;
@@ -55,15 +56,11 @@
 
 
 .v-portlet .v-portlet-header-buttonbar {
-	/*float: right;
-	margin-right: 9px;
-	padding-top: 7px;
-	padding-bottom: 2px;*/
 	display: inline-block;
 }
 
 .v-portlet .v-portlet-header .v-caption {
-	padding-right: 3px;
+	margin-right: 7px;
 	padding-left: 7px;
 	height: 100%;
 	float: left;

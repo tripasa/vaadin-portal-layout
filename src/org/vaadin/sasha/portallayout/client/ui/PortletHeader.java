@@ -235,6 +235,7 @@ public class PortletHeader extends ComplexPanel implements Container {
         
         public VPortletCaption(Paintable component, ApplicationConnection client) {
             super(component, client);
+            getElement().getStyle().setHeight(100, Unit.PCT);
             getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
         }
 
