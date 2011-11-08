@@ -34,12 +34,10 @@
 }
 
 .v-portlet .v-portlet-header-button {
-	margin-top: 6px;
-	margin-bottom: 6px;
 	width: 16px;
 	height: 16px;
 	background: transparent;
-	border: 0px;
+	border: none;
 }
 
 .v-portlet .v-portlet-header-button-close {
@@ -55,12 +53,27 @@
 }
 
 
-.v-portlet .v-portlet-header-buttonbar {
+.v-portlet .v-portlet-header-toolbar {
 	display: inline-block;
 }
 
+.v-portlet .v-portlet-header-buttonbar {
+	float: right;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.v-portlet .v-portlet-header-widget-slot {
+	height: 100%;
+	float: rigth;
+}
+
+.v-portlet .v-portlet-header-widget {
+	float: right;
+	margin-right: 10px;
+}
+            
 .v-portlet .v-portlet-header .v-caption {
-	margin-right: 7px;
 	padding-left: 7px;
 	height: 100%;
 	float: left;

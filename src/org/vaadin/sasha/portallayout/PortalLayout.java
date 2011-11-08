@@ -1,14 +1,10 @@
 package org.vaadin.sasha.portallayout;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,6 +12,7 @@ import java.util.Map.Entry;
 import org.vaadin.sasha.portallayout.client.ui.AnimationType;
 import org.vaadin.sasha.portallayout.client.ui.PortalConst;
 import org.vaadin.sasha.portallayout.client.ui.VPortalLayout;
+import org.vaadin.sasha.portallayout.event.Context;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
@@ -29,7 +26,6 @@ import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.ClientWidget.LoadStyle;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Layout.SpacingHandler;
-import com.vaadin.ui.TextField;
 
 /**
  * Layout that presents its contents in a portal style.
@@ -39,96 +35,6 @@ import com.vaadin.ui.TextField;
 @SuppressWarnings("serial")
 @ClientWidget(value = VPortalLayout.class, loadStyle = LoadStyle.EAGER)
 public class PortalLayout extends AbstractLayout implements SpacingHandler, LayoutClickNotifier {
-
-    /**
-     * Helper class that holds Portlet information about the object.
-     * 
-     * @author p4elkin
-     */
-    public class ComponentDetails implements Serializable {
-
-        private boolean isLocked = false;
-
-        private boolean isCollapsed = false;
-
-        private boolean isClosable = true;
-
-        private boolean isCollapsible = true;
-
-        private Map<String, ToolbarAction> actions;
-
-        private List<String> styles = new LinkedList<String>();
-
-        private Component headerComponent = new TextField("Test");
-        
-        public ComponentDetails() {
-        }
-
-        public boolean isLocked() {
-            return isLocked;
-        }
-
-        public void setLocked(boolean isLocked) {
-            this.isLocked = isLocked;
-        }
-
-        public boolean isCollapsed() {
-            return isCollapsed;
-        }
-
-        public void setCollapsed(boolean isCollapsed) {
-            this.isCollapsed = isCollapsed;
-        }
-
-        public boolean isClosable() {
-            return isClosable;
-        }
-
-        public void setClosable(boolean isClosable) {
-            this.isClosable = isClosable;
-        }
-
-        public boolean isCollapsible() {
-            return isCollapsible;
-        }
-
-        public void setCollapsible(boolean isCollapsible) {
-            this.isCollapsible = isCollapsible;
-        }
-
-        public String addAction(final ToolbarAction action) {
-            if (actions == null)
-                actions = new LinkedHashMap<String, ToolbarAction>();
-            final String randomId = "TB_ACTION" + Math.random();
-            actions.put(randomId, action);
-            return randomId;
-        }
-
-        public Map<String, ToolbarAction> getActions() {
-            return actions;
-        }
-
-        public ToolbarAction getActionById(final String id) {
-            return actions.get(id);
-        }
-
-        public void removeAction(final String actionId) {
-            actions.remove(actionId);
-        }
-        
-        public void addStyle(final String style) {
-            styles.add(style);
-        }
-        
-        public void removeStyle(final String style) {
-            styles.remove(style);
-        }
-        
-        public List<String> getStyles() {
-            return styles;
-        }
-    }
-
     /**
      * Identifier for the click event.
      */
@@ -157,9 +63,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
 
     private final Map<AnimationType, Boolean> animationModeMap = new HashMap<AnimationType, Boolean>();
     private final Map<AnimationType, Integer> animationSpeedMap = new HashMap<AnimationType, Integer>();
-    
-    private final List<PortletCollapseListener> collapseListeners = new ArrayList<PortletCollapseListener>();
-    private final List<PortletCloseListener> closeListeners = new ArrayList<PortletCloseListener>();
     
     /**
      * Constructor
@@ -210,13 +113,23 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
             childComponent.paint(target);
             target.endTag("body");
             target.startTag("header");
-            childComponentDetails.headerComponent.setWidth("50%");
-            childComponentDetails.headerComponent.paint(target);
+            childComponentDetails.getHeaderComponent().setWidth("50%");
+            childComponentDetails.getHeaderComponent().addStyleName("v-portlet-header-widget");
+            childComponentDetails.getHeaderComponent().paint(target);
             target.endTag("header");
             target.endTag("portlet");
         }
     }
 
+    @Override
+    public void detach() {
+        for (final ComponentDetails details : componentToDetails.values()) {
+            if (details.getHeaderComponent() != null) {
+                details.getHeaderComponent().detach();
+            }
+        }
+        super.detach();
+    }
     /**
      * Check if portlet containing this component is collapsed.
      * 
@@ -228,8 +141,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         final ComponentDetails details = componentToDetails.get(c);
 
         if (details == null)
-            throw new IllegalArgumentException(
-                    "Portal doesn not contain this component!");
+            throw new IllegalArgumentException("Portal doesn not contain this component!");
 
         return details.isCollapsed();
     }
@@ -512,12 +424,20 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         components.remove(c);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.vaadin.ui.AbstractComponentContainer#removeComponent(com.vaadin.ui.Component)
+     */
     @Override
     public void removeComponent(Component c) {
         doComponentRemoveLogic(c);
         super.removeComponent(c);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.vaadin.ui.AbstractComponentContainer#addComponent(com.vaadin.ui.Component)
+     */
     public void addComponent(Component c) {
         addComponent(c, components.size());
     }
@@ -534,29 +454,40 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
             throw new IllegalArgumentException("Component has already been added to the portal!");
 
         c.setWidth("100%");
-        final ComponentDetails details = c.getParent() instanceof PortalLayout ? 
-                    ((PortalLayout) c.getParent()).getDetails(c) : new ComponentDetails();
+        final ComponentDetails details = c.getParent() instanceof PortalLayout ? ((PortalLayout) c.getParent()).getDetails(c) : new ComponentDetails();
         componentToDetails.put(c, details);
         if (position == components.size())
             components.add(c);
         else
             components.add(position, c);
-        details.headerComponent.attach();
-        details.headerComponent.setParent(c);
+        details.getHeaderComponent().attach();
+        details.getHeaderComponent().setParent(c);
         super.addComponent(c);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.vaadin.ui.Layout.SpacingHandler#setSpacing(boolean)
+     */
     @Override
     public void setSpacing(boolean enabled) {
         isSpacingEnabled = enabled;
         requestRepaint();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.vaadin.ui.Layout.SpacingHandler#isSpacingEnabled()
+     */
     @Override
     public boolean isSpacingEnabled() {
         return isSpacingEnabled;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.vaadin.ui.Layout.SpacingHandler#isSpacing()
+     */
     @Override
     public boolean isSpacing() {
         return isSpacingEnabled;
@@ -644,10 +575,6 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     
     /**
      * Get caption of the portlet containing this component.
-     * 
-     * @param c
-     *            Component
-     * @return Caption.
      * @deprecated
      */
     public String getComponentCaption(Component c) {
@@ -656,74 +583,90 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
     
     /**
      * Set caption of the portlet containing this component.
-     * 
-     * @param c
-     *            Component.
-     * @param caption
-     *            Caption.
-     *@deprecated use components setCation method instead
+     * @deprecated use components setCation method instead
      */
     public void setComponentCaption(final Component c, final String caption) {
         c.setCaption(caption);
-    }
-    
-    public static class Context {
-        
-        private final Component component;
-
-        private final PortalLayout portal;
-        
-        public Context(final PortalLayout portal, final Component c) {
-            this.portal = portal;
-            this.component = c;
-        }
-        
-        public Component getComponent() {
-            return component;
-        }
-        
-        public PortalLayout getPortal() {
-            return portal;
-        }
     }
     
     public interface PortletCollapseListener {
         void portletCollapseStateChanged(final Context context);
     }
     
-    public interface PortletCloseListener {
-        void portletClosed(final Context context);
-    }
-    
-    public void addCloseListener(final PortletCloseListener listener) {
-        closeListeners.add(listener);
-    }
-    
-    public void removeCloseListener(final PortletCloseListener listener) {
-        closeListeners.remove(listener);
-    }
-    
-    public void addCollapseListener(final PortletCollapseListener listener) {
-        collapseListeners.add(listener);
-    }
-    
-    public void removeCollapseListener(final PortletCollapseListener listener) {
-        collapseListeners.remove(listener);
-    }
+  
     
     private void fireCloseEvent(final Component c) {
-        final Context context = new Context(this, c); 
-        final Collection<PortletCloseListener> listeners = Collections.unmodifiableCollection(closeListeners);
-        for (final PortletCloseListener l : listeners) {
-            l.portletClosed(context);
-        }
+        fireEvent(new PortletClosedEvent(this, new Context(this, c)));
     }
     
     private void fireCollapseEvent(final Component c) {
-        final Context context = new Context(this, c); 
-        final Collection<PortletCollapseListener> listeners = Collections.unmodifiableCollection(collapseListeners);
-        for (final PortletCollapseListener l : listeners) {
-            l.portletCollapseStateChanged(context);
+        fireEvent(new PortletCollapsedEvent(this, new Context(this, c)));
+    }
+    
+    public void addCloseListener(final PortletCloseListener listener) {
+        addListener(VPortalLayout.PORTLET_CLOSED_EVENT_ID, PortletClosedEvent.class, listener, PortletClosedEvent.PORTLET_CLOSED);
+    }
+    
+    public void removeCloseListener(final PortletCloseListener listener) {
+        removeListener(VPortalLayout.PORTLET_CLOSED_EVENT_ID, PortletClosedEvent.class, listener);
+    }
+    
+    public void addCollapseListener(final PortletCollapseListener listener) {
+        addListener(VPortalLayout.PORTLET_COLLAPSE_EVENT_ID, PortletCollapsedEvent.class, listener, PortletCollapsedEvent.PORTLET_COLLAPSE_STATE_CHANGED);
+    }
+    
+    public void removeCollapseListener(final PortletCollapseListener listener) {
+        removeListener(VPortalLayout.PORTLET_COLLAPSE_EVENT_ID, PortletCollapsedEvent.class, listener);
+    }
+    public interface PortletCloseListener {
+        public void portletClosed(final PortletClosedEvent event);
+    }
+    
+    public final static class PortletClosedEvent extends Component.Event {
+        
+        public static final java.lang.reflect.Method PORTLET_CLOSED;
+        
+        private Context context;
+        
+        static {
+            try {
+                PORTLET_CLOSED = PortletCloseListener.class.getDeclaredMethod("portletClosed", new Class[] { PortletClosedEvent.class });
+            } catch (final java.lang.NoSuchMethodException e) {
+                throw new java.lang.RuntimeException(e);
+            }
+        }
+        
+        public PortletClosedEvent(Component source, final Context context) {
+            super(source);
+            this.context = context;
+        }
+        
+        public Context getContext() {
+            return context;
+        }
+    }
+    
+    public final static class PortletCollapsedEvent extends Component.Event {
+        
+        public static final java.lang.reflect.Method PORTLET_COLLAPSE_STATE_CHANGED;
+        
+        private Context context;
+        
+        static {
+            try {
+                PORTLET_COLLAPSE_STATE_CHANGED = PortletCollapseListener.class.getDeclaredMethod("portletCollapseStateChanged", new Class[] { PortletCollapsedEvent.class });
+            } catch (final java.lang.NoSuchMethodException e) {
+                throw new java.lang.RuntimeException(e);
+            }
+        }
+        
+        public PortletCollapsedEvent(Component source, final Context context) {
+            super(source);
+            this.context = context;
+        }
+        
+        public Context getContext() {
+            return context;
         }
     }
 }

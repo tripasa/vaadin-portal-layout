@@ -78,13 +78,13 @@ public class DashBoardPanel extends HorizontalSplitPanel {
                 Component c = createTableTest();
                 c.setHeight("30%");
                 mainPortal.addComponent(panel);
-                mainPortal.setComponentCaption(panel, f.getName());
+                panel.setCaption(f.getName());
             }
         });
         sidePortal.addComponent(sourceTree);
         sidePortal.setLocked(sourceTree, true);
         sidePortal.setClosable(sourceTree, false);
-        sidePortal.setComponentCaption(sourceTree, "Source Tree");
+        sourceTree.setCaption("Source Tree");
         addComponent(sidePortal);
 
         Label tx = new Label(
@@ -98,7 +98,7 @@ public class DashBoardPanel extends HorizontalSplitPanel {
         sidePortal.addComponent(tx);
         sidePortal.setLocked(tx, true);
         sidePortal.setClosable(tx, false);
-        sidePortal.setComponentCaption(tx, "CONSOLE");
+        tx.setCaption("CONSOLE");
     }
 
     private void buildLeftSide() {
@@ -115,7 +115,7 @@ public class DashBoardPanel extends HorizontalSplitPanel {
         bottomPortal.addComponent(c);
         bottomPortal.setLocked(c, true);
         bottomPortal.setClosable(c, false);
-        bottomPortal.setComponentCaption(c, "Statistics");
+        c.setCaption("Statistics");
         layout.addComponent(mainPortal);
         layout.addComponent(bottomPortal);
         layout.setExpandRatio(mainPortal, 1f);
