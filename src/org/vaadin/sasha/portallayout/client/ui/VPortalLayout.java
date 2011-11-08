@@ -70,6 +70,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
           super.insert(w, beforeIndex);
           VPortalLayout.this.updateSpacingOnPortletPositionChange((PortalObject)w, true);
           if (!isRendering)
+              System.out.println("Recalc!!!");
               recalculateLayoutAndPortletSizes();
       };
       
@@ -316,8 +317,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             for (final Portlet portlet : widgetToPortletContainer.values())
                 if (!portlet.isLocked()) {
                     currentController.makeNotDraggable(portlet);
-                    newController.makeDraggable(portlet,
-                            portlet.getDraggableArea());
+                    newController.makeDraggable(portlet, portlet.getDraggableArea());
                 }
         }
     }
@@ -331,6 +331,16 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             getDragController().makeNotDraggable(portlet);
     }
 
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        final PickupDragController dragController = getDragController();
+        for (final Portlet p : widgetToPortletContainer.values()) {
+            dragController.makeNotDraggable(p);
+        }
+        dragController.unregisterDropController(dropController);
+    }
+    
     private void updateSpacingInfoFromUidl(final UIDL uidl) {
         boolean newSpacingEnabledState = uidl.getBooleanAttribute("spacing");
         if (isSpacingEnabled != newSpacingEnabledState) {
