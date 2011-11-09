@@ -10,9 +10,9 @@ import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
@@ -340,8 +340,9 @@ public class Portlet extends ComplexPanel implements PortalObject {
             } else {
                 setCollapsed(!isCollapsed);
                 if (!isCollapsed) {
-                    contentDiv.getStyle().setDisplay(Display.BLOCK);
+                    contentDiv.getStyle().setVisibility(Visibility.VISIBLE);
                     setPortletWidth(getOffsetWidth());
+                    //client.handleComponentRelativeSize(content);
                 }
                 parentPortal.recalculateLayout();
                 final Set<PortalObject> portletSet = parentPortal.getPortletSet();
@@ -374,7 +375,7 @@ public class Portlet extends ComplexPanel implements PortalObject {
             parentPortal.onPortletCollapseStateChanged(Portlet.this);
             Util.notifyParentOfSizeChange(parentPortal, false);
             if (isCollapsed)
-                contentDiv.getStyle().setDisplay(Display.NONE);
+                contentDiv.getStyle().setVisibility(Visibility.HIDDEN);
         }
 
     }

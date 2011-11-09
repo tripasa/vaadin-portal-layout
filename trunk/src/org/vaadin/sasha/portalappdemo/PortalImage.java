@@ -15,6 +15,8 @@ public class PortalImage extends Embedded {
     
     private File[] files; 
     
+    private double[] ratings; 
+    
     private Application app;
     
     public PortalImage(final Application app) {
@@ -32,7 +34,8 @@ public class PortalImage extends Embedded {
             }
         });
         if (!isEmpty()) {        
-            currentDisplayedImage = 0;
+            ratings = new double[files.length];
+            showNextFile();
             setCaption(files[currentDisplayedImage].getName());
             setIcon(new ThemeResource("picture.png"));
         }
@@ -43,6 +46,21 @@ public class PortalImage extends Embedded {
     public boolean isEmpty() {
         return files == null || files.length == 0;
     }
+    
+    public double getRating() {
+        double result = 0d;
+        if (!isEmpty()) {
+            result = ratings[currentDisplayedImage];
+        }
+        return result;
+    }
+    
+    public void setRating(double rating) {
+        if (!isEmpty()) {
+            ratings[currentDisplayedImage] = rating;
+        }
+    }
+    
     public void showNextFile() {
         final File next = getNextFile();
         setCaption(next.getName());

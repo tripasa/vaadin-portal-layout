@@ -751,4 +751,12 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         headerWidget.setParent(child);
         headerWidget.attach();
     }
+
+    public Component getHeaderComponent(Component c) {
+        final ComponentDetails details = componentToDetails.get(c);
+        if (details == null) {
+            throw new IllegalArgumentException("Portal doesn not contain this component!");
+        }               
+        return details.getHeaderComponent();
+    }
 }
