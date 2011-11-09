@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.vaadin.sasha.portallayout.client.dnd.util.DOMUtil;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
@@ -151,7 +153,12 @@ public class PortletHeader extends ComplexPanel implements Container {
     @Override
     public void setWidth(String width) {
         super.setWidth(width);
-        vcaption.updateComponentSlotWidth();
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() { 
+            @Override
+            public void execute() {
+                vcaption.updateComponentSlotWidth();
+            }
+        });
     }
     
     public Widget getDraggableArea() {
@@ -228,12 +235,13 @@ public class PortletHeader extends ComplexPanel implements Container {
     }
     
     public void setHeaderWidget(Widget widget) {
-        replaceChildComponent(child, widget);
+        if (widget != child) {
+            replaceChildComponent(child, widget);
+        }
     }
     
     public void updateCaption(UIDL uidl) {
         vcaption.updateCaption(uidl);
-        vcaption.updateComponentSlotWidth();
     }
 
     public void toggleCollapseStyles(boolean isCollapsed) {
@@ -243,15 +251,24 @@ public class PortletHeader extends ComplexPanel implements Container {
     
     private class VPortletCaption extends VCaption {
         
+        int iconWidth = 0;
+        
         public VPortletCaption(Paintable component, ApplicationConnection client) {
             super(component, client);
             getElement().getStyle().setHeight(100, Unit.PCT);
             getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+            getElement().getStyle().setVerticalAlign(VerticalAlign.TOP);
             getElement().getStyle().setProperty("zoom", "1");
         }
-
+        
+        @Override
+        public Element getTextElement() {
+            return super.getTextElement();
+        }
+        
         public void updateComponentSlotWidth() {
-            int offsetWidth = PortletHeader.this.getOffsetWidth() - getRequiredWidth()  - getHPadding();
+            System.out.println(PortletHeader.this.getOffsetWidth() + " " + getTextElement().getOffsetWidth() + " " + getTextElement().getScrollWidth());
+            int offsetWidth = PortletHeader.this.getOffsetWidth() - getTextElement().getScrollWidth() - iconWidth - getHPadding();
             controlContainer.getStyle().setWidth(offsetWidth, Unit.PX);
             uidlContainer.getStyle().setWidth(offsetWidth - buttonContainer.getOffsetWidth(), Unit.PX);
             if (child != null) {
@@ -267,6 +284,7 @@ public class PortletHeader extends ComplexPanel implements Container {
         public void onBrowserEvent(Event event) {
             super.onBrowserEvent(event);
             if (event.getTypeInt() == Event.ONLOAD) {
+                iconWidth = super.getRequiredWidth() - getTextElement().getOffsetWidth();
                 updateComponentSlotWidth();
             }
         }
@@ -284,7 +302,6 @@ public class PortletHeader extends ComplexPanel implements Container {
             child = newComponent;
             add(newComponent, uidlContainer);
             newComponent.addDomHandler(blockingDownHandler, MouseDownEvent.getType());
-            vcaption.updateComponentSlotWidth();
         }
     }
 
@@ -298,7 +315,6 @@ public class PortletHeader extends ComplexPanel implements Container {
 
     @Override
     public boolean requestLayout(Set<Paintable> children) {
-        vcaption.updateComponentSlotWidth();
         return false;
     }
 

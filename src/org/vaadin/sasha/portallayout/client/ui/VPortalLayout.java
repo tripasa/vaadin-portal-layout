@@ -232,7 +232,9 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
                     realtiveSizePortletUIDLS.put(portlet, childUidl);
                 else {
                     portlet.renderContent(childUidl);
-                    portletSize.setHeight(Util.getRequiredHeight(widget.getElement()));
+                    if (!portlet.isCollapsed()) {
+                        portletSize.setHeight(Util.getRequiredHeight(widget.getElement()));
+                    }
                 }
                 
                 final UIDL headerUidl = itUidl.getChildByTagName("header");

@@ -1,6 +1,6 @@
 package org.vaadin.sasha.portalappdemo;
 
-import org.vaadin.sasha.portalappdemo.chart.ChartUtil;
+import org.vaadin.sasha.portalappdemo.DemoTable.NameType;
 import org.vaadin.sasha.portallayout.PortalLayout;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletCloseListener;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletClosedEvent;
@@ -12,10 +12,18 @@ import org.vaadin.teemu.ratingstars.RatingStars;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
 import com.vaadin.Application;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.terminal.ThemeResource;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
@@ -91,21 +99,60 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
     }
     
     private void createMiscContents() {
-        final Component chart = ChartUtil.getChartByIndex(1);
-        miscPortal.addComponent(chart);
-        chart.setCaption(ChartUtil.getChartCaptionByIndex(1));
-        chart.setIcon(new ThemeResource("chart.png"));
+        final DemoTable table = new DemoTable();
+        miscPortal.addComponent(table);
+        table.setCaption("Artists");
+        table.setIcon(new ThemeResource("chart.png"));
+        
+        final HorizontalLayout header =  new HorizontalLayout();
+        final TextField filterField = new TextField();
+        final NativeSelect filterType = new NativeSelect();
+        final Label caption = new Label("Filter: ");
+        for (final NameType t : NameType.values()) {
+            filterType.addItem(t);
+        }
+        filterType.setValue(NameType.NT_FIRST_NAME);
+        caption.addStyleName("v-white-text");
+        filterField.setImmediate(true);
+        header.setSizeUndefined();
+        header.addComponent(caption);
+        header.addComponent(filterField);
+        header.addComponent(filterType);
+        header.setSpacing(true);
+        header.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
+        header.setComponentAlignment(filterType, Alignment.MIDDLE_LEFT);
+        miscPortal.setHeaderWidget(table, header);
+        filterField.addListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                table.filter((NameType)filterType.getValue(), filterField.getValue().toString());
+            }
+        });
     }
 
     private void createImageContents() {
         final PortalImage image = new PortalImage(app);
         imagePortal.addComponent(image);
-        imagePortal.setHeaderWidget(image, new RatingStars());
+        final RatingStars rating = new RatingStars();
+        rating.setImmediate(true);
+        rating.addListener(new ValueChangeListener() {            
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                if (rating.getValue() != null) {
+                    image.setRating((Double)rating.getValue());
+                }
+            }
+        });
+        imagePortal.setHeaderWidget(image, rating);
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_right.png")) {
             @Override
             public void execute(final Context context) {
                 if (!image.isEmpty()) {
                     image.showNextFile();
+                    final Component header = context.getPortal().getHeaderComponent(image);
+                    if (header instanceof Field) {
+                        ((Field) header).setValue(image.getRating());
+                    }
                 }
             }
         });
@@ -114,6 +161,10 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
             public void execute(final Context context) {
                 if (!image.isEmpty()) {
                     image.showPrevFile();
+                    final Component header = context.getPortal().getHeaderComponent(image);
+                    if (header instanceof Field) {
+                        ((Field) header).setValue(image.getRating());
+                    }
                 }
             }
         });
@@ -127,6 +178,26 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         videoPortal.addComponent(pl);
         pl.setCaption("Joy Division - Disorder");
         pl.setIcon(new ThemeResource("video.png"));
+        
+        final HorizontalLayout header =  new HorizontalLayout();
+        final TextField idField = new TextField();
+        final Label caption = new Label("Enter video id: ");
+        caption.addStyleName("v-white-text");
+        idField.setImmediate(true);
+        header.setSizeUndefined();
+        header.addComponent(caption);
+        header.addComponent(idField);
+        header.setSpacing(true);
+        header.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
+        
+        idField.addListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                pl.setVideoId(idField.getValue().toString());
+            }
+        });
+        
+        videoPortal.setHeaderWidget(pl, header);
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("stop.png")) {
             @Override
             public void execute(final Context context) {

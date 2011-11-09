@@ -4,14 +4,14 @@
 	background-color: #878484;
 }
 
-.test  .v-app .v-portlet-header {
+.v-app .v-portlet-header {
     border-radius: 5px 5px 0 0;
     -moz-box-shadow: 5px 5px 5px #ccc;
     -webkit-box-shadow: 5px 5px 5px #ccc;
     box-shadow: 5px 5px 5px #ccc;
 }
 
-.test .v-app .v-portlet-content {
+.v-app .v-portlet-content {
     background-color: #FEFEFE;
     -moz-box-shadow: 5px 5px 5px #ccc;
     -webkit-box-shadow: 5px 5px 5px #ccc;
@@ -38,4 +38,8 @@
 .v-test .v-portlet-header {
 	background-image: none;
 	background-color: green;
+}
+
+.v-white-text {
+	color: #FFFFFF;
 }

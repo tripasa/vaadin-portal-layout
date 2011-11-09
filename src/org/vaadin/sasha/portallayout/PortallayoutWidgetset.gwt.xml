@@ -67,4 +67,44 @@
     <inherits name="org.vaadin.rpc.WidgetRPC" />
 
     <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.teemu.ratingstars.gwt.RatingStarsWidgetset" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
+
+    <inherits name="org.vaadin.rpc.WidgetRPC" />
 </module>
