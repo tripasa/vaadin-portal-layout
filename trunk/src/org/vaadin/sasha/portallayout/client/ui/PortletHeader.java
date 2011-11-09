@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -150,7 +151,7 @@ public class PortletHeader extends ComplexPanel implements Container {
     @Override
     public void setWidth(String width) {
         super.setWidth(width);
-        vcaption.updateComponentWidth();
+        vcaption.updateComponentSlotWidth();
     }
     
     public Widget getDraggableArea() {
@@ -225,11 +226,6 @@ public class PortletHeader extends ComplexPanel implements Container {
             }
         }
     }
-
-    @Override
-    protected void onAttach() {
-        super.onAttach();
-    }
     
     public void setHeaderWidget(Widget widget) {
         replaceChildComponent(child, widget);
@@ -237,7 +233,7 @@ public class PortletHeader extends ComplexPanel implements Container {
     
     public void updateCaption(UIDL uidl) {
         vcaption.updateCaption(uidl);
-        vcaption.updateComponentWidth();
+        vcaption.updateComponentSlotWidth();
     }
 
     public void toggleCollapseStyles(boolean isCollapsed) {
@@ -251,9 +247,10 @@ public class PortletHeader extends ComplexPanel implements Container {
             super(component, client);
             getElement().getStyle().setHeight(100, Unit.PCT);
             getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+            getElement().getStyle().setProperty("zoom", "1");
         }
 
-        public void updateComponentWidth() {
+        public void updateComponentSlotWidth() {
             int offsetWidth = PortletHeader.this.getOffsetWidth() - getRequiredWidth()  - getHPadding();
             controlContainer.getStyle().setWidth(offsetWidth, Unit.PX);
             uidlContainer.getStyle().setWidth(offsetWidth - buttonContainer.getOffsetWidth(), Unit.PX);
@@ -262,10 +259,17 @@ public class PortletHeader extends ComplexPanel implements Container {
             }
         }
         
-        public int getHPadding() {
+        public int getHPadding() {    
             return DOMUtil.getHorizontalMargin(getElement());
         }
         
+        @Override
+        public void onBrowserEvent(Event event) {
+            super.onBrowserEvent(event);
+            if (event.getTypeInt() == Event.ONLOAD) {
+                updateComponentSlotWidth();
+            }
+        }
     }
 
     @Override
@@ -280,7 +284,7 @@ public class PortletHeader extends ComplexPanel implements Container {
             child = newComponent;
             add(newComponent, uidlContainer);
             newComponent.addDomHandler(blockingDownHandler, MouseDownEvent.getType());
-            vcaption.updateComponentWidth();
+            vcaption.updateComponentSlotWidth();
         }
     }
 
@@ -294,7 +298,7 @@ public class PortletHeader extends ComplexPanel implements Container {
 
     @Override
     public boolean requestLayout(Set<Paintable> children) {
-        vcaption.updateComponentWidth();
+        vcaption.updateComponentSlotWidth();
         return false;
     }
 

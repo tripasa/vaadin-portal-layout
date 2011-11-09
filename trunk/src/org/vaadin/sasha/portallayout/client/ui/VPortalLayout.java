@@ -74,7 +74,6 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
           super.insert(w, beforeIndex);
           VPortalLayout.this.updateSpacingOnPortletPositionChange((PortalObject)w, true);
           if (!isRendering)
-              System.out.println("Recalc!!!");
               recalculateLayoutAndPortletSizes();
       };
       
@@ -375,8 +374,8 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
 
     public void setContainerHeight(int newHeight) {
         int contentHeight = portalContent.getOffsetHeight();
-        setDOMHeight(newHeight/* + getVerticalMargins()*/);
-        if (newHeight /*+ getVerticalMargins()*/ != contentHeight && getPortletCount() > 0 && !isRendering) {
+        setDOMHeight(newHeight);
+        if (newHeight != contentHeight && getPortletCount() > 0 && !isRendering) {
             Util.notifyParentOfSizeChange(this, false);
         }
     }
@@ -417,8 +416,7 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
             final PortalObject portalObject = (PortalObject)it.next();
             int height = 
             portalObject.isHeightRelative() ?
-                getRelativePortletHeight(portalObject):
-                portalObject.getContentHeight();
+                getRelativePortletHeight(portalObject): portalObject.getContentHeight();
             portalObject.setWidgetSizes(width, height);
         }
         if (client != null)
@@ -445,10 +443,9 @@ public class VPortalLayout extends SimplePanel implements Paintable, Container {
     }
     
     public int getRelativePortletHeight(final PortalObject portalObject) {
-        int residualHeight = getResidualHeight();
-        float relativeHeightRatio = normalizedRealtiveRatio();
-        float newRealtiveHeight = relativeHeightRatio * portalObject.getRelativeHeightValue();
-        return (int) (residualHeight * newRealtiveHeight / 100);
+        int headerHeight = portalObject.getPortletRef().getHeaderHeight();
+        float newRealtiveHeight = normalizedRealtiveRatio() * portalObject.getRelativeHeightValue();
+        return Math.max((int)(getResidualHeight() * newRealtiveHeight / 100), headerHeight); 
     }
     
     private void setDOMHeight(int height) {
