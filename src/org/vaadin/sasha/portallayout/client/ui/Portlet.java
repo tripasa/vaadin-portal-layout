@@ -125,6 +125,10 @@ public class Portlet extends ComplexPanel implements PortalObject {
         }
     }
     
+    public int getHeaderHeight() {
+        return header.getOffsetHeight();
+    }
+    
     @Override
     public void addStyleName(String style) {
         super.addStyleName(style);
@@ -140,10 +144,11 @@ public class Portlet extends ComplexPanel implements PortalObject {
 
     public void setPortletHeight(int height) {
         int contentHeight = isHeightRelative ? height - header.getOffsetHeight(): height;
+        int containerHeight = isHeightRelative ? height: height + header.getOffsetHeight();
         contentHeight = (contentHeight >= getVBorders()) ? contentHeight - getVBorders() : 0;
         contentSizeInfo.setHeight(contentHeight);
         contentDiv.getStyle().setHeight(contentSizeInfo.getHeight(), Unit.PX);
-        containerElement.getStyle().setHeight(contentHeight + header.getOffsetHeight(), Unit.PX);
+        containerElement.getStyle().setHeight(containerHeight, Unit.PX);
     }
     
     public void setPortletWidth(int width) {
@@ -154,9 +159,7 @@ public class Portlet extends ComplexPanel implements PortalObject {
     }
     
     public int getVBorders() {
-        if (vBorders < 0) {
-            vBorders = DOMUtil.getVerticalBorders(contentDiv);
-        }
+        vBorders = DOMUtil.getVerticalBorders(contentDiv);
         return isCollapsed ? 0 : vBorders;
     }
     
@@ -338,7 +341,7 @@ public class Portlet extends ComplexPanel implements PortalObject {
                 setCollapsed(!isCollapsed);
                 if (!isCollapsed) {
                     contentDiv.getStyle().setDisplay(Display.BLOCK);
-                    setPortletWidth(contentSizeInfo.getWidth());
+                    setPortletWidth(getOffsetWidth());
                 }
                 parentPortal.recalculateLayout();
                 final Set<PortalObject> portletSet = parentPortal.getPortletSet();
@@ -433,5 +436,9 @@ public class Portlet extends ComplexPanel implements PortalObject {
 
     public void setHeaderWidget(Widget widget) {
         header.setHeaderWidget(widget);
+    }
+
+    public PortletHeader getHeader() {
+        return header;
     }
 }

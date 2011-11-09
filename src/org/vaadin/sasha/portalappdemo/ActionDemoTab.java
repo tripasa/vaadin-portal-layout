@@ -1,33 +1,38 @@
 package org.vaadin.sasha.portalappdemo;
 
-import java.io.File;
-import java.io.FileFilter;
-
 import org.vaadin.sasha.portalappdemo.chart.ChartUtil;
 import org.vaadin.sasha.portallayout.PortalLayout;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletCloseListener;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletClosedEvent;
-import org.vaadin.sasha.portallayout.PortalLayout.PortletCollapseListener;
 import org.vaadin.sasha.portallayout.PortalLayout.PortletCollapseEvent;
+import org.vaadin.sasha.portallayout.PortalLayout.PortletCollapseListener;
 import org.vaadin.sasha.portallayout.ToolbarAction;
 import org.vaadin.sasha.portallayout.event.Context;
+import org.vaadin.teemu.ratingstars.RatingStars;
 import org.vaadin.youtubeplayer.YouTubePlayer;
 
 import com.vaadin.Application;
-import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Embedded;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
 public class ActionDemoTab extends Panel implements PortletCloseListener, PortletCollapseListener {
+   
+    public class DemoPortal extends PortalLayout {
+        
+        public DemoPortal() {
+            setWidth("100%");
+            setHeight("800px");
+            addCloseListener(ActionDemoTab.this);
+            addCollapseListener(ActionDemoTab.this);
+            setMargin(true);
+        }
+    }
     
-    private final Application app;
-    
-    private final PortalLayout videoPortal = new PortalLayout() {
+    private final PortalLayout videoPortal = new DemoPortal() {
         public void addComponent(Component c, int position) {
             super.addComponent(c, position);
             clearStyleNames(c);
@@ -35,7 +40,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         };
     };
     
-    private final PortalLayout imagePortal = new PortalLayout()  {
+    private final PortalLayout imagePortal = new DemoPortal()  {
         public void addComponent(Component c, int position) {
             super.addComponent(c, position);
             clearStyleNames(c);
@@ -43,7 +48,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         };
     };
     
-    private final PortalLayout miscPortal = new PortalLayout()  {
+    private final PortalLayout miscPortal = new DemoPortal()  {
         public void addComponent(Component c, int position) {
             super.addComponent(c, position);
             clearStyleNames(c);
@@ -51,13 +56,11 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         };
     };
     
+    private final Application app;
+    
     private final GridLayout layout = new GridLayout(3, 1);
     
     private boolean init = false;
-    
-    private int currentDisplayedImage = -1;
-    
-    private File[] files; 
     
     public ActionDemoTab(Application app) {
         super();
@@ -75,27 +78,6 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         layout.addComponent(videoPortal, 0, 0);
         layout.addComponent(imagePortal, 1, 0);
         layout.addComponent(miscPortal, 2, 0);
-        
-        imagePortal.setWidth("100%");
-        videoPortal.setWidth("100%");
-        miscPortal.setWidth("100%");
-
-        imagePortal.setHeight("800px");
-        videoPortal.setHeight("800px");
-        miscPortal.setHeight("800px");
-        
-        imagePortal.addCloseListener(this);
-        imagePortal.addCollapseListener(this);
-        
-        miscPortal.addCloseListener(this);
-        miscPortal.addCollapseListener(this);
-        
-        videoPortal.addCloseListener(this);
-        videoPortal.addCollapseListener(this);
-        
-        miscPortal.setMargin(true);
-        imagePortal.setMargin(true);
-        videoPortal.setMargin(true);
     }
     
 
@@ -105,10 +87,10 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         init = true;
         createVideoContents();
         createImageContents();
-        createMisc();
+        createMiscContents();
     }
     
-    private void createMisc() {
+    private void createMiscContents() {
         final Component chart = ChartUtil.getChartByIndex(1);
         miscPortal.addComponent(chart);
         chart.setCaption(ChartUtil.getChartCaptionByIndex(1));
@@ -116,62 +98,25 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
     }
 
     private void createImageContents() {
-        String fullPath = app.getContext().getBaseDirectory() + "/sample_pictures";
-        File dir = new File(fullPath);
-        files = dir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                String path = pathname.getAbsolutePath();
-                int mid = path.lastIndexOf(".");
-                String ext = path.substring(mid + 1, path.length());
-                return "jpg".equals(ext);
-            }
-        });
-        
-        if (files.length == 0)
-            return;
-        final Embedded image = new Embedded();
-        currentDisplayedImage = 0;
-        image.setWidth("100%");
-        image.setHeight("400px");
-        image.setIcon(new ThemeResource("arrow_left.png"));
-        image.setSource(new FileResource(files[currentDisplayedImage], app));
+        final PortalImage image = new PortalImage(app);
         imagePortal.addComponent(image);
-        image.setCaption(files[currentDisplayedImage].getName());
-        image.setIcon(new ThemeResource("picture.png"));
+        imagePortal.setHeaderWidget(image, new RatingStars());
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_right.png")) {
             @Override
             public void execute(final Context context) {
-                final File next = getNextFile();
-                image.setCaption(next.getName());
-                image.setSource(new FileResource(next, app));
+                if (!image.isEmpty()) {
+                    image.showNextFile();
+                }
             }
         });
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_left.png")) {
             @Override
             public void execute(final Context context) {
-                final File prev = getPrevFile();
-                image.setCaption(prev.getName());
-                image.setSource(new FileResource(prev, app));
+                if (!image.isEmpty()) {
+                    image.showPrevFile();
+                }
             }
         });
-    }
-    
-    private File getNextFile() {
-        if (files == null ||
-            files.length == 0)
-            return null;
-        currentDisplayedImage = ++currentDisplayedImage % files.length;
-        return files[currentDisplayedImage];
-    }
-
-    private File getPrevFile() {
-        if (files == null ||
-            files.length == 0)
-            return null;
-        currentDisplayedImage = currentDisplayedImage == 0 ? 
-                files.length - 1 : --currentDisplayedImage;
-        return files[currentDisplayedImage];
     }
     
     private void createVideoContents() {
