@@ -153,7 +153,7 @@ public class PortletHeader extends ComplexPanel implements Container {
     @Override
     public void setWidth(String width) {
         super.setWidth(width);
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() { 
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
                 vcaption.updateComponentSlotWidth();
@@ -274,6 +274,13 @@ public class PortletHeader extends ComplexPanel implements Container {
             if (child != null) {
                 client.handleComponentRelativeSize(child);
             }
+        }
+        
+        @Override
+        public boolean updateCaption(UIDL uidl) {
+            boolean result = super.updateCaption(uidl);
+            updateComponentSlotWidth();
+            return result;
         }
         
         public int getHPadding() {    

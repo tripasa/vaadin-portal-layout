@@ -13,7 +13,9 @@ public class PortalTabSheet extends TabSheet {
     public PortalTabSheet(Application app) {
         super();
         actionTab = new ActionDemoTab(app);
-        addTab(actionTab, "Portal In Action", null);
+        addTab(actionTab, 
+                "The first portal adds the red border to contents, second - green, third - yellow. Check out interactive headers! Try e.g. 51Bpx63wkbA for video, " +
+                "rate the pictures, filter the table!", null);
         addListener(new SelectedTabChangeListener() {
 
             @Override
