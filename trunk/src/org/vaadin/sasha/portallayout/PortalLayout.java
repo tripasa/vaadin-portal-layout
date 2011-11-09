@@ -176,7 +176,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
                 LayoutClickListener.clickMethod);
     }
 
-    public void addStyleName(final Component c, final String style) {
+    public void addPortletStyleName(final Component c, final String style) {
         final ComponentDetails details = componentToDetails.get(c);
         if (details != null && details.getStyles().indexOf(style) < 0) {
             details.addStyle(style);
@@ -184,7 +184,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         }
     }
     
-    public void removeStyleName(final Component c, final String style) {
+    public void removePortletStyleName(final Component c, final String style) {
         final ComponentDetails details = componentToDetails.get(c);
         if (details != null) {
             if (details.getStyles().indexOf(style) != -1) {
@@ -194,7 +194,7 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         }
     }
     
-    public void clearStyleNames(final Component c) {
+    public void clearPortletStyleNames(final Component c) {
         final ComponentDetails details = componentToDetails.get(c);
         if (details != null) {
             details.setStyles(new ArrayList<String>());
@@ -742,14 +742,14 @@ public class PortalLayout extends AbstractLayout implements SpacingHandler, Layo
         return result == null || result;
     }
 
-    public void setHeaderWidget(Component child, Component headerWidget) {
+    public void setHeaderComponent(Component child, Component headerComponent) {
         final ComponentDetails details = componentToDetails.get(child);
         if (details == null) {
             throw new IllegalArgumentException("Portal doesn not contain this component!");
         }       
-        details.setHeaderComponent(headerWidget);
-        headerWidget.setParent(child);
-        headerWidget.attach();
+        details.setHeaderComponent(headerComponent);
+        headerComponent.setParent(child);
+        headerComponent.attach();
     }
 
     public Component getHeaderComponent(Component c) {

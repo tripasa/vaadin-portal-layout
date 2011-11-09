@@ -43,24 +43,24 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
     private final PortalLayout videoPortal = new DemoPortal() {
         public void addComponent(Component c, int position) {
             super.addComponent(c, position);
-            clearStyleNames(c);
-            addStyleName(c, "red");
+            clearPortletStyleNames(c);
+            addPortletStyleName(c, "red");
         };
     };
     
     private final PortalLayout imagePortal = new DemoPortal()  {
         public void addComponent(Component c, int position) {
             super.addComponent(c, position);
-            clearStyleNames(c);
-            addStyleName(c, "green");
+            clearPortletStyleNames(c);
+            addPortletStyleName(c, "green");
         };
     };
     
     private final PortalLayout miscPortal = new DemoPortal()  {
         public void addComponent(Component c, int position) {
             super.addComponent(c, position);
-            clearStyleNames(c);
-            addStyleName(c, "yellow");
+            clearPortletStyleNames(c);
+            addPortletStyleName(c, "yellow");
         };
     };
     
@@ -121,7 +121,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
         header.setSpacing(true);
         header.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
         header.setComponentAlignment(filterType, Alignment.MIDDLE_LEFT);
-        miscPortal.setHeaderWidget(table, header);
+        miscPortal.setHeaderComponent(table, header);
         filterField.addListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
@@ -143,7 +143,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
                 }
             }
         });
-        imagePortal.setHeaderWidget(image, rating);
+        imagePortal.setHeaderComponent(image, rating);
         imagePortal.addAction(image, new ToolbarAction(new ThemeResource("arrow_right.png")) {
             @Override
             public void execute(final Context context) {
@@ -197,7 +197,7 @@ public class ActionDemoTab extends Panel implements PortletCloseListener, Portle
             }
         });
         
-        videoPortal.setHeaderWidget(pl, header);
+        videoPortal.setHeaderComponent(pl, header);
         videoPortal.addAction(pl, new ToolbarAction(new ThemeResource("stop.png")) {
             @Override
             public void execute(final Context context) {
