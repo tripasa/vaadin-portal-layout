@@ -261,14 +261,15 @@ public class PortletHeader extends ComplexPanel implements Container {
             getElement().getStyle().setProperty("zoom", "1");
         }
         
-        @Override
-        public Element getTextElement() {
-            return super.getTextElement();
+        private int getTextWidth() {
+            if (getTextElement() != null) {
+                return getTextElement().getOffsetWidth();
+            }
+            return 0;
         }
         
         public void updateComponentSlotWidth() {
-            System.out.println(PortletHeader.this.getOffsetWidth() + " " + getTextElement().getOffsetWidth() + " " + getTextElement().getScrollWidth());
-            int offsetWidth = PortletHeader.this.getOffsetWidth() - getTextElement().getScrollWidth() - iconWidth - getHPadding();
+            int offsetWidth = PortletHeader.this.getOffsetWidth() - getTextWidth() - iconWidth - getHPadding();
             controlContainer.getStyle().setWidth(offsetWidth, Unit.PX);
             uidlContainer.getStyle().setWidth(offsetWidth - buttonContainer.getOffsetWidth(), Unit.PX);
             if (child != null) {
@@ -291,7 +292,7 @@ public class PortletHeader extends ComplexPanel implements Container {
         public void onBrowserEvent(Event event) {
             super.onBrowserEvent(event);
             if (event.getTypeInt() == Event.ONLOAD) {
-                iconWidth = super.getRequiredWidth() - getTextElement().getOffsetWidth();
+                iconWidth = super.getRequiredWidth() - getTextWidth();
                 updateComponentSlotWidth();
             }
         }
